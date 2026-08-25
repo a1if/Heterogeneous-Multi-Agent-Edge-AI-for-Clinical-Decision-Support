@@ -1,0 +1,25 @@
+{
+  "real_vocab": {
+    "mean": 1.2063524723052979,
+    "std": 0.08350939303636551,
+    "n": 262144
+  },
+  "virtual_init": {
+    "mean": 0.8993839025497437,
+    "std": 0.04318302124738693,
+    "n": 320
+  },
+  "virtual_trained": {
+    "mean": 27.803823471069336,
+    "std": 6.594357490539551,
+    "n": 320
+  },
+  "comparison": {
+    "init_vs_trained_wilcoxon": {
+      "statistic": 0.0,
+      "p_value": 0.0,
+      "interpretation": "drift is statistically supported",
+      "n": 320
+    }
+  }
+}

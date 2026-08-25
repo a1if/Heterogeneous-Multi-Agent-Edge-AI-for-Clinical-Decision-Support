@@ -1,0 +1,12 @@
+{
+  "checkpoint": "perception/checkpoints/cnn_lstm.pt",
+  "n_test": 49680,
+  "overall_accuracy": 0.8537640901771336,
+  "per_class_accuracy": {
+    "N": 0.8992652876681361,
+    "S": 0.08165487207403375,
+    "V": 0.7717391304347826,
+    "F": 0.002577319587628866,
+    "Q": NaN
+  }
+}

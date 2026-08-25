@@ -1,0 +1,59 @@
+{
+  "base_config": {
+    "per_class": 16,
+    "epochs": 3,
+    "learning_rate": 0.002,
+    "loss_mode": "full",
+    "tier_weight": 4.0,
+    "max_examples": null,
+    "num_tokens": 4,
+    "seed": null
+  },
+  "by_seed": {
+    "existing": {
+      "seed": "existing (unrecorded, pre-dates seed control)",
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+      "retrained": false,
+      "n": 80,
+      "n_failed": 0,
+      "correct": 76,
+      "accuracy": 0.95,
+      "tokens_mean": 486.0,
+      "gen_ms_mean": 8573.700276017189,
+      "vram_mean": 9230.23876953125
+    },
+    "101": {
+      "seed": 101,
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed101.pt",
+      "retrained": true,
+      "n": 80,
+      "n_failed": 2,
+      "correct": 65,
+      "accuracy": 0.8125,
+      "tokens_mean": 486.0,
+      "gen_ms_mean": 7567.742488323114,
+      "vram_mean": 9231.47478465545
+    },
+    "202": {
+      "seed": 202,
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed202.pt",
+      "retrained": true,
+      "n": 80,
+      "n_failed": 0,
+      "correct": 63,
+      "accuracy": 0.7875,
+      "tokens_mean": 486.0,
+      "gen_ms_mean": 8156.114247441292,
+      "vram_mean": 9236.94140625
+    }
+  },
+  "aggregate": {
+    "n_seeds": 3,
+    "accuracy_mean": 0.85,
+    "accuracy_std": 0.08749999999999998,
+    "tokens_mean": 486.0,
+    "tokens_std": 0.0,
+    "gen_ms_mean": 8099.185670593865,
+    "gen_ms_std": 505.389369498404
+  }
+}

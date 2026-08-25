@@ -1,0 +1,62 @@
+{
+  "base_config": {
+    "per_class": 16,
+    "epochs": 3,
+    "learning_rate": 0.002,
+    "loss_mode": "full",
+    "tier_weight": 4.0,
+    "max_examples": null,
+    "num_tokens": 4,
+    "seed": null
+  },
+  "by_k": {
+    "4": {
+      "k": 4,
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+      "retrained": false,
+      "n": 80,
+      "n_failed": 0,
+      "correct": 76,
+      "accuracy": 0.95,
+      "tokens_mean": 486.0,
+      "gen_ms_mean": 8573.700276017189,
+      "vram_mean": 9230.23876953125
+    },
+    "1": {
+      "k": 1,
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k1.pt",
+      "retrained": true,
+      "n": 80,
+      "n_failed": 0,
+      "correct": 58,
+      "accuracy": 0.725,
+      "tokens_mean": 483.0,
+      "gen_ms_mean": 9367.552295327187,
+      "vram_mean": 9228.70068359375
+    },
+    "2": {
+      "k": 2,
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k2.pt",
+      "retrained": true,
+      "n": 80,
+      "n_failed": 4,
+      "correct": 68,
+      "accuracy": 0.85,
+      "tokens_mean": 484.0,
+      "gen_ms_mean": 9048.553564046559,
+      "vram_mean": 9230.93663908306
+    },
+    "8": {
+      "k": 8,
+      "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k8.pt",
+      "retrained": true,
+      "n": 80,
+      "n_failed": 4,
+      "correct": 64,
+      "accuracy": 0.8,
+      "tokens_mean": 490.0,
+      "gen_ms_mean": 10270.964139386228,
+      "vram_mean": 9234.326480263158
+    }
+  }
+}

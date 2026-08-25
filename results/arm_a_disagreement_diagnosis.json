@@ -1,0 +1,82 @@
+[
+  {
+    "idx": 15504,
+    "true_class": "V",
+    "confidence": 0.911147,
+    "consecutive_abnormal_beats": 1,
+    "reference_tier": "urgent",
+    "arm_a_tier": "urgent",
+    "arm_a_justification": "The beat warrants an urgent review because it is a ventricular beat classified with a confidence level greater than 0.85.",
+    "arm_a_referenced_fact": "A single occurrence classified with high confidence (greater than 0.85) warrants prompt clinical review."
+  },
+  {
+    "idx": 15630,
+    "true_class": "V",
+    "confidence": 0.92929,
+    "consecutive_abnormal_beats": 1,
+    "reference_tier": "urgent",
+    "arm_a_tier": "urgent",
+    "arm_a_justification": "The beat warrants an urgent review because it is a ventricular beat classified with a confidence level greater than 0.85.",
+    "arm_a_referenced_fact": "A single occurrence classified with high confidence (greater than 0.85) is sufficient to warrant prompt clinical review."
+  },
+  {
+    "idx": 15750,
+    "true_class": "V",
+    "confidence": 0.944512,
+    "consecutive_abnormal_beats": 1,
+    "reference_tier": "urgent",
+    "arm_a_tier": "urgent",
+    "arm_a_justification": "The beat warrants an urgent review because it is a ventricular beat classified with a confidence level greater than 0.85.",
+    "arm_a_referenced_fact": "A single occurrence classified with high confidence (greater than 0.85) is sufficient to warrant prompt clinical review."
+  },
+  {
+    "idx": 15752,
+    "true_class": "V",
+    "confidence": 0.943535,
+    "consecutive_abnormal_beats": 1,
+    "reference_tier": "urgent",
+    "arm_a_tier": "urgent",
+    "arm_a_justification": "The beat warrants an urgent review because the classification confidence is greater than 0.85.",
+    "arm_a_referenced_fact": "A single occurrence classified with high confidence (greater than 0.85) warrants prompt clinical review."
+  },
+  {
+    "idx": 15754,
+    "true_class": "V",
+    "confidence": 0.941832,
+    "consecutive_abnormal_beats": 3,
+    "reference_tier": "urgent",
+    "arm_a_tier": "urgent",
+    "arm_a_justification": "The beat warrants an urgent review because the count of consecutive abnormal beats is three or more.",
+    "arm_a_referenced_fact": "Three or more consecutive occurrences of this beat type warrant prompt clinical review."
+  },
+  {
+    "idx": 15756,
+    "true_class": "V",
+    "confidence": 0.943275,
+    "consecutive_abnormal_beats": 5,
+    "reference_tier": "urgent",
+    "arm_a_tier": "urgent",
+    "arm_a_justification": "The beat warrants an urgent review because it is a ventricular beat occurring with a confidence level greater than 0.85.",
+    "arm_a_referenced_fact": "A single occurrence classified with high confidence (greater than 0.85) warrants prompt clinical review."
+  },
+  {
+    "idx": 9535,
+    "true_class": "S",
+    "confidence": 0.754682,
+    "consecutive_abnormal_beats": 1,
+    "reference_tier": "priority",
+    "arm_a_tier": "priority",
+    "arm_a_justification": "The beat is classified as a supraventricular ectopic beat, which warrants attention because frequent occurrences can suggest an underlying atrial rhythm disturbance.",
+    "arm_a_referenced_fact": "Isolated supraventricular ectopy is usually benign, but frequent or sustained occurrences raise the possibility of an underlying atrial rhythm disturbance and warrant confirmation with a full ECG trace and clinical correlation with symptoms such as palpitations, breathlessness, or dizziness."
+  },
+  {
+    "idx": 10289,
+    "true_class": "S",
+    "confidence": 0.861581,
+    "consecutive_abnormal_beats": 1,
+    "reference_tier": "priority",
+    "arm_a_tier": "priority",
+    "arm_a_justification": "The beat is classified as supraventricular ectopy, which warrants attention because frequent occurrences can suggest an underlying atrial rhythm disturbance.",
+    "arm_a_referenced_fact": "Isolated supraventricular ectopy is usually benign, but frequent or sustained occurrences raise the possibility of an underlying atrial rhythm disturbance and warrant confirmation with a full ECG trace and clinical correlation with symptoms such as palpitations, breathlessness, or dizziness."
+  }
+]

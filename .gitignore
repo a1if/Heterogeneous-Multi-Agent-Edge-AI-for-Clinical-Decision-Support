@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.claude/
+cache/
+logs/
+data/
+docs/
+*.log
+*.bak_*
+perception/checkpoints/
+reasoning/checkpoints/
+results/norm_check_raw_arrays.npz

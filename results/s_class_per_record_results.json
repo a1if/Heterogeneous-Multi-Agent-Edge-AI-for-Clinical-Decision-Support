@@ -1,0 +1,122 @@
+{
+  "original20_per_record": {
+    "100": {
+      "n": 5,
+      "classifier_acc": 0.2,
+      "probe_acc": 0.4
+    },
+    "103": {
+      "n": 2,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.0
+    },
+    "113": {
+      "n": 5,
+      "classifier_acc": 1.0,
+      "probe_acc": 1.0
+    },
+    "117": {
+      "n": 1,
+      "classifier_acc": 0.0,
+      "probe_acc": 1.0
+    },
+    "121": {
+      "n": 1,
+      "classifier_acc": 0.0,
+      "probe_acc": 1.0
+    },
+    "200": {
+      "n": 5,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.4
+    },
+    "202": {
+      "n": 1,
+      "classifier_acc": 0.0,
+      "probe_acc": 1.0
+    }
+  },
+  "new43_per_record": {
+    "202": {
+      "n": 4,
+      "classifier_acc": 0.5,
+      "probe_acc": 0.25
+    },
+    "210": {
+      "n": 5,
+      "classifier_acc": 0.2,
+      "probe_acc": 0.4
+    },
+    "213": {
+      "n": 5,
+      "classifier_acc": 1.0,
+      "probe_acc": 0.2
+    },
+    "219": {
+      "n": 5,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.0
+    },
+    "222": {
+      "n": 5,
+      "classifier_acc": 0.2,
+      "probe_acc": 0.2
+    },
+    "228": {
+      "n": 3,
+      "classifier_acc": 0.0,
+      "probe_acc": 1.0
+    },
+    "231": {
+      "n": 1,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.0
+    },
+    "232": {
+      "n": 5,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.4
+    },
+    "233": {
+      "n": 5,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.0
+    },
+    "234": {
+      "n": 5,
+      "classifier_acc": 0.0,
+      "probe_acc": 0.0
+    }
+  },
+  "shared_records": [
+    202
+  ],
+  "clean_split": {
+    "classifier_acc": {
+      "original20_range": [
+        0.0,
+        1.0
+      ],
+      "new43_range": [
+        0.0,
+        1.0
+      ],
+      "original20_mean": 0.17142857142857143,
+      "new43_mean": 0.19,
+      "clean_split": false
+    },
+    "probe_acc": {
+      "original20_range": [
+        0.0,
+        1.0
+      ],
+      "new43_range": [
+        0.0,
+        1.0
+      ],
+      "original20_mean": 0.6857142857142857,
+      "new43_mean": 0.24500000000000002,
+      "clean_split": false
+    }
+  }
+}

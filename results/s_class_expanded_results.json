@@ -1,0 +1,22 @@
+{
+  "n": 63,
+  "classifier": {
+    "correct": 15,
+    "recall": 23.80952380952381,
+    "ci_wilson95": [
+      15.0,
+      35.6
+    ],
+    "n_sqi_overridden_new43": 0
+  },
+  "probe": {
+    "correct": 22,
+    "recall": 34.92063492063492,
+    "ci_wilson95": [
+      24.3,
+      47.2
+    ],
+    "note": "combines original-20 CV out-of-fold predictions (existing, unmodified) with new-43 predictions from a single probe fit once on the original 80 -- two distinct but both genuinely held-out mechanisms, disclosed rather than blended silently."
+  },
+  "cis_overlap": true
+}

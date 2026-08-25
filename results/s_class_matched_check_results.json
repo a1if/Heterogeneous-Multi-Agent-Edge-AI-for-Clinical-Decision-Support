@@ -1,0 +1,29 @@
+{
+  "probe_eval_set_n": 80,
+  "per_class_n": {
+    "N": 20,
+    "S": 20,
+    "V": 20,
+    "F": 20,
+    "Q": 0
+  },
+  "s_class": {
+    "n_in_probe_subset": 20,
+    "classifier_correct": 6,
+    "classifier_recall_matched_subset": 0.3,
+    "classifier_ci_wilson95": [
+      14.5,
+      51.9
+    ],
+    "probe_correct": 12,
+    "probe_total": 20,
+    "probe_recall": 0.6,
+    "probe_ci_wilson95": [
+      38.7,
+      78.1
+    ],
+    "cis_overlap": true,
+    "n_sqi_overridden": 0,
+    "note": "Both figures now on the SAME 20-event S-class population with matching Wilson 95% CIs. Do not report either as a bare point estimate in Discussion. If n_sqi_overridden > 0, classifier_recall_matched_subset reflects predict()'s SQI-override behavior, not a pure argmax(probs) comparison -- see console warning."
+  }
+}
