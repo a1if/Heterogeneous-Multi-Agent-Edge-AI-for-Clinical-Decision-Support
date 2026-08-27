@@ -1,0 +1,43 @@
+{
+  "n_seeds": 3,
+  "lam": 0.1,
+  "accuracy_mean": 90.55152979066024,
+  "accuracy_std": 2.6949992908584397,
+  "probe_recall_mean": 72.08333333333333,
+  "probe_recall_std": 7.009418267191964,
+  "probe_recall_min": 64.16666666666667,
+  "probe_recall_max": 77.5,
+  "per_seed": [
+    {
+      "seed": 101,
+      "ds2_accuracy_pct": 87.50402576489533,
+      "final_train_loss_recon": 0.34265861285508736,
+      "first_train_loss_recon": 0.7158978800096455,
+      "probe_recall_mean_pct": 74.58333333333333,
+      "probe_recall_std_pct": 8.680277773333192,
+      "checkpoint": "perception/checkpoints\\cnn_lstm_aux_seed101.pt"
+    },
+    {
+      "seed": 202,
+      "ds2_accuracy_pct": 91.52979066022544,
+      "final_train_loss_recon": 0.3181824342033567,
+      "first_train_loss_recon": 0.6881879330034086,
+      "probe_recall_mean_pct": 64.16666666666667,
+      "probe_recall_std_pct": 8.975274678557508,
+      "checkpoint": "perception/checkpoints\\cnn_lstm_aux_seed202.pt"
+    },
+    {
+      "seed": 303,
+      "ds2_accuracy_pct": 92.62077294685992,
+      "final_train_loss_recon": 0.28642388067301916,
+      "first_train_loss_recon": 0.7837069193287008,
+      "probe_recall_mean_pct": 77.5,
+      "probe_recall_std_pct": 9.354143466934854,
+      "checkpoint": "perception/checkpoints\\cnn_lstm_aux_seed303.pt"
+    }
+  ],
+  "branch": "D",
+  "branch_reason": "mean 72.1% is within one seed-SD (7.0pp) of baseline 69.6%; improvement appears in some seeds but not others (range [64.2%, 77.5%])",
+  "baseline_accuracy": 85.4,
+  "baseline_probe_recall": 69.6
+}
