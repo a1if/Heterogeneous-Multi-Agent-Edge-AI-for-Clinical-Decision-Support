@@ -15,7 +15,8 @@ plus (added after this doc was first written, same constraint applies):
 `merge_e1_e2_to_ledger.py`, `merge_gpu_checks_to_ledger.py`,
 `run_gpu_checks_combined.py`, `s_class_expanded_check.py`,
 `check_s_class_per_record.py`, `check_s_class_headroom.py`,
-`find_additional_s_events.py`, `export_norm_check_raw.py`.
+`find_additional_s_events.py`, `export_norm_check_raw.py`,
+`day6_class_heading_ablation.py`, and `quantization_coupling_pilot.py`.
 
 These all do bare `from perception.X import Y` / `from reasoning.X import Y` imports,
 which only resolve because Python adds a directly-invoked script's own directory to
@@ -47,7 +48,8 @@ Raw JSON outputs from the scripts above: `day6_results.json`,
 `s_class_matched_check_results.json`, `arm_a_disagreement_diagnosis.json`,
 `e1_ablation_results.json`, `e2_seed_variance_results.json`,
 `day3_norm_check_results.json`, `s_class_expanded_results.json`,
-`s_class_per_record_results.json`. Producing scripts' `RESULTS_PATH` constants
+`s_class_per_record_results.json`, `class_heading_ablation_results.json`, and
+`quantization_coupling_pilot_results.json`. Producing scripts' `RESULTS_PATH` constants
 point here; nothing else reads these files directly except `results_ledger.json`'s
 `source` field (documentation only).
 
