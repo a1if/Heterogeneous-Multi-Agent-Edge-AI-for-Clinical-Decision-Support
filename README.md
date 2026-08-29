@@ -4,14 +4,14 @@ Research code for a dissertation investigating whether a learned adapter that
 projects a non-transformer perception model's internal feature representation
 directly into a language model's input embedding space can replace a
 text-based agent-to-agent interface, reducing inter-agent communication cost
-(tokens, latency, memory) while preserving task accuracy — and at what
+(tokens, latency, memory) while preserving task accuracy  and at what
 auditability cost.
 
 ## Research Question
 
 > Can a small, learned adapter that projects a non-transformer perception
 > model's internal feature representation directly into a language model's
-> input embedding space — replacing a text-based structured interface —
+> input embedding space,  replacing a text-based structured interface ,
 > reduce inter-agent communication cost (tokens, latency, memory) compared to
 > the text-based baseline, while preserving task accuracy, and what
 > auditability cost does this trade-off impose relative to the structured
