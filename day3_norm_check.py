@@ -30,10 +30,8 @@ from reasoning.adapter_arm import load_trained_adapter
 from reasoning.model_loader import load_model
 from reasoning.virtual_adapter import VirtualTokenAdapter
 from day7_auditability_probe import select_events  # same 80-event selection as Day 6/7
+from project_config import ADAPTER_CHECKPOINT, DS2_PATH, PERCEPTION_CHECKPOINT
 
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
-ADAPTER_CHECKPOINT = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
 RESULTS_PATH = "results/day3_norm_check_results.json"
 INIT_ADAPTER_SEED = 42  # previously unset -- untrained baseline was non-reproducible run to run
 

@@ -15,7 +15,6 @@ import torch
 from transformers import TextIteratorStreamer
 
 from reasoning.baseline_arm import _extract_last_json_object, GENERATION_CONFIG
-from reasoning.model_loader import load_model
 from reasoning.output_schema import ReasoningOutput
 from reasoning.virtual_adapter import VirtualTokenAdapter, prepare_adapter_inputs
 

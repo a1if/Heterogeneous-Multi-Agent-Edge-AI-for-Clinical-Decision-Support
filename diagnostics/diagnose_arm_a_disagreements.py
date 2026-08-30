@@ -26,11 +26,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root, fo
 from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.baseline_arm import run_baseline_arm_timed
 from reasoning.training_targets import urgency_tier_from_event
+from project_config import DS2_PATH, PERCEPTION_CHECKPOINT
 
 # Paths below are relative to CWD (repo root), per the "run from repo root" convention
 # used throughout this project -- NOT relative to this script's own location.
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 RESULTS_PATH = "results/arm_a_disagreement_diagnosis.json"
 
 # The known V-class disagreement run from the Day 6 log, plus two S-class

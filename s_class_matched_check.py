@@ -18,15 +18,13 @@ Run:
     python s_class_matched_check.py
 """
 import json
-import math
 import numpy as np
 from collections import Counter
 
-from perception.perception_agent import PerceptionAgent, compute_sqi, SQI_LOW_THRESHOLD  # noqa: F401 -- SQI_LOW_THRESHOLD used for diagnostic below
+from perception.perception_agent import PerceptionAgent, SQI_LOW_THRESHOLD
 from day7_auditability_probe import select_events  # same selection fn as the probe itself
+from project_config import DS2_PATH, PERCEPTION_CHECKPOINT, wilson_ci
 
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 RESULTS_PATH = "results/s_class_matched_check_results.json"
 
 # AAMI class labels -- adjust if your label encoding differs
@@ -35,17 +33,6 @@ CLASS_NAMES = {0: "N", 1: "S", 2: "V", 3: "F", 4: "Q"}  # confirm against your a
 # Known from day7_auditability_results_v2.json: probe recovers S-class at 12/20 (60.0%)
 PROBE_S_CORRECT = 12
 PROBE_S_TOTAL = 20
-
-
-def wilson_ci(correct, total, z=1.96):
-    """Wilson score 95% CI for a binomial proportion. Returns (lower, upper) as percentages."""
-    if total == 0:
-        return (float("nan"), float("nan"))
-    p = correct / total
-    denom = 1 + z**2 / total
-    center = (p + z**2 / (2 * total)) / denom
-    margin = (z / denom) * math.sqrt(p * (1 - p) / total + z**2 / (4 * total**2))
-    return (100 * (center - margin), 100 * (center + margin))
 
 
 def main():

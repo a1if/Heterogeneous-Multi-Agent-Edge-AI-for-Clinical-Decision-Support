@@ -24,10 +24,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root, fo
 
 from perception.perception_agent import PerceptionAgent
 from reasoning.baseline_arm import run_baseline_arm_timed
+from project_config import DS2_PATH
+from perception.model import AAMI_CLASSES  # single source of truth
 
 CHECKPOINT_PATH = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
-AAMI_CLASSES = ["N", "S", "V", "F", "Q"]
 
 
 def pick_one_event_per_class(X, y, rr, max_classes=5):

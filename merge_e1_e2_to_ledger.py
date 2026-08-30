@@ -11,11 +11,10 @@ Run (from repo root):
 import json
 
 from render_ledger import source_run_date
+from project_config import DAY6_RESULTS, LEDGER_PATH
 
-LEDGER_PATH = "results_ledger.json"
 E1_RESULTS = "results/e1_ablation_results.json"
 E2_RESULTS = "results/e2_seed_variance_results.json"
-DAY6_RESULTS = "results/day6_results.json"
 
 # "run" is dated per-entry from whichever result file that entry's numbers actually
 # came from, mirroring the existing per-entry `source` selection below: the

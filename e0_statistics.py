@@ -10,14 +10,14 @@ Run:
 """
 import json
 
-import numpy as np
 from scipy.stats import beta as beta_dist
 from scipy.stats import binomtest, wilcoxon
 from statsmodels.stats.proportion import proportion_confint
 
 from render_ledger import source_run_date
+from project_config import DAY6_RESULTS
 
-RESULTS_PATH = "results/day6_results.json"
+RESULTS_PATH = DAY6_RESULTS
 LEDGER_PATH = "results_ledger.json"
 
 

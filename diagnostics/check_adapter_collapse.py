@@ -28,12 +28,11 @@ from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed
 from reasoning.model_loader import load_model
 from reasoning.training_targets import urgency_tier_from_event
+from project_config import DS2_PATH, PERCEPTION_CHECKPOINT
+from perception.model import AAMI_CLASSES  # single source of truth
 
 DEFAULT_CHECKPOINT = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 PER_CLASS = 3
-AAMI_CLASSES = ["N", "S", "V", "F", "Q"]
 
 
 def main():
