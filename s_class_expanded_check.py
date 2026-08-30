@@ -46,7 +46,6 @@ Run:
     python s_class_expanded_check.py
 """
 import json
-import math
 from pathlib import Path
 
 import numpy as np
@@ -56,14 +55,12 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 
-from perception.perception_agent import PerceptionAgent, compute_sqi, SQI_LOW_THRESHOLD
+from perception.perception_agent import PerceptionAgent, SQI_LOW_THRESHOLD
 from reasoning.adapter_arm import load_trained_adapter
 from reasoning.model_loader import load_model
 from day7_auditability_probe import select_events, PCA_COMPONENTS  # exact same pipeline params
+from project_config import ADAPTER_CHECKPOINT, DS2_PATH, PERCEPTION_CHECKPOINT, wilson_ci
 
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-ADAPTER_CHECKPOINT = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 EXISTING_PROBE_RESULTS = "results/day7_auditability_results_v2.json"
 ADDITIONAL_S_INDICES = "cache/additional_s_class_indices.npy"
 RESULTS_PATH = "results/s_class_expanded_results.json"
@@ -74,16 +71,6 @@ ADAPTER_VECTORS_CACHE_NEW43 = "cache/s_class_adapter_vectors_new43_cache.npy"
 
 S_CLASS_IDX = 1  # confirm against your actual encoding
 PER_EVENT_DTYPE = [("idx", "i8"), ("record_id", "i8"), ("classifier_correct", "?"), ("probe_correct", "?")]
-
-
-def wilson_ci(correct, total, z=1.96):
-    if total == 0:
-        return (float("nan"), float("nan"))
-    p = correct / total
-    denom = 1 + z**2 / total
-    center = (p + z**2 / (2 * total)) / denom
-    margin = (z / denom) * math.sqrt(p * (1 - p) / total + z**2 / (4 * total**2))
-    return (100 * (center - margin), 100 * (center + margin))
 
 
 def main():

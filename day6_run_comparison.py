@@ -25,92 +25,27 @@ Run:
 """
 import json
 import time
-from collections import defaultdict
 
 import numpy as np
-import torch
 
-from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed
 from reasoning.baseline_arm import run_baseline_arm_timed
 from reasoning.model_loader import load_model
-from reasoning.training_targets import urgency_tier_from_event
+from ablation_common import prepare_events
+from project_config import DAY6_RESULTS, ADAPTER_CHECKPOINT, DS2_PATH, MAX_PER_RECORD, PERCEPTION_CHECKPOINT, PER_CLASS, measure_vram, select_events
+from perception.model import AAMI_CLASSES  # single source of truth
 
-ADAPTER_CHECKPOINT = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
-PER_CLASS = 20
-MAX_PER_RECORD = 5  # cap so one patient can't dominate a class
-AAMI_CLASSES = ["N", "S", "V", "F", "Q"]
-RESULTS_PATH = "results/day6_results.json"
-
-
-def select_events(y: np.ndarray, record_ids: np.ndarray) -> list[int]:
-    """PER_CLASS events per class (N/S/V/F), capped at MAX_PER_RECORD per patient
-    record, deterministic first-occurrence within that cap -- documented, not random."""
-    selected = []
-    for class_id in range(4):  # N,S,V,F -- Q excluded, zero examples in DS2
-        per_record_count = defaultdict(int)
-        class_indices = np.flatnonzero(y == class_id)
-        picked_for_class = []
-        for idx in class_indices:
-            rec = int(record_ids[idx])
-            if per_record_count[rec] >= MAX_PER_RECORD:
-                continue
-            picked_for_class.append(int(idx))
-            per_record_count[rec] += 1
-            if len(picked_for_class) == PER_CLASS:
-                break
-        if len(picked_for_class) < PER_CLASS:
-            raise RuntimeError(
-                f"Class {AAMI_CLASSES[class_id]}: only found {len(picked_for_class)}/{PER_CLASS} "
-                f"events under the {MAX_PER_RECORD}-per-record cap. Loosen MAX_PER_RECORD or PER_CLASS."
-            )
-        selected.extend(picked_for_class)
-    return selected
-
-
-def measure_vram(fn, *args, **kwargs):
-    """Runs fn, returns (result, peak_vram_mb) isolated to this call."""
-    if torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
-    result = fn(*args, **kwargs)
-    peak_mb = torch.cuda.max_memory_allocated() / (1024 ** 2) if torch.cuda.is_available() else None
-    return result, peak_mb
+RESULTS_PATH = DAY6_RESULTS
 
 
 def main():
-    print("Loading Perception Agent + DS2...")
-    agent = PerceptionAgent(checkpoint_path=PERCEPTION_CHECKPOINT)
-    data = np.load(DS2_PATH)
-    X, y, rr, record_ids = data["features"], data["labels"], data["rr_interval_ms"], data["record_ids"]
-
-    selected = select_events(y, record_ids)
-    print(f"Selected {len(selected)} events: {PER_CLASS} per class (N/S/V/F), "
-          f"capped at {MAX_PER_RECORD}/record")
-
-    print("Building Perception outputs via chronological per-record replay "
-          "(matches adapter_training.py's approach -- consecutive_abnormal_beats "
-          "is stateful and depends on true beat order within each record; "
-          "predicting directly on scattered selected indices would give it "
-          "arbitrary, incorrect state)...")
-    replayed = replay_selected(agent, X, rr, record_ids, selected)
-    prepared = []
-    for i in selected:  # preserve original class-grouped order
-        health_event, context_vector = replayed[i]
-        prepared.append({
-            "idx": i,
-            "true_class": AAMI_CLASSES[y[i]],
-            "predicted_class": health_event["classification"]["label"],
-            "record_id": int(record_ids[i]),
-            "health_event": health_event,
-            "context_vector": context_vector,
-            "reference_tier": urgency_tier_from_event(health_event),
-        })
-
-    del agent
-    if torch.cuda.is_available():
-        torch.cuda.empty_cache()
+    # Chronological per-record replay lives in ablation_common.prepare_events():
+    # consecutive_abnormal_beats is stateful and depends on true beat order within
+    # each record, so predicting directly on scattered selected indices would give
+    # it arbitrary, incorrect state. Shared with the ablations rather than copied,
+    # so "the same 80 events" is enforced by construction rather than by comment.
+    prepared = prepare_events(
+        note=f" ({PER_CLASS}/class N/S/V/F, capped at {MAX_PER_RECORD}/record)")
 
     print("Loading Gemma 4 E4B + trained adapter (shared by both arms)...")
     model, processor = load_model()

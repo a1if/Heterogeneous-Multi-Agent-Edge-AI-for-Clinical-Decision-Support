@@ -12,7 +12,6 @@ quantization is "correct" or preferred.
 Requires: same `huggingface-cli login` / Gemma license acceptance as
 model_loader.py.
 """
-import torch
 from transformers import AutoProcessor, BitsAndBytesConfig, Gemma4ForConditionalGeneration
 
 from reasoning.model_loader import MODEL_ID

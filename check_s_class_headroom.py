@@ -8,10 +8,9 @@ No GPU needed, no model loading. Run:
 """
 import numpy as np
 from collections import Counter
+from project_config import DS2_PATH, MAX_PER_RECORD
 
-DS2_PATH = "data/processed/ds2_test.npz"
 CLASS_NAMES = {0: "N", 1: "S", 2: "V", 3: "F", 4: "Q"}  # confirm against your actual encoding
-MAX_PER_RECORD = 5  # matches the existing selection cap in select_events()
 
 
 def main():

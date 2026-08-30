@@ -15,10 +15,8 @@ from reasoning.adapter_arm import load_trained_adapter
 from reasoning.model_loader import load_model
 from reasoning.virtual_adapter import VirtualTokenAdapter
 from day7_auditability_probe import select_events
+from project_config import ADAPTER_CHECKPOINT, DS2_PATH, PERCEPTION_CHECKPOINT
 
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
-ADAPTER_CHECKPOINT = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
 INIT_ADAPTER_SEED = 42
 OUT_PATH = "results/norm_check_raw_arrays.npz"
 

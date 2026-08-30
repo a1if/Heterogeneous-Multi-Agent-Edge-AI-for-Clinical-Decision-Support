@@ -17,11 +17,11 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-from perception.model import CNNLSTM, AAMI_CLASSES
+from perception.model import CNNLSTM
 from train_perception_agent import evaluate, load_split
+from project_config import DS2_PATH
 
 CHECKPOINT_PATH = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 RESULTS_PATH = "results/perception_eval_results.json"
 
 

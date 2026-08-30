@@ -43,9 +43,8 @@ from reasoning.baseline_arm import run_baseline_arm_timed
 from reasoning.baseline_arm_class_heading_ablation import run_baseline_arm_neutral_timed
 from reasoning.model_loader import load_model
 from reasoning.training_targets import urgency_tier_from_event
+from project_config import DS2_PATH, PERCEPTION_CHECKPOINT
 
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 RESULTS_PATH = "results/class_heading_ablation_results.json"
 
 

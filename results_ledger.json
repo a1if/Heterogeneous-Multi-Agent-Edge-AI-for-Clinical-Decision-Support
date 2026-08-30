@@ -1286,5 +1286,69 @@
     "source": "day7_auditability_probe.py",
     "run": "2026-08-23",
     "note": "Seeded, reproducible headline auditability estimate: mean over 10 PCA seeds (sd 0.28 pp, range 67.1-67.9%). This is the value audit.armB.headline now carries; the unseeded single draw it replaced was 67.9%."
+  },
+  "tokens.reduction.n80.ci95.lower": {
+    "value": 23.9,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI lower bound for the reduction reported at tokens.reduction.n80. No CI existed for this quantity before this run."
+  },
+  "tokens.reduction.n80.ci95.upper": {
+    "value": 25.5,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI upper bound for the reduction reported at tokens.reduction.n80."
+  },
+  "latency.reduction.n80.ci95.lower": {
+    "value": 10.0,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI lower bound for the reduction reported at latency.reduction.n80. No CI existed for this quantity before this run."
+  },
+  "latency.reduction.n80.ci95.upper": {
+    "value": 16.6,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI upper bound for the reduction reported at latency.reduction.n80."
+  },
+  "vram.reduction.n80.ci95.lower": {
+    "value": 0.27,
+    "unit": "%",
+    "format": ".2f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI lower bound for the reduction reported at vram.reduction.n80. No CI existed for this quantity before this run."
+  },
+  "vram.reduction.n80.ci95.upper": {
+    "value": 0.29,
+    "unit": "%",
+    "format": ".2f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI upper bound for the reduction reported at vram.reduction.n80."
+  },
+  "vram.reduction.n80": {
+    "value": 0.28,
+    "unit": "%",
+    "format": ".2f",
+    "derived_from": [
+      "armA.vram.mean.n80",
+      "armB.vram.mean.n80"
+    ],
+    "note": "Small relative to the ~9GB working set dominated by the frozen quantised LLM, which both arms load identically; reported to 2dp because 1dp collapses point and both CI bounds to the same displayed value."
   }
 }

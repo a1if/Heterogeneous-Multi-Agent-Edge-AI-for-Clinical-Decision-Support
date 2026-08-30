@@ -70,14 +70,11 @@ from sklearn.metrics import confusion_matrix, classification_report
 from perception.perception_agent import PerceptionAgent
 from reasoning.adapter_arm import load_trained_adapter
 from reasoning.model_loader import load_model
+from project_config import ADAPTER_CHECKPOINT, DS2_PATH, MAX_PER_RECORD, PERCEPTION_CHECKPOINT, PER_CLASS, select_events
+from perception.model import AAMI_CLASSES  # single source of truth
 
 # --- Configuration -----------------------------------------------------------
-ADAPTER_CHECKPOINT    = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH              = "data/processed/ds2_test.npz"
 
-PER_CLASS      = 20     # matches Day 6's 80-event run (was 15 -> 60 events)
-MAX_PER_RECORD = 5
 N_FOLDS        = 5
 N_REPEATS      = 3
 PCA_COMPONENTS = 30     # just under the theoretical rank-32 of the adapter output
@@ -95,7 +92,6 @@ PCA_COMPONENTS = 30     # just under the theoretical rank-32 of the adapter outp
 PCA_RANDOM_STATE = 42
 PCA_SEED_SWEEP = list(range(10))
 
-AAMI_CLASSES   = ["N", "S", "V", "F", "Q"]
 RESULTS_PATH   = "results/day7_auditability_results_v2.json"
 
 # Stable internal keys, decoupled from display strings -- v1 used the display
@@ -106,33 +102,6 @@ KEY_ADAPTER_PCA   = "adapter_linear_pca"
 KEY_ADAPTER_RBF   = "adapter_rbf_pca"
 KEY_CONTEXT_LIN   = "context_linear"
 KEY_CONTEXT_RBF   = "context_rbf"
-
-
-def select_events(y: np.ndarray, record_ids: np.ndarray) -> list[int]:
-    """Identical logic to day6_run_comparison.py so the probe evaluates the
-    exact same 80 events Day 6 scored -- direct comparability."""
-    from collections import defaultdict
-    selected = []
-    for class_id in range(4):                      # N/S/V/F (Q absent in DS2)
-        per_record_count = defaultdict(int)
-        class_indices = np.flatnonzero(y == class_id)
-        picked = []
-        for idx in class_indices:
-            rec = int(record_ids[idx])
-            if per_record_count[rec] >= MAX_PER_RECORD:
-                continue
-            picked.append(int(idx))
-            per_record_count[rec] += 1
-            if len(picked) == PER_CLASS:
-                break
-        if len(picked) < PER_CLASS:
-            raise RuntimeError(
-                f"Class {AAMI_CLASSES[class_id]}: only found "
-                f"{len(picked)}/{PER_CLASS} events under the "
-                f"{MAX_PER_RECORD}-per-record cap."
-            )
-        selected.extend(picked)
-    return selected
 
 
 def build_probe_suite() -> list[tuple[str, str, str, Pipeline]]:

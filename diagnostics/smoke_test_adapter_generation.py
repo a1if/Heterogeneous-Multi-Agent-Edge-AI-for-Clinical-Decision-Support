@@ -24,10 +24,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root, fo
 from perception.perception_agent import PerceptionAgent
 from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed
 from reasoning.model_loader import load_model
+from project_config import DS2_PATH, PERCEPTION_CHECKPOINT
 
 CHECKPOINT_PATH = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 
 
 def main():

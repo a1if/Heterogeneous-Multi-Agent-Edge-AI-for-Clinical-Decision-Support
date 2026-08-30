@@ -12,13 +12,11 @@ No GPU needed. Run:
     python find_additional_s_events.py
 """
 import numpy as np
-from collections import Counter
 
 from day7_auditability_probe import select_events  # unchanged -- gives the original 80
+from project_config import DS2_PATH, MAX_PER_RECORD
 
-DS2_PATH = "data/processed/ds2_test.npz"
 S_CLASS_IDX = 1  # confirm against your actual encoding
-MAX_PER_RECORD = 5  # matches select_events()'s own cap
 
 
 def all_s_events_under_cap(y, record_ids):

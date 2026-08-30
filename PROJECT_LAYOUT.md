@@ -37,6 +37,35 @@ the same constraint). `run_gpu_checks_combined.py` goes one step further and doe
 (to load Gemma once instead of twice across both checks) — another reason those two
 can't move either.
 
+## `project_config.py` — shared constants and helpers
+Single home for the literals and helpers that used to be re-typed in every script:
+`DS1_PATH`/`DS2_PATH`, `PERCEPTION_CHECKPOINT`, `ADAPTER_CHECKPOINT`, `DAY6_RESULTS`,
+`LEDGER_PATH`, `PER_CLASS`/`MAX_PER_RECORD`, and the `select_events`, `measure_vram`
+and `wilson_ci` helpers. Before this, `data/processed/ds2_test.npz` appeared in 19
+files, `perception/checkpoints/cnn_lstm.pt` in 17, and `AAMI_CLASSES` was redeclared
+in 6 despite already existing in `perception/model.py`.
+
+The important one was `select_events`. It had TWO independent definitions —
+`day6_run_comparison.py` and `day7_auditability_probe.py` — with six other scripts
+importing the day7 copy while day6 used its own. Every one of those scripts claims to
+score "the same 80 events", but nothing enforced it: editing either copy would have
+broken that guarantee silently. Both were verified to return byte-identical output
+before being merged, so the consolidation preserves behaviour exactly and removes the
+drift risk. `day7_auditability_probe.select_events` is now a re-export, so the existing
+`from day7_auditability_probe import select_events` in six scripts still resolves.
+
+**Scope is deliberately limited to root scripts and `diagnostics/`.** The
+`perception/`/`reasoning/` packages do NOT import from it — a package depending on a
+repo-root module inverts the dependency direction and would break if those packages
+were imported from outside this checkout. `AAMI_CLASSES` is likewise NOT re-exported
+from `project_config`; it stays in `perception.model` and is imported from there, so
+this module removes a duplicate rather than becoming a seventh copy (and importing it
+here would drag `torch` into CPU-only scripts like `check_s_class_headroom.py`).
+
+Deliberate local overrides survive: `diagnostics/check_adapter_collapse.py` keeps its
+own `PER_CLASS = 3`, because the migration only replaced constants whose value matched
+the canonical one exactly.
+
 ## `results_ledger.json`, `render_ledger.py`, `methodology_footnote_e0.md`
 Also stay at root — this is the dissertation "single source of numeric truth"
 infrastructure (see `7day_dissertation_sprint_plan.md` §2.1), referenced by

@@ -55,9 +55,10 @@ from ablation_common import prepare_events, run_arm_b_eval, summarize_arm_b
 from reasoning.adapter_arm import load_trained_adapter
 from reasoning.adapter_training import TrainingConfig, train_adapter
 from reasoning.model_loader import load_model
+from project_config import DAY6_RESULTS as DAY6_RESULTS_STR
 
 EXISTING_K4_CHECKPOINT = Path("reasoning/checkpoints/virtual_adapter_day5_larger.pt")
-DAY6_RESULTS = Path("results/day6_results.json")
+DAY6_RESULTS = Path(DAY6_RESULTS_STR)
 E2_RESULTS = Path("results/e2_seed_variance_results.json")
 ABLATION_K_VALUES = [1, 2, 8]
 

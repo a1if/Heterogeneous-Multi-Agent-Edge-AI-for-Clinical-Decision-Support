@@ -46,10 +46,11 @@ from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed
 from reasoning.model_loader_8bit import load_model_8bit
 from reasoning.training_targets import urgency_tier_from_event
+from perception.model import AAMI_CLASSES  # single source of truth
+from project_config import DAY6_RESULTS
 
-AAMI_CLASSES = ["N", "S", "V", "F", "Q"]
 PER_CLASS_PILOT = 5
-DAY6_RESULTS_PATH = "results/day6_results.json"
+DAY6_RESULTS_PATH = DAY6_RESULTS
 RESULTS_PATH = "results/quantization_coupling_pilot_results.json"
 
 

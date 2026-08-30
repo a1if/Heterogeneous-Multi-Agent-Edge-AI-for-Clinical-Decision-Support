@@ -55,10 +55,8 @@ from day7_auditability_probe import (
 )
 from perception.perception_agent import PerceptionAgent
 from reasoning.virtual_adapter import VirtualTokenAdapter
+from project_config import ADAPTER_CHECKPOINT, DS2_PATH, PERCEPTION_CHECKPOINT
 
-ADAPTER_CHECKPOINT = "reasoning/checkpoints/virtual_adapter_day5_larger.pt"
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
 RESULTS_PATH = "results/s_class_headroom_bias_results.json"
 S_CLASS_ID = 1
 

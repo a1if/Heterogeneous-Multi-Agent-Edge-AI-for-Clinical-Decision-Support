@@ -27,48 +27,51 @@ from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.adapter_arm import run_adapter_arm_timed
 from reasoning.training_targets import urgency_tier_from_event
 from day7_auditability_probe import select_events  # identical 80-event selection as Day 6/7
-
-PERCEPTION_CHECKPOINT = "perception/checkpoints/cnn_lstm.pt"
-DS2_PATH = "data/processed/ds2_test.npz"
-AAMI_CLASSES = ["N", "S", "V", "F", "Q"]
+from project_config import DS2_PATH, PERCEPTION_CHECKPOINT, measure_vram
+from perception.model import AAMI_CLASSES  # single source of truth
 
 
-def measure_vram(fn, *args, **kwargs):
-    """Runs fn, returns (result, peak_vram_mb) isolated to this call."""
-    if torch.cuda.is_available():
-        torch.cuda.reset_peak_memory_stats()
-    result = fn(*args, **kwargs)
-    peak_mb = torch.cuda.max_memory_allocated() / (1024 ** 2) if torch.cuda.is_available() else None
-    return result, peak_mb
-
-
-def prepare_events() -> list[dict]:
-    """Chronological per-record replay -> the same 80 events Day 6/7 scored.
+def prepare_events(selected=None, *, note="") -> list[dict]:
+    """Chronological per-record replay -> the events Day 6/7 scored.
 
     Computed once and reused across every checkpoint evaluated below: Perception
     output does not depend on the adapter, so redoing this per-checkpoint would
     be pure waste.
+
+    ``selected`` defaults to the standard 80-event ``select_events`` selection;
+    pass an explicit index list for a subset (e.g. the quantization pilot). The
+    returned dicts always carry the full key set -- callers that only need some
+    of them (Arm-A-only runs ignore ``context_vector``) just don't read the rest.
+    That superset is safe because no caller of this function spreads the dict
+    into a saved artifact; ``diagnostics/check_adapter_collapse.py`` does do that,
+    which is exactly why it keeps its own prep rather than calling this.
+
+    This body was previously copy-pasted into day6_run_comparison.py,
+    day6_class_heading_ablation.py and quantization_coupling_pilot.py, all of
+    which document that they replay events "the same way" as Day 6 -- a claim
+    nothing enforced while four copies existed.
     """
-    print("Loading Perception Agent + DS2, preparing the 80-event selection "
-          "(chronological replay, matches day6_run_comparison.py)...")
+    print("Loading Perception Agent + DS2, preparing the event selection "
+          "(chronological replay, matches day6_run_comparison.py)..." + note)
     agent = PerceptionAgent(checkpoint_path=PERCEPTION_CHECKPOINT)
     data = np.load(DS2_PATH)
     X, y, rr, record_ids = data["features"], data["labels"], data["rr_interval_ms"], data["record_ids"]
 
-    selected = select_events(y, record_ids)
+    if selected is None:
+        selected = select_events(y, record_ids)
     replayed = replay_selected(agent, X, rr, record_ids, selected)
-    prepared = []
-    for i in selected:
-        health_event, context_vector = replayed[i]
-        prepared.append({
+    prepared = [
+        {
             "idx": i,
             "true_class": AAMI_CLASSES[y[i]],
-            "predicted_class": health_event["classification"]["label"],
+            "predicted_class": replayed[i][0]["classification"]["label"],
             "record_id": int(record_ids[i]),
-            "health_event": health_event,
-            "context_vector": context_vector,
-            "reference_tier": urgency_tier_from_event(health_event),
-        })
+            "health_event": replayed[i][0],
+            "context_vector": replayed[i][1],
+            "reference_tier": urgency_tier_from_event(replayed[i][0]),
+        }
+        for i in selected                      # preserve original class-grouped order
+    ]
 
     del agent
     if torch.cuda.is_available():
@@ -92,15 +95,18 @@ def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: st
     results = []
     run_start = time.time()
     for i, item in enumerate(prepared):
+        # Carried through unchanged on both the success and failure paths. Kept as
+        # an explicit leading dict so key ORDER in the saved JSON stays exactly as
+        # it was when day6_results.json and the E1/E2 result files were written.
+        base = {k: item[k] for k in
+                ("idx", "true_class", "predicted_class", "record_id", "reference_tier")}
+        base["arm"] = "B"
         try:
             out, vram = measure_vram(
                 run_adapter_arm_timed, item["health_event"], item["context_vector"], model, processor, adapter
             )
         except RuntimeError as e:
-            results.append({
-                "idx": item["idx"], "true_class": item["true_class"],
-                "predicted_class": item["predicted_class"], "record_id": item["record_id"],
-                "reference_tier": item["reference_tier"], "arm": "B",
+            results.append({**base,
                 "urgency_tier": None, "correct": False,
                 "prompt_tokens": None, "output_tokens": None,
                 "generation_duration_ms": None, "time_to_first_token_ms": None,
@@ -112,10 +118,7 @@ def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: st
                   f"GENERATION FAILED: {e} elapsed={elapsed:.0f}s")
             continue
 
-        results.append({
-            "idx": item["idx"], "true_class": item["true_class"],
-            "predicted_class": item["predicted_class"], "record_id": item["record_id"],
-            "reference_tier": item["reference_tier"], "arm": "B",
+        results.append({**base,
             "urgency_tier": out["result"]["urgency_tier"],
             "correct": out["result"]["urgency_tier"] == item["reference_tier"],
             "prompt_tokens": out["prompt_tokens"], "output_tokens": out["output_tokens"],
