@@ -50,6 +50,92 @@ count, generation latency, VRAM footprint, task accuracy), plus auditability,
 assessed separately via a held-out linear-probe protocol that recovers the
 true class label from each arm's transmitted representation.
 
+## Worked Example
+
+One real, held-out DS2 event (index 13389, true AAMI class V — a ventricular
+ectopic beat), traced through both interfaces. Every value below is genuine
+output from the trained checkpoints, not a constructed illustration.
+
+**Perception Agent output** — the Perception Agent classifies the beat once;
+both arms consume the same result, packaged differently.
+
+```json
+{
+  "classification": {
+    "label": "V",
+    "description": "Ventricular ectopic beat",
+    "confidence": 0.932758,
+    "top_3": [
+      {"label": "V", "confidence": 0.943032},
+      {"label": "N", "confidence": 0.046482},
+      {"label": "S", "confidence": 0.010486}
+    ]
+  },
+  "signal_features": {
+    "rr_interval_ms": 572.22,
+    "qrs_duration_ms": 77.78,
+    "heart_rate_bpm": 104.85,
+    "beat_morphology": "narrow_complex"
+  },
+  "clinical_flags": {
+    "requires_urgent_review": true,
+    "flag_reason": "V-class beat detected with confidence 0.93",
+    "consecutive_abnormal_beats": 1
+  }
+}
+```
+
+(`confidence` is the classifier's true softmax probability for the escalation
+rule below; `top_3` is separately renormalised to sum to 1.0 to satisfy the
+output schema — see `perception/perception_agent.py` for why these two
+numbers are deliberately different.)
+
+**Arm A (JSON interface):** the full event above is serialised to text inside
+a prompt. Gemma reads it as text and reasons over the named `"label"` and
+`"confidence"` fields directly.
+
+```json
+// prompt_tokens: 695   output_tokens: 77   generation: 13051 ms
+{
+  "urgency_tier": "urgent",
+  "justification": "The beat warrants an urgent review because the classification confidence is greater than 0.85.",
+  "referenced_guideline_fact": "A single occurrence classified with high confidence (greater than 0.85) warrants prompt clinical review."
+}
+```
+
+**Arm B (adapter interface):** the same event's 32-dimensional context
+vector — the Perception Agent's internal representation, taken from
+immediately before its classification head — is projected by
+`VirtualTokenAdapter` (a single linear layer) into 4 tokens native to Gemma's
+2,560-dimensional embedding space. No JSON, no class label, and no confidence
+score are ever materialised as text; Gemma receives only the projected
+vectors, concatenated directly into its input embedding sequence in place of
+where the JSON payload would sit.
+
+```
+context_vector: (32,) float32   →   VirtualTokenAdapter   →   virtual_tokens: (4, 2560)
+```
+
+```json
+// prompt_tokens: 486   output_tokens: 61   generation: 9086 ms
+{
+  "urgency_tier": "urgent",
+  "justification": "The beat is classified as ventricular, which warrants an urgent review.",
+  "referenced_guideline_fact": "A high-confidence ventricular classification warrants prompt clinical review."
+}
+```
+
+Both arms reach the same `urgency_tier` for this event from the same
+underlying classification, using 209 fewer prompt tokens under Arm B (695 →
+486, a 30% reduction on this single event — the headline 24.7% figure in the
+Results is the mean over the full 80-event evaluation set, not this one
+event). This is the concrete trade-off the dissertation measures: Arm B's
+justification text no longer explicitly names a confidence value or cites the
+0.85 threshold, because that number was never transmitted as a legible
+token — it exists only inside the adapter's projected vectors, recoverable
+(per Chapter 4's auditability probe) only via a trained decoder, not by
+reading the interface.
+
 ## Dataset
 
 The MIT-BIH Arrhythmia Database (Moody and Mark, 2001), accessed via the
