@@ -1,0 +1,15 @@
+{
+  "reps": 167350,
+  "batch_size": 10,
+  "elapsed_s": 9.625235999999859,
+  "n_distinct_sensor_readings": 20,
+  "total_energy_j": 621.5478872533613,
+  "mean_power_w": 64.57482052942602,
+  "mj_per_call": 3.714059678836936,
+  "mj_per_event": 0.3714059678836937,
+  "per_call_time_ms": 0.07170568084716797,
+  "idle_power_w": 17.26278378378378,
+  "net_of_idle_mean_power_w": 47.31203674564224,
+  "net_of_idle_mj_per_call": 2.721180276770074,
+  "net_of_idle_mj_per_event": 0.2721180276770074
+}

@@ -1,0 +1,348 @@
+{
+  "n_events": 10,
+  "idle_power_w": 17.26278378378378,
+  "assumption": "Arm B communication boundary = 32-dim context vector, pre-adapter (see module docstring)",
+  "bytes_per_event": [
+    {
+      "idx": 0,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 561,
+        "minified_json_bytes": 383
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 1,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 582,
+        "minified_json_bytes": 404
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 2,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 561,
+        "minified_json_bytes": 383
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 3,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 561,
+        "minified_json_bytes": 383
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 4,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 562,
+        "minified_json_bytes": 384
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 2271,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 562,
+        "minified_json_bytes": 384
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 2272,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 561,
+        "minified_json_bytes": 383
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 2273,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 562,
+        "minified_json_bytes": 384
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 2274,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 562,
+        "minified_json_bytes": 384
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    },
+    {
+      "idx": 2275,
+      "arm_a": {
+        "as_embedded_in_prompt_bytes": 563,
+        "minified_json_bytes": 385
+      },
+      "arm_b": {
+        "context_vector_float32_bytes": 128,
+        "context_vector_float16_bytes": 64,
+        "virtual_tokens_float32_bytes": 40960,
+        "virtual_tokens_float16_bytes": 20480,
+        "context_vector_dims": 32,
+        "virtual_tokens_dims": 10240
+      }
+    }
+  ],
+  "adapter_only": {
+    "reps": 500,
+    "batch_size": 10,
+    "time_ms_mean": 0.09072070392593741,
+    "time_ms_median": 0.08032000064849854,
+    "time_ms_min": 0.022624000906944275,
+    "time_ms_max": 0.2680320143699646,
+    "energy": {
+      "reps": 167350,
+      "total_joules": 621.5478872533613,
+      "mean_power_w": 64.57482052942602,
+      "elapsed_s": 9.625235999999859,
+      "n_power_samples": 20,
+      "mj_per_event": 0.3714059678836937,
+      "net_of_idle_mean_power_w": 47.31203674564224,
+      "net_of_idle_mj_per_event": 0.2721180276770074,
+      "note": "Superseded the initial 500-rep/45ms measurement, which fell within a single GPU power-sensor refresh interval (confirmed empirically: refresh is ~200-500ms under load) and rested on only 4 real samples. This version calibrates the rep count to a ~10s window, spanning 20 real sensor readings -- comparable to the full-generation measurements below."
+    }
+  },
+  "generation_energy_per_event": [
+    {
+      "idx": 0,
+      "arm_a": {
+        "joules": 640.0175706230557,
+        "mean_power_w": 54.93601062887511,
+        "elapsed_s": 11.81649599999946,
+        "output_tokens": 81,
+        "prompt_tokens": 620
+      },
+      "arm_b": {
+        "joules": 544.768209935611,
+        "mean_power_w": 59.93461824324324,
+        "elapsed_s": 9.092848199994478,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 1,
+      "arm_a": {
+        "joules": 856.5676194884632,
+        "mean_power_w": 61.66616421207658,
+        "elapsed_s": 13.894656699994812,
+        "output_tokens": 110,
+        "prompt_tokens": 663
+      },
+      "arm_b": {
+        "joules": 495.8311565024076,
+        "mean_power_w": 63.011218586387436,
+        "elapsed_s": 7.87791599999764,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 2,
+      "arm_a": {
+        "joules": 518.2097804696746,
+        "mean_power_w": 62.70997256857856,
+        "elapsed_s": 8.273167200000898,
+        "output_tokens": 65,
+        "prompt_tokens": 620
+      },
+      "arm_b": {
+        "joules": 496.63396076303746,
+        "mean_power_w": 62.47519047619048,
+        "elapsed_s": 7.953147100000933,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 3,
+      "arm_a": {
+        "joules": 514.2514713939561,
+        "mean_power_w": 63.10804260651629,
+        "elapsed_s": 8.150538399997458,
+        "output_tokens": 65,
+        "prompt_tokens": 620
+      },
+      "arm_b": {
+        "joules": 490.1278080821955,
+        "mean_power_w": 62.82109907529723,
+        "elapsed_s": 7.810904400001164,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 4,
+      "arm_a": {
+        "joules": 541.3341924881099,
+        "mean_power_w": 63.62470179640718,
+        "elapsed_s": 8.512056500003382,
+        "output_tokens": 68,
+        "prompt_tokens": 621
+      },
+      "arm_b": {
+        "joules": 494.8039382890112,
+        "mean_power_w": 63.60947174770039,
+        "elapsed_s": 7.787945700001728,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 2271,
+      "arm_a": {
+        "joules": 536.4458063242691,
+        "mean_power_w": 63.59247279322854,
+        "elapsed_s": 8.437052400004177,
+        "output_tokens": 68,
+        "prompt_tokens": 621
+      },
+      "arm_b": {
+        "joules": 552.5970865484278,
+        "mean_power_w": 61.63250800915331,
+        "elapsed_s": 8.967420499997388,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 2272,
+      "arm_a": {
+        "joules": 782.4189587537593,
+        "mean_power_w": 60.0009628458498,
+        "elapsed_s": 13.04800759999489,
+        "output_tokens": 81,
+        "prompt_tokens": 620
+      },
+      "arm_b": {
+        "joules": 582.8584198402622,
+        "mean_power_w": 61.40219462365591,
+        "elapsed_s": 9.499267999999574,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 2273,
+      "arm_a": {
+        "joules": 712.4139482699709,
+        "mean_power_w": 61.99358207630879,
+        "elapsed_s": 11.49421330000041,
+        "output_tokens": 81,
+        "prompt_tokens": 621
+      },
+      "arm_b": {
+        "joules": 556.0936845036452,
+        "mean_power_w": 62.467417149478564,
+        "elapsed_s": 8.907023699997808,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 2274,
+      "arm_a": {
+        "joules": 814.6425424765971,
+        "mean_power_w": 60.726431087289434,
+        "elapsed_s": 13.415886599999794,
+        "output_tokens": 84,
+        "prompt_tokens": 621
+      },
+      "arm_b": {
+        "joules": 585.0290651392295,
+        "mean_power_w": 61.12366702586207,
+        "elapsed_s": 9.5750240999987,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    },
+    {
+      "idx": 2275,
+      "arm_a": {
+        "joules": 567.3344899501292,
+        "mean_power_w": 63.64325230414747,
+        "elapsed_s": 8.92039880000084,
+        "output_tokens": 68,
+        "prompt_tokens": 622
+      },
+      "arm_b": {
+        "joules": 559.5895970185228,
+        "mean_power_w": 64.57155924170617,
+        "elapsed_s": 8.667116900003748,
+        "output_tokens": 61,
+        "prompt_tokens": 486
+      }
+    }
+  ]
+}

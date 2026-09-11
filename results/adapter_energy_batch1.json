@@ -1,0 +1,11 @@
+{
+  "batch_size": 1,
+  "per_call_time_ms": 0.06694933471679687,
+  "reps": 179240,
+  "elapsed_s": 14.138943400001153,
+  "n_distinct_sensor_readings": 29,
+  "idle_power_w": 27.77550000000001,
+  "mean_power_w": 48.3905056030769,
+  "gross_mj_per_event": 3.8171759641784373,
+  "net_of_idle_mj_per_event": 1.6261682515767173
+}

@@ -1,0 +1,14 @@
+{
+  "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day4.pt",
+  "training_example_count": 16,
+  "class_centroid_l2_distances": {
+    "0-1": 3.0629632472991943,
+    "0-2": 22.786836624145508,
+    "0-3": 3.648289203643799,
+    "1-2": 21.608314514160156,
+    "1-3": 0.6674230694770813,
+    "2-3": 21.421911239624023
+  },
+  "leave_one_out_nearest_centroid_accuracy": 0.4375,
+  "note": "Training-subset representation diagnostic only; not a held-out accuracy or auditability result."
+}

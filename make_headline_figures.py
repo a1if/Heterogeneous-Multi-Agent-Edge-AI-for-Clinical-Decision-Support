@@ -104,11 +104,13 @@ def make_forest_plot(a, b):
     ax.set_yticks(ypos)
     ax.set_yticklabels([r[0] for r in rows])
     ax.set_xlabel("Reduction, Arm A $\\rightarrow$ Arm B (%)")
+    ax.set_ylabel("Measure")
     ax.set_xlim(-2, 32)
     ax.set_ylim(-0.6, len(rows) - 0.4)
     ax.set_title("Headline efficiency reductions with 95% bootstrap CIs (n=80, paired)", fontsize=11)
     fig.tight_layout()
     save(fig, "fig4_5_headline_forest.png")
+    save(fig, "fig4_eff_forest.png")
     plt.close(fig)
     return rows
 
@@ -117,10 +119,12 @@ def make_paired_distributions(idxs, a, b):
     fig, axes = plt.subplots(1, 2, figsize=(9, 4.2))
 
     specs = [
-        (axes[0], a["prompt_tokens"], b["prompt_tokens"], "Prompt tokens", "tok"),
-        (axes[1], a["generation_duration_ms"], b["generation_duration_ms"], "Generation latency", "ms"),
+        (axes[0], a["prompt_tokens"], b["prompt_tokens"], "Prompt tokens",
+         "Prompt tokens per event (count)"),
+        (axes[1], a["generation_duration_ms"], b["generation_duration_ms"], "Generation latency",
+         "Generation latency per event (ms)"),
     ]
-    for ax, av, bv, title, unit in specs:
+    for ax, av, bv, title, ylabel in specs:
         xs = [0, 1]
         for i in range(len(av)):
             ax.plot(xs, [av[i], bv[i]], color="#999999", lw=0.6, alpha=0.5, zorder=1)
@@ -134,14 +138,16 @@ def make_paired_distributions(idxs, a, b):
             patch.set_facecolor("white")
             patch.set_alpha(0.85)
         ax.set_xticks(xs)
-        ax.set_xticklabels(["Arm A", "Arm B"])
-        ax.set_ylabel(unit)
+        ax.set_xticklabels(["Arm A\n(JSON)", "Arm B\n(adapter)"])
+        ax.set_xlabel("Interface")
+        ax.set_ylabel(ylabel)
         ax.set_title(title, fontsize=11)
 
     axes[0].legend(loc="upper right", frameon=False, fontsize=9)
     fig.suptitle("Paired per-event distributions, Arm A vs Arm B (n=80)", fontsize=11, y=1.02)
     fig.tight_layout()
     save(fig, "fig4_6_paired_distributions.png")
+    save(fig, "fig4_eff_paired.png")
     plt.close(fig)
 
 

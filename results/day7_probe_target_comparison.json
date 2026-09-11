@@ -1,0 +1,16 @@
+{
+  "n_events": 80,
+  "probe": "context-32d, StandardScaler + LogisticRegression, 5-fold x 3 repeats, random_state=42",
+  "ecg_model_agreement_with_ground_truth": 0.4875,
+  "arm_a_transmitted_class": 1.0,
+  "arm_a_true_class": 0.4875,
+  "arm_b_transmitted_class": {
+    "mean": 0.95,
+    "sd": 0.040824829046386304
+  },
+  "arm_b_true_class": {
+    "mean": 0.6958333333333333,
+    "sd": 0.099128143778086
+  },
+  "note": "Arm B is the adapter's INPUT (context-32d), a validated proxy for its output under the Section 4.5 attribution result (paired Wilcoxon p = 0.530). That equivalence was established for the true-class target; its extension to the predicted-class target is an assumption."
+}

@@ -9,6 +9,6 @@ data/
 docs/
 *.log
 *.bak_*
-perception/checkpoints/
-reasoning/checkpoints/
-results/norm_check_raw_arrays.npz
+
+# Checkpoints and raw result files are tracked: Appendix A.4 of the
+# dissertation tells readers they are archived here.
