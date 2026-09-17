@@ -72,6 +72,13 @@ def main() -> None:
     print(f"\n  {RULE}")
     print(f"  -> reference tier for this event: {item['reference_tier']}   "
           f"(computed from the ECG model's output, never shown to either arm)")
+    if ev["classification"]["label"] != item["true_class"]:
+        print(f"\n  NOTE: the ECG model's prediction ({ev['classification']['label']}) differs from the "
+              f"MIT-BIH annotation ({item['true_class']}).\n"
+              f"  Both arms are scored against the ECG model's output, so a {ev['classification']['label']}-class "
+              f"answer is the correct one here (Section 3.7).\n"
+              f"  The ECG model agrees with the annotation on 39 of these 80 events (48.8%, Table 4.3); "
+              f"the interface is not the source of that error.")
 
     # --- 2. what each arm sends ------------------------------------------------
     hr("2. Arm A sends JSON text")
