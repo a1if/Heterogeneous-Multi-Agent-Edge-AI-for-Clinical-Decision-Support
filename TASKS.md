@@ -7,7 +7,7 @@ Tick items when done; add new items as they are found.
 Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes from its saved state later.
 1. [x] Profile the replay. `predict()` is ~6 ms/beat; the ~70 min came from indexing an `NpzFile` inside the loop, which re-decompresses the whole array on every access. Fixed in `build_real_training_examples`: 62 s, identical 64 examples. The eval replays (`prepare_events`) were never affected
 2. [x] RR encoder training: 10 epochs (early stop). DS2 acc 91.1% vs 85.4%; S Se 38.3% (+P 55.0%) vs 8.2% (+P 5.1%); V Se 96.9% vs 77.2%; F Se 0.0% vs 0.3% (`results/p1_rr_encoder_results.json`)
-3. [ ] Probe the RR vs reference 32-d context vectors on E80 (CPU)
+3. [x] Probe on the 32-d context vector, E80, dissertation protocol: reference 69.6% ± 9.9 (reproduces dissertation exactly), RR encoder 84.6% ± 5.5; paired Wilcoxon over 15 matched folds p = 0.0022 (folds overlap across repeats, so p is optimistic). Probe recall N 1.0 / S 0.7 / V 0.9 / F 0.8 vs 0.7 / 0.7 / 0.85 / 0.5 (`results/p1_rr_probe_results.json`). Decision gate for the RR adapters: passed
 4. [ ] Step 2: confidence and top-3 for the contested events (CPU, existing results)
 5. [ ] Step 9 prep: multi-flag decision target and unsupported-claim scorer, run on the existing Day 6 outputs (CPU)
 6. [ ] Step 7: inverse decoder and confidence R² on adapter outputs (adapter forward pass only, seconds of GPU)
@@ -35,7 +35,7 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 - [x] Full training on GPU (seed 0, 10 epochs)
 - [x] Compare DS2 accuracy and per-class Se/+P against the reference (same metric code): see run-order item 2
 - [x] Integrate into `PerceptionAgent`: encoder chosen by checkpoint format; per-record RR history cleared by `reset_state()`; post-RR via `next_rr_interval_ms`, supplied by `replay_selected`; reference encoder bit-identical on 320 golden events; 4 parity tests
-- [ ] Probe recoverability at the encoder's context vector (attribution protocol) for the RR encoder. The probe must replay with `replay_selected`: `day7_auditability_probe.py` and similar call `agent.predict(X[idx])` with no RR and out of order, which the RR agent now rejects on purpose
+- [x] Probe recoverability at the encoder's context vector (see run-order item 3). The probe must replay with `replay_selected`: `day7_auditability_probe.py` and similar call `agent.predict(X[idx])` with no RR and out of order, which the RR agent now rejects on purpose
 - [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
