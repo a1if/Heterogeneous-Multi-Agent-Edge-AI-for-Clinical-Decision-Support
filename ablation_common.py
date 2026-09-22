@@ -126,6 +126,10 @@ def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: st
             "time_to_first_token_ms": out["time_to_first_token_ms"],
             "peak_vram_mb": vram, "parse_attempts": out["parse_attempts"],
             "generation_failed": False,
+            # Generated text, kept for the Phase 1 unsupported-claim scorer (step 9);
+            # appended last so existing key order is unchanged.
+            "justification": out["result"]["justification"],
+            "referenced_guideline_fact": out["result"]["referenced_guideline_fact"],
         })
         elapsed = time.time() - run_start
         print(f"[{label}][{i+1}/{len(prepared)}] idx={item['idx']} true={item['true_class']} "

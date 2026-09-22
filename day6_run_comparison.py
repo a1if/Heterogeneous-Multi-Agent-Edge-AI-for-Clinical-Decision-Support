@@ -77,6 +77,8 @@ def main():
                 "generation_duration_ms": out["generation_duration_ms"],
                 "time_to_first_token_ms": out["time_to_first_token_ms"],
                 "peak_vram_mb": vram, "parse_attempts": out["parse_attempts"],
+                "justification": out["result"]["justification"],
+                "referenced_guideline_fact": out["result"]["referenced_guideline_fact"],
             })
 
         elapsed = time.time() - run_start
