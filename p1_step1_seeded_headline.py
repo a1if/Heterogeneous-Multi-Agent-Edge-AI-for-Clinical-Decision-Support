@@ -102,6 +102,11 @@ def stage_train(state: dict) -> None:
         print(f"\n[train] seed={seed} -> {path}")
         t0 = time.time()
         summary = train_adapter(headline_config(seed), output_path=path)
+        # Guard on the example cache: same 64 DS1 examples as the headline checkpoint.
+        trained = torch.load(path, map_location="cpu", weights_only=False)["source_indices"]
+        headline = torch.load(HEADLINE_CHECKPOINT, map_location="cpu", weights_only=False)["source_indices"]
+        if trained != headline:
+            raise RuntimeError(f"seed={seed}: training examples differ from the headline checkpoint's")
         state["train"][str(seed)] = {
             "checkpoint": str(path), "sha256": sha256(path),
             "losses": summary["losses"], "train_seconds": round(time.time() - t0, 1),

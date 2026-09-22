@@ -7,7 +7,9 @@ class-balanced DS1 subset; DS2 remains untouched for Day 6 evaluation.
 from __future__ import annotations
 from tqdm import tqdm
 import argparse
+import hashlib
 import json
+import pickle
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -38,7 +40,47 @@ class TrainingConfig:
     seed: int | None = None  # E2 seed-variance sets this explicitly; None preserves prior (unseeded) behavior.
 
 
+PERCEPTION_CHECKPOINT_PATH = Path("perception/checkpoints/cnn_lstm.pt")
+EXAMPLE_CACHE_DIR = Path("cache/adapter_training_examples")
+
+
+def _file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def build_real_training_examples(
+    dataset_path: Path,
+    *,
+    per_class: int,
+    max_examples: int | None = None,
+) -> list[dict]:
+    """Disk-cached wrapper around the chronological DS1 replay below.
+
+    The replay is deterministic but costs ~70 min (~143 ms/beat, up to index
+    ~30k), and train_adapter() repeats it for every seed. The cache key covers
+    everything the result depends on: dataset bytes, Perception checkpoint bytes,
+    per_class and max_examples.
+    """
+    key = hashlib.sha256(json.dumps({
+        "dataset": _file_sha256(Path(dataset_path)),
+        "perception": _file_sha256(PERCEPTION_CHECKPOINT_PATH),
+        "per_class": per_class, "max_examples": max_examples,
+    }, sort_keys=True).encode()).hexdigest()[:16]
+    cache_path = EXAMPLE_CACHE_DIR / f"examples_{key}.pkl"
+    if cache_path.exists():
+        with open(cache_path, "rb") as f:
+            examples = pickle.load(f)
+        print(f"Loaded {len(examples)} cached training examples from {cache_path}")
+        return examples
+    examples = _build_real_training_examples_uncached(
+        dataset_path, per_class=per_class, max_examples=max_examples)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(cache_path, "wb") as f:
+        pickle.dump(examples, f)
+    return examples
+
+
+def _build_real_training_examples_uncached(
     dataset_path: Path,
     *,
     per_class: int,
@@ -46,7 +88,7 @@ def build_real_training_examples(
 ) -> list[dict]:
     """Extract real vectors/events before Gemma is loaded onto the GPU."""
     data = np.load(dataset_path)
-    perception = PerceptionAgent(checkpoint_path="perception/checkpoints/cnn_lstm.pt")
+    perception = PerceptionAgent(checkpoint_path=str(PERCEPTION_CHECKPOINT_PATH))
     remaining = {int(class_id): per_class for class_id in np.unique(data["labels"])}
     examples = []
     active_record_id = None
