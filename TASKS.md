@@ -15,19 +15,21 @@ Tick items when done; add new items as they are found.
 - [ ] Add step 1 results to `results_ledger.json`
 
 ## Phase 1, new step: RR-branch encoder (encoder sweep, plan §2.6.2)
-- [ ] Log Deviation 2 in the analysis plan (new, unplanned encoder arm)
-- [ ] `perception/rr_features.py`: pre-RR, post-RR, local average RR, ratios (per record)
-- [ ] Unit tests for the RR features (record boundaries, post-RR fallback, causality of the local average)
-- [ ] `perception/model_rr.py`: CNN-LSTM + RR branch fed into the context LSTM (context vector stays 32-d, same extraction point)
-- [ ] `train_perception_agent_rr.py`: same split, sampler and early stopping as the reference; seed recorded; writes `results/p1_rr_encoder_results.json`
-- [ ] CPU smoke test of training (a few batches)
-- [ ] Full training on GPU, only after step 1 frees the GPU
+- [x] Log Deviation 2 in the analysis plan (new, unplanned encoder arm)
+- [x] `perception/rr_features.py`: pre-RR, post-RR, local average RR, ratios (per record)
+- [x] Unit tests for the RR features (record boundaries, post-RR fallback, causality of the local average)
+- [x] `perception/model_rr.py`: CNN-LSTM + RR branch fed into the context LSTM (context vector stays 32-d, same extraction point)
+- [x] `train_perception_agent_rr.py`: same split, sampler and early stopping as the reference; seed recorded; writes `results/p1_rr_encoder_results.json`
+- [x] CPU smoke test of training (a few batches)
+- [ ] Full training on GPU: queued, starts automatically when step 1's process exits (`logs/p1_rr_encoder.log`)
 - [ ] Compare DS2 overall accuracy and per-class recall (S especially) against the reference CNN-LSTM (85.4%, S 8.2%)
 - [ ] Integrate into `PerceptionAgent` (RR features from per-record state) so adapters and probes can use it
 - [ ] Probe recoverability at the encoder's context vector (attribution protocol) for the RR encoder
 
 ## Found along the way
+- [x] Pre-check: RR features separate S from N in held-out data (DS2: 85% of S vs 4% of N have pre-RR ratio < 0.85)
+- [ ] F-class RR distribution shifts between splits (DS1 post-ratio median 0.76, DS2 1.00); check F results for this
 - [ ] `tests/test_day2_baseline_arm.py::test_baseline_arm_produces_structured_output` crashes with a Windows access violation while loading Gemma (pre-existing, unrelated to Phase 1 changes)
-- [ ] DS1 `rr_interval_ms` has outliers up to 100,022 ms (annotation gaps and skipped edge windows); RR features must clip them
+- [x] DS1 `rr_interval_ms` has outliers up to 100,022 ms; RR features clip to [200, 3000] ms (`perception/rr_features.py`, tested)
 - [ ] Per-beat perception replay is slow (~143 ms/beat); profile `compute_sqi` / `estimate_qrs_duration_ms` before step 10 (E400)
 - [ ] Services audit request: no `services/` directory and no issue link in this repo; waiting on the user
