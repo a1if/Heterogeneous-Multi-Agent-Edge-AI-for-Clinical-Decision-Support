@@ -13,8 +13,8 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
    - eval harnesses (`ablation_common.run_arm_b_eval`, `day6_run_comparison.py`) now save `justification` and `referenced_guideline_fact` per event, so every GPU run from here on (step 1 included) produces scorable text
    - `reasoning/multiflag_target.py`: tier + 2 flags (confirm_classification ~11-12% prevalence; rate_out_of_range 51% E80 / 25% DS2). Candidate v1: must be pre-specified before use, and it needs a new output schema, prompt changes for both arms, and adapter retraining (GPU)
    - `reasoning/claim_scorer.py`: class / rate / RR / run / confidence claims checked against the event; score the justification only. Sanity check on the 64 canonical training justifications: 64 claims, 0 unsupported. 6 tests
-6. [ ] Step 7: inverse decoder and confidence R² on adapter outputs (adapter forward pass only, seconds of GPU)
-7. [ ] Step 8: pre-generation anomaly check on adapter outputs (CPU / seconds of GPU)
+6. [x] Step 7, inverse decoder (`results/p1_items6_7_decoder_anomaly.json`; trained on DS1 4,358 beats, tested on DS2 1,938). All 3 adapters have rank 32 (cond ~39), and decoding from their tokens matches decoding from the 32-d input field by field, so the projection loses nothing. Carried: predicted label 99.5%, tier 95% (bal 0.86-0.88), urgent 97%, confidence R² 0.70 linear / 0.96-0.98 MLP, margin 0.63 / 0.96. NOT carried: heart rate (R² 0.16), RR (0.02), SQI (<0), run length (<0; it's agent state, not in the vector). RR encoder: HR / RR linear R² 0.38 / 0.32, confidence MLP R² 0.76
+7. [x] Step 8, pre-generation anomaly check. Corruption AUROC (Mahalanobis / head margin / tier-decoder uncertainty): noise 0.99/0.89/0.91, powerline 0.99/0.90/0.83, baseline wander 0.86/0.75/0.81, segment dropout 0.68/0.62/0.66, clipping 0.56/0.45/0.74. Predicting Arm B's wrong answers on E80: tier-decoder uncertainty AUROC 0.89 / 0.91 / 0.97 (headline / seed 101 / seed 202; 4 / 13 / 17 errors). Mahalanobis on tokens = on input (rank corr 1.000, affine invariance)
 8. [ ] GPU-heavy, in rising cost: step 4 baseline family (~1.5 h), step 5 timing (~2 h), step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
 
 ## Phase 1, step 1: seeded headline (stopped, resumable)
@@ -42,6 +42,11 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 - [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
+- [ ] Confidence IS in the adapter's tokens (MLP R² 0.96), and so is the tier (95%). Together with item 4, Arm B's priority-tier errors come from the adapter/LLM not using information that is present, pointing again at the 5-example training tier imbalance, not at an information gap
+- [ ] Fields the latent interface cannot carry (heart rate, RR, SQI, run length) are exactly what the JSON adds. State this as the interface's information cost alongside the class probe
+- [ ] Choose the anomaly-check threshold on DS1 (not E80) before it is used to route Arm B events to a JSON fallback
+- [ ] `PerceptionAgent` crashes on 3 DS1 beats whose stored RR is an annotation gap > 12 s (schema rejects HR < 5 bpm); items 6-7 capped these; fix in data_prep or the agent
+- [ ] For vector-only analyses, compute context vectors in batch (seconds) and replay only for stateful fields; the full agent replay costs ~10 min per encoder
 - [ ] `estimate_qrs_duration_ms` is miscalibrated: median 36-44 ms on DS2 (physiological ~80-120 ms). Arm A's JSON has been passing this value (and the `beat_morphology` derived from it) to the LLM. Disclose, or fix and check effect on Arm A
 - [ ] `compute_sqi` barely varies on MIT-BIH (median 0.87, 99% < 0.95); it's uninformative as a transmitted field
 - [ ] Canonical adapter targets contain only class claims (no numbers), so the claim scorer on Arm B output will mostly test class claims
