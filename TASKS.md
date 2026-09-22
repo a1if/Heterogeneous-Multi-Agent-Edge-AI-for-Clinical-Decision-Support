@@ -3,7 +3,18 @@
 Working checklist for Phase 1 (see `docs/analysis_plan.md`, `docs/publication_plan.md` §9).
 Tick items when done; add new items as they are found.
 
-## Phase 1, step 1: seeded headline (running)
+## Run order: least GPU first (set 2026-09-23)
+Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes from its saved state later.
+1. [x] Profile the replay. `predict()` is ~6 ms/beat; the ~70 min came from indexing an `NpzFile` inside the loop, which re-decompresses the whole array on every access. Fixed in `build_real_training_examples`: 62 s, identical 64 examples. The eval replays (`prepare_events`) were never affected
+2. [x] RR encoder training: 10 epochs (early stop). DS2 acc 91.1% vs 85.4%; S Se 38.3% (+P 55.0%) vs 8.2% (+P 5.1%); V Se 96.9% vs 77.2%; F Se 0.0% vs 0.3% (`results/p1_rr_encoder_results.json`)
+3. [ ] Probe the RR vs reference 32-d context vectors on E80 (CPU)
+4. [ ] Step 2: confidence and top-3 for the contested events (CPU, existing results)
+5. [ ] Step 9 prep: multi-flag decision target and unsupported-claim scorer, run on the existing Day 6 outputs (CPU)
+6. [ ] Step 7: inverse decoder and confidence R² on adapter outputs (adapter forward pass only, seconds of GPU)
+7. [ ] Step 8: pre-generation anomaly check on adapter outputs (CPU / seconds of GPU)
+8. [ ] GPU-heavy, in rising cost: step 4 baseline family (~1.5 h), step 5 timing (~2 h), step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
+
+## Phase 1, step 1: seeded headline (stopped, resumable)
 - [x] Write and commit the analysis plan (`c779b80`)
 - [x] Step 1 harness `p1_step1_seeded_headline.py`
 - [x] Drop the GPU E60 rerun; E60 is a subset of E80, so compute it offline (Deviation 1, `c6402c5`)
@@ -21,16 +32,16 @@ Tick items when done; add new items as they are found.
 - [x] `perception/model_rr.py`: CNN-LSTM + RR branch fed into the context LSTM (context vector stays 32-d, same extraction point)
 - [x] `train_perception_agent_rr.py`: same split, sampler and early stopping as the reference; seed recorded; writes `results/p1_rr_encoder_results.json`
 - [x] CPU smoke test of training (a few batches)
-- [ ] Full training on GPU: queued, starts automatically when step 1's process exits (`logs/p1_rr_encoder.log`)
-- [ ] Compare DS2 overall accuracy and per-class recall (S especially) against the reference CNN-LSTM (85.4%, S 8.2%)
+- [x] Full training on GPU (seed 0, 10 epochs)
+- [x] Compare DS2 accuracy and per-class Se/+P against the reference (same metric code): see run-order item 2
 - [x] Integrate into `PerceptionAgent`: encoder chosen by checkpoint format; per-record RR history cleared by `reset_state()`; post-RR via `next_rr_interval_ms`, supplied by `replay_selected`; reference encoder bit-identical on 320 golden events; 4 parity tests
 - [ ] Probe recoverability at the encoder's context vector (attribution protocol) for the RR encoder. The probe must replay with `replay_selected`: `day7_auditability_probe.py` and similar call `agent.predict(X[idx])` with no RR and out of order, which the RR agent now rejects on purpose
 - [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
 - [x] Pre-check: RR features separate S from N in held-out data (DS2: 85% of S vs 4% of N have pre-RR ratio < 0.85)
-- [ ] F-class RR distribution shifts between splits (DS1 post-ratio median 0.76, DS2 1.00); check F results for this
+- [ ] F-class RR distribution shifts between splits (DS1 post-ratio median 0.76, DS2 1.00); the RR encoder's F Se is 0.0%. Check whether this shift explains it
+- [ ] RR encoder is a single seed (0); train more seeds before reporting it as a sweep point
 - [ ] `tests/test_day2_baseline_arm.py::test_baseline_arm_produces_structured_output` crashes with a Windows access violation while loading Gemma (pre-existing, unrelated to Phase 1 changes)
 - [x] DS1 `rr_interval_ms` has outliers up to 100,022 ms; RR features clip to [200, 3000] ms (`perception/rr_features.py`, tested)
-- [ ] Per-beat perception replay is slow (~143 ms/beat); profile `compute_sqi` / `estimate_qrs_duration_ms` before step 10 (E400)
 - [ ] Services audit request: no `services/` directory and no issue link in this repo; waiting on the user

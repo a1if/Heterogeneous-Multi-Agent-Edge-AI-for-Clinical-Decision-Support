@@ -56,8 +56,8 @@ def build_real_training_examples(
 ) -> list[dict]:
     """Disk-cached wrapper around the chronological DS1 replay below.
 
-    The replay is deterministic but costs ~70 min (~143 ms/beat, up to index
-    ~30k), and train_adapter() repeats it for every seed. The cache key covers
+    The replay is deterministic and train_adapter() repeats it for every seed,
+    so it is computed once per input state. The cache key covers
     everything the result depends on: dataset bytes, Perception checkpoint bytes,
     per_class and max_examples.
     """
@@ -87,7 +87,11 @@ def _build_real_training_examples_uncached(
     max_examples: int | None = None,
 ) -> list[dict]:
     """Extract real vectors/events before Gemma is loaded onto the GPU."""
-    data = np.load(dataset_path)
+    # Materialise the arrays once: indexing an NpzFile (data["features"][i]) re-reads
+    # and decompresses the whole array on every access, which made this loop ~70 min
+    # (predict() itself is ~6 ms/beat).
+    with np.load(dataset_path) as npz:
+        data = {key: npz[key] for key in ("features", "labels", "rr_interval_ms", "record_ids")}
     perception = PerceptionAgent(checkpoint_path=str(PERCEPTION_CHECKPOINT_PATH))
     remaining = {int(class_id): per_class for class_id in np.unique(data["labels"])}
     examples = []
