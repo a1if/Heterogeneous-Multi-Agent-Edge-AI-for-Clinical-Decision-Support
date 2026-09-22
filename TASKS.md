@@ -23,8 +23,9 @@ Tick items when done; add new items as they are found.
 - [x] CPU smoke test of training (a few batches)
 - [ ] Full training on GPU: queued, starts automatically when step 1's process exits (`logs/p1_rr_encoder.log`)
 - [ ] Compare DS2 overall accuracy and per-class recall (S especially) against the reference CNN-LSTM (85.4%, S 8.2%)
-- [ ] Integrate into `PerceptionAgent` (RR features from per-record state) so adapters and probes can use it
-- [ ] Probe recoverability at the encoder's context vector (attribution protocol) for the RR encoder
+- [x] Integrate into `PerceptionAgent`: encoder chosen by checkpoint format; per-record RR history cleared by `reset_state()`; post-RR via `next_rr_interval_ms`, supplied by `replay_selected`; reference encoder bit-identical on 320 golden events; 4 parity tests
+- [ ] Probe recoverability at the encoder's context vector (attribution protocol) for the RR encoder. The probe must replay with `replay_selected`: `day7_auditability_probe.py` and similar call `agent.predict(X[idx])` with no RR and out of order, which the RR agent now rejects on purpose
+- [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
 - [x] Pre-check: RR features separate S from N in held-out data (DS2: 85% of S vs 4% of N have pre-RR ratio < 0.85)

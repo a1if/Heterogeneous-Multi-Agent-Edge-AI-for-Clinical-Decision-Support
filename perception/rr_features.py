@@ -29,25 +29,37 @@ FEATURE_NAMES = ("pre_s", "post_s", "local_s", "pre_ratio", "post_ratio")
 N_RR_FEATURES = len(FEATURE_NAMES)
 
 
+def clip_rr_s(rr_interval_ms: float) -> float:
+    return min(max(float(rr_interval_ms), RR_MIN_MS), RR_MAX_MS) / 1000.0
+
+
+def beat_rr_features(pre_s: float, post_s: float | None, previous_pre_s) -> np.ndarray:
+    """Features for one beat. ``pre_s``/``post_s`` are clipped RRs in seconds
+    (``post_s`` None -> the beat's own pre-RR, as for a record's last beat);
+    ``previous_pre_s`` holds the clipped pre-RRs of earlier beats in the same
+    record, most recent last (only the last LOCAL_WINDOW are used). Shared by
+    the batch path below and by PerceptionAgent, so training and inference
+    features cannot diverge."""
+    post_s = pre_s if post_s is None else post_s
+    window = list(previous_pre_s)[-LOCAL_WINDOW:]
+    local_s = float(np.mean(window)) if window else pre_s
+    return np.array([pre_s, post_s, local_s, pre_s / local_s, post_s / local_s], dtype=np.float32)
+
+
 def compute_rr_features(rr_interval_ms: np.ndarray, record_ids: np.ndarray) -> np.ndarray:
     """(n,) pre-RR in ms + (n,) record ids, in chronological order within each
     record -> (n, 5) float32 features. Records must be contiguous."""
-    rr = np.clip(np.asarray(rr_interval_ms, dtype=np.float64), RR_MIN_MS, RR_MAX_MS) / 1000.0
     record_ids = np.asarray(record_ids)
     boundaries = np.flatnonzero(np.diff(record_ids) != 0) + 1
     if len(np.unique(record_ids)) != len(boundaries) + 1:
         raise ValueError("record_ids must be contiguous (one run per record)")
 
-    out = np.empty((len(rr), N_RR_FEATURES), dtype=np.float32)
-    for seg in np.split(np.arange(len(rr)), boundaries):
-        pre = rr[seg]
-        post = np.append(pre[1:], pre[-1])
-        csum = np.concatenate([[0.0], np.cumsum(pre)])
-        local = np.empty_like(pre)
-        for j in range(len(pre)):
-            lo = max(0, j - LOCAL_WINDOW)
-            local[j] = (csum[j] - csum[lo]) / (j - lo) if j > lo else pre[j]
-        out[seg] = np.stack([pre, post, local, pre / local, post / local], axis=1)
+    out = np.empty((len(record_ids), N_RR_FEATURES), dtype=np.float32)
+    for seg in np.split(np.arange(len(record_ids)), boundaries):
+        pre = [clip_rr_s(v) for v in np.asarray(rr_interval_ms)[seg]]
+        for j, i in enumerate(seg):
+            post = pre[j + 1] if j + 1 < len(pre) else None
+            out[i] = beat_rr_features(pre[j], post, pre[max(0, j - LOCAL_WINDOW):j])
     return out
 
 
