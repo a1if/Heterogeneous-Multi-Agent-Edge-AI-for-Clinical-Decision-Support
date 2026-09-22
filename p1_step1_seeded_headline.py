@@ -1,5 +1,5 @@
 """Phase 1, step 1: seeded headline adapter, training-determinism check, and the
-E60 invariance rerun. Pre-specified in docs/analysis_plan.md (sections 2, 4, 6).
+E60 invariance check (offline). Pre-specified in docs/analysis_plan.md (sections 2, 4, 6).
 
 Stages (each saved as soon as it finishes; rerunning resumes from the results file):
   train     -- train k=4 adapters for seeds 101..505 with the headline config
@@ -9,8 +9,9 @@ Stages (each saved as soon as it finishes; rerunning resumes from the results fi
   determinism -- max |dw| between p1 seeds 101/202 and the E2 checkpoints of the
                same seed (gate 6a: <= 1e-4).
   eval_e80   -- Arm B on the standard 80-event set for every seed (gate 6b).
-  e60        -- interleaved Arm A-full / Arm B (reference seed 101) on the
-               15/class set; replaces the unrecoverable 60-event raw output (gate 6c).
+  e60        -- offline: E60 (15/class) is a strict subset of E80, so its
+               figures are computed from E80 per-event results, no GPU
+               (Deviation 1 in the analysis plan; gate 6c).
 
 Run (from repo root):
     python p1_step1_seeded_headline.py
@@ -26,10 +27,9 @@ import numpy as np
 import torch
 
 from ablation_common import prepare_events, run_arm_b_eval, summarize_arm_b
-from project_config import DS2_PATH, measure_vram, select_events
-from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed
+from project_config import DS2_PATH, select_events
+from reasoning.adapter_arm import load_trained_adapter
 from reasoning.adapter_training import TrainingConfig, train_adapter
-from reasoning.baseline_arm import run_baseline_arm_timed
 from reasoning.model_loader import load_model
 
 SEEDS = [101, 202, 303, 404, 505]
@@ -38,6 +38,7 @@ HEADLINE_CHECKPOINT = Path("reasoning/checkpoints/virtual_adapter_day5_larger.pt
 E2_CHECKPOINTS = {101: Path("reasoning/checkpoints/virtual_adapter_e2_seed101.pt"),
                   202: Path("reasoning/checkpoints/virtual_adapter_e2_seed202.pt")}
 RESULTS_PATH = Path("results/p1_step1_seeded_headline.json")
+DAY6_REPORTED_PASS = Path("results/day6_results.json.bak_pre_rerun_20260816")  # the pass the dissertation cites
 DETERMINISM_TOL = 1e-4
 
 
@@ -150,63 +151,37 @@ def stage_eval_e80(state: dict, model, processor) -> None:
     save(state)
 
 
-def stage_e60(state: dict, model, processor) -> None:
+def stage_e60(state: dict) -> None:
+    """Offline, no GPU (Deviation 1, docs/analysis_plan.md): E60 is a strict subset
+    of E80, so a GPU rerun adds no independent evidence. Arm A comes from the
+    dissertation's reported Day 6 pass, Arm B from this run's seed-101 E80 events.
+    Only accuracy and prompt tokens are reported -- the arms come from different
+    sessions, so latency is not a paired, interleaved comparison here."""
     if state.get("e60"):
         return
     data = np.load(DS2_PATH)
-    selected = select_events(data["labels"], data["record_ids"], per_class=15)
-    prepared = prepare_events(selected, note=" (E60, 15/class)")
-    adapter = load_trained_adapter(str(checkpoint_path(REFERENCE_SEED)), model)
+    e60 = {int(i) for i in select_events(data["labels"], data["record_ids"], per_class=15)}
+    e80 = {int(i) for i in select_events(data["labels"], data["record_ids"])}
+    if not e60 <= e80:
+        raise RuntimeError("E60 is not a subset of E80; Deviation 1's premise fails")
+    with open(DAY6_REPORTED_PASS, encoding="utf-8") as f:
+        arm_a = [r for r in json.load(f) if r["arm"] == "A"]
+    arm_b = state["eval_e80"][str(REFERENCE_SEED)]["per_event"]
 
-    def run(fn, *args, **kwargs):
-        # A failed parse is a reportable outcome (counts against accuracy, excluded
-        # from continuous means), same convention as ablation_common.run_arm_b_eval.
-        try:
-            out, vram = measure_vram(fn, *args, **kwargs)
-            return out, vram, None
-        except RuntimeError as e:
-            return None, None, str(e)
-
-    rows, t0 = [], time.time()
-    for i, item in enumerate(prepared):
-        a = run(run_baseline_arm_timed, item["health_event"], perception_agent=None)
-        b = run(run_adapter_arm_timed, item["health_event"], item["context_vector"],
-                model, processor, adapter)
-        for arm, (out, vram, err) in (("A", a), ("B", b)):
-            row = {"idx": item["idx"], "true_class": item["true_class"],
-                   "predicted_class": item["predicted_class"], "record_id": item["record_id"],
-                   "reference_tier": item["reference_tier"], "arm": arm,
-                   "generation_failed": err is not None}
-            if err is None:
-                row.update({
-                    "urgency_tier": out["result"]["urgency_tier"],
-                    "correct": out["result"]["urgency_tier"] == item["reference_tier"],
-                    "prompt_tokens": out["prompt_tokens"], "output_tokens": out["output_tokens"],
-                    "generation_duration_ms": out["generation_duration_ms"],
-                    "time_to_first_token_ms": out["time_to_first_token_ms"],
-                    "peak_vram_mb": vram, "parse_attempts": out["parse_attempts"],
-                })
-            else:
-                row.update({"urgency_tier": None, "correct": False, "error": err})
-            rows.append(row)
-        tier = lambda r: r[0]["result"]["urgency_tier"] if r[0] else "FAILED"
-        print(f"[e60][{i+1}/{len(prepared)}] idx={item['idx']} A={tier(a)} B={tier(b)} "
-              f"ref={item['reference_tier']} elapsed={time.time() - t0:.0f}s")
-
-    def arm_stats(arm):
-        r = [x for x in rows if x["arm"] == arm]
-        ok = [x for x in r if not x["generation_failed"]]
+    def stats(rows, idx):
+        r = [x for x in rows if int(x["idx"]) in idx]
+        ok = [x for x in r if not x.get("generation_failed", False)]
         return {"n": len(r), "n_failed": len(r) - len(ok),
                 "accuracy": float(np.mean([x["correct"] for x in r])),
-                "prompt_tokens_mean": float(np.mean([x["prompt_tokens"] for x in ok])),
-                "gen_ms_mean": float(np.mean([x["generation_duration_ms"] for x in ok]))}
-    a, b = arm_stats("A"), arm_stats("B")
-    state["e60"] = {
-        "reference_seed": REFERENCE_SEED, "event_indices": [int(i) for i in selected],
-        "armA": a, "armB": b,
-        "token_reduction_pct": 100 * (1 - b["prompt_tokens_mean"] / a["prompt_tokens_mean"]),
-        "per_event": rows,
-    }
+                "prompt_tokens_mean": float(np.mean([x["prompt_tokens"] for x in ok]))}
+
+    out = {"method": "offline subset of E80 (Deviation 1)", "reference_seed": REFERENCE_SEED,
+           "arm_a_source": str(DAY6_REPORTED_PASS), "event_indices": sorted(e60)}
+    for name, idx in (("e60", e60), ("e80", e80)):
+        a, b = stats(arm_a, idx), stats(arm_b, idx)
+        out[name] = {"armA": a, "armB": b, "token_reduction_pct":
+                     100 * (1 - b["prompt_tokens_mean"] / a["prompt_tokens_mean"])}
+    state["e60"] = out
     save(state)
 
 
@@ -216,9 +191,9 @@ def main():
     stage_determinism(state)
     model, processor = load_model()
     stage_eval_e80(state, model, processor)
-    stage_e60(state, model, processor)
+    stage_e60(state)
     print(json.dumps({k: state[k] for k in ("determinism", "eval_e80_aggregate")}, indent=2))
-    print(json.dumps({k: v for k, v in state["e60"].items() if k != "per_event"}, indent=2))
+    print(json.dumps({k: v for k, v in state["e60"].items() if k != "event_indices"}, indent=2))
 
 
 if __name__ == "__main__":

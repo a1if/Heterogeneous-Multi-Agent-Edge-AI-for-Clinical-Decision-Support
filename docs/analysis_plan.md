@@ -78,4 +78,4 @@ Every run writes a `results/p1_*.json` file containing the git commit, checkpoin
 
 ## 9. Deviations
 
-(none yet)
+**Deviation 1 (2026-09-22, before any E60 data was produced): E60 GPU rerun dropped.** `select_events(per_class=15)` is a strict subset of the E80 set (60/60 events overlap), so a GPU rerun on E60 adds no independent evidence. E60 figures for gate 6c are now computed offline. Arm A comes from the dissertation's reported Day 6 pass (`results/day6_results.json.bak_pre_rerun_20260816`), and Arm B from the seed-101 E80 per-event results of step 1. Only accuracy and prompt tokens are reported, because the two arms come from different sessions and their latencies are not paired. Consequence for the paper: dissertation §4.8's "stability across sample sizes" compared a set with its own superset. It is not a robustness test, and it will not be presented as one. Step 10 (E400) is the stability test.
