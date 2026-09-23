@@ -55,7 +55,14 @@ def e2():
 def task5():
     s = load("results/p1_task5_tier_balanced.json")
     if not s:
-        return None
+        # Nothing saved until the first seed finishes training: report the live epoch instead.
+        log = Path("logs/p1_task5.log")
+        if not log.exists():
+            return None
+        tail = log.read_text(encoding="utf-8", errors="replace")[-4000:].replace("\r", "\n")
+        steps = [ln.strip() for ln in tail.splitlines() if ln.strip().startswith("Epoch")]
+        last = steps[-1].encode("ascii", "ignore").decode() if steps else "starting"  # drop tqdm bar glyphs
+        return f"Task 5 training seed 101 (first of 3): {last[:70]}"
     trained = list(s.get("train", {}))
     done = {k: v["summary"]["correct"] for k, v in s.get("eval", {}).items()}
     partial = {k: f"{sum(r['correct'] for r in v)}/{len(v)}" for k, v in s.get("eval_partial", {}).items()}
