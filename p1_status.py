@@ -66,7 +66,13 @@ def task5():
     trained = list(s.get("train", {}))
     done = {k: v["summary"]["correct"] for k, v in s.get("eval", {}).items()}
     partial = {k: f"{sum(r['correct'] for r in v)}/{len(v)}" for k, v in s.get("eval_partial", {}).items()}
-    return (f"Task 5 trained seeds {trained or 'none yet'} | finished evals (correct/80): {done or '-'}"
+    live = ""
+    if len(trained) < 3:  # a seed is still training: show its live step from the log
+        tail = Path("logs/p1_task5.log").read_text(encoding="utf-8", errors="replace")[-4000:].replace("\r", "\n")
+        steps = [ln.strip() for ln in tail.splitlines() if ln.strip().startswith("Epoch")]
+        if steps:
+            live = f" | now training seed #{len(trained) + 1}: " + steps[-1].encode("ascii", "ignore").decode()[:60]
+    return (f"Task 5 trained seeds {trained or 'none yet'}{live} | finished evals (correct/80): {done or '-'}"
             f" | in-progress eval: {partial or '-'} | true-class baseline: 65, 63 /80")
 
 
