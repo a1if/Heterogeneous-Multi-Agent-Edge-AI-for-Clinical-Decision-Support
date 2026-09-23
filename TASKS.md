@@ -22,7 +22,10 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
    Also: A-compact is 100% accurate with FEWER end-to-end prompt tokens than B-4 (458 vs 486), because Arm B's scaffold (482) is longer than Arm A's (~402). Decode speed is identical (~169 ms/output token), so every latency gap is output length.
    Controls: B-4 beats B-null by 18.8 pp (urgent 11/12 vs 0/12), so the tokens carry event information; B-shuffle (50%) is below B-null. B-4 priority tier 4/18 (the item 4 failure, reproduced). B-4 = 65/80 = the E2 seed-101 figure from August exactly.
    Strict claim scoring (justification names a class other than the predicted one): A-full 1/80, A-compact 5/80, A-label 1/80, B-4 13/78, B-shuffle 27/78, B-null 30/80
-9. [ ] Remaining GPU, in rising cost (step 5 running: `p1_step5_timing.py`, Deviation 4, `logs/p1_step5.log`): step 5 timing (~2 h), step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
+9. [x] Step 5, forced-length timing and energy (`results/p1_step5_timing.json`, 640 measurements, no missing energy). Prompt tokens / prefill ms / decode ms per token / J at 64 tokens:
+   A-full 645 / 185.4 / 153.1 / 632.0; A-compact 458 / 196.2 / 159.0 / 640.4; A-label 414 / 196.0 / 160.6 / 651.3; B-4 486 / 196.2 / 156.4 / 631.1.
+   With output length fixed, B-4 differs from every text arm by <= 6% in prefill and <= 3.1% in decode time, total time and energy. Prefill vs A-compact / A-label: +0.1% (p = 0.92 / 0.09). Energy vs A-full: -0.1% (p = 0.42). So the dissertation's -13.3% latency / -17.9% energy were output-length effects, not interface effects (blocker B2 confirmed). Prefill is flat across 414-645 prompt tokens at batch 1 (overhead-dominated); A-full is even slightly faster (185 vs 196 ms)
+10. [ ] Remaining GPU, in rising cost: step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
 
 ## Phase 1, step 1: seeded headline (stopped, resumable)
 - [x] Write and commit the analysis plan (`c779b80`)
@@ -49,6 +52,8 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 - [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
+- [ ] Idle power drifted from 19.9 W (start) to ~47 W (end) of step 5, so "net of idle" energy is unreliable; report gross energy as primary. The same drift could affect the dissertation's energy figure
+- [ ] Step 4's A-full time-to-first-token (396 ms) is ~2x its forced-length prefill in step 5 (185 ms), while the other text arms match (~200 ms both times). A-full goes through `run_baseline_arm_timed` rather than the family runner; check what that path adds inside the timer before any TTFT figure is reported
 - [x] Checkpointing: results files are written atomically (`p1_io.save_json_atomic`); step 5 saves after every measurement, step 4 after every arm, step 1's evaluation after every event (`729db50`, tests in `tests/test_p1_checkpointing.py`). Rerunning any of them resumes from the last save.
 - [x] Training checkpoints: `train_adapter` saves adapter + AdamW + position + RNG state every 8 steps and at each epoch end to `<output>.resume.pt` (atomic), resumes only for an identical config, and deletes the file when done; the final checkpoint is written atomically too. Resumed runs are bit-identical to uninterrupted ones (`tests/test_adapter_training_resume.py`, CPU stand-in model)
 - [ ] Claim scorer v1 flagged rule restatements ("confidence greater than 0.85", "ventricular or fusion beat") as claims, and its top-3 class leniency hid B-null calling V beats normal. Fixed: rule restatements excluded, strict class matching by default (8 tests)
