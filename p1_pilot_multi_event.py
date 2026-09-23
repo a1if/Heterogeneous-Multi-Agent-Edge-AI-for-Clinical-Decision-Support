@@ -52,22 +52,8 @@ def note(n):
             "beat and report the single most urgent tier among them.\n").format(n=n)
 
 
-def main():
-    state = json.loads(RESULTS_PATH.read_text(encoding="utf-8")) if RESULTS_PATH.exists() else {
-        "design": __doc__, "provenance": provenance(),
-        "b4_checkpoint": {"path": str(B4_CHECKPOINT), "sha256": sha256(B4_CHECKPOINT)}, "rows": []}
-    done = {(r["window"], r["n"], r["arm"]) for r in state["rows"]}
-
-    with np.load(DS2_PATH) as z:
-        data = {k: z[k] for k in ("features", "labels", "rr_interval_ms", "record_ids")}
-    wins = windows(data, np.random.default_rng(0))
-    agent = PerceptionAgent(checkpoint_path=PERCEPTION_CHECKPOINT)
-    replayed = replay_selected(agent, data["features"], data["rr_interval_ms"], data["record_ids"],
-                               sorted({i for w in wins for i in w[:max(NS)]}))
-    del agent
-
-    model, processor = load_model()
-    adapter = load_trained_adapter(str(B4_CHECKPOINT), model)
+def make_generator(model, processor, adapter, replayed):
+    """generate(arm, idx) -> raw model text for the events at indices idx (shared by both pilots)."""
     device = model.get_input_embeddings().weight.device
     tok = processor.tokenizer
 
@@ -94,6 +80,26 @@ def main():
         start = kw["input_ids"].shape[1] if "input_ids" in kw else 0
         out = model.generate(**kw, do_sample=False, max_new_tokens=256)
         return tok.decode(out[0][start:], skip_special_tokens=True)
+    return generate
+
+
+def main():
+    state = json.loads(RESULTS_PATH.read_text(encoding="utf-8")) if RESULTS_PATH.exists() else {
+        "design": __doc__, "provenance": provenance(),
+        "b4_checkpoint": {"path": str(B4_CHECKPOINT), "sha256": sha256(B4_CHECKPOINT)}, "rows": []}
+    done = {(r["window"], r["n"], r["arm"]) for r in state["rows"]}
+
+    with np.load(DS2_PATH) as z:
+        data = {k: z[k] for k in ("features", "labels", "rr_interval_ms", "record_ids")}
+    wins = windows(data, np.random.default_rng(0))
+    agent = PerceptionAgent(checkpoint_path=PERCEPTION_CHECKPOINT)
+    replayed = replay_selected(agent, data["features"], data["rr_interval_ms"], data["record_ids"],
+                               sorted({i for w in wins for i in w[:max(NS)]}))
+    del agent
+
+    model, processor = load_model()
+    adapter = load_trained_adapter(str(B4_CHECKPOINT), model)
+    generate = make_generator(model, processor, adapter, replayed)
 
     t0 = time.time()
     with torch.no_grad():
