@@ -66,6 +66,7 @@ Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI 
 - [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
+- [ ] Adapter training at batch 1 already uses ~11.8 of 12.2 GB. Steps slow from ~8-14 s to ~29 s once other GPU users push it over the limit (task 5 seed 101, epoch 3). Item 7 (multi-event, longer sequences) needs memory-saving training (gradient checkpointing and/or a shorter scaffold) before it can run on this GPU
 - [ ] Idle power drifted from 19.9 W (start) to ~47 W (end) of step 5, so "net of idle" energy is unreliable; report gross energy as primary. The same drift could affect the dissertation's energy figure
 - [ ] Step 4's A-full time-to-first-token (396 ms) is ~2x its forced-length prefill in step 5 (185 ms), while the other text arms match (~200 ms both times). A-full goes through `run_baseline_arm_timed` rather than the family runner; check what that path adds inside the timer before any TTFT figure is reported
 - [x] Checkpointing: results files are written atomically (`p1_io.save_json_atomic`); step 5 saves after every measurement, step 4 after every arm, step 1's evaluation after every event (`729db50`, tests in `tests/test_p1_checkpointing.py`). Rerunning any of them resumes from the last save.
