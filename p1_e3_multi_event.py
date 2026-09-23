@@ -47,6 +47,10 @@ N_WINDOWS = 20
 PREFILL_REPS = 3
 DECODE_TOKENS = 16
 RESULTS_PATH = Path("results/p1_e3_multi_event.json")
+# Deviation 7: A-full at N = 50 (~12.6k tokens, ~80 s per prefill) took over half of
+# each window's GPU time; it is not part of the gate (B-4 vs A-compact) and was
+# unambiguous after 8 complete windows, so it is measured on windows 0-7 only.
+SKIP = {("A-full", 50): 8}  # (arm, n) -> measured only for windows below this index
 
 
 class MultiEventAdapter(nn.Module):
@@ -98,6 +102,7 @@ def main():
         data = {k: z[k] for k in ("features", "labels", "rr_interval_ms", "record_ids")}
     wins = windows(data, np.random.default_rng(0))
     state["windows"] = [[w[0], w[-1]] for w in wins]
+    state["skipped"] = {f"{a} N={n}": f"windows >= {w}" for (a, n), w in SKIP.items()}
     agent = PerceptionAgent(checkpoint_path=PERCEPTION_CHECKPOINT)
     replayed = replay_selected(agent, data["features"], data["rr_interval_ms"], data["record_ids"],
                                sorted({i for w in wins for i in w}))
@@ -128,7 +133,7 @@ def main():
             order = ARMS[j % len(ARMS):] + ARMS[:j % len(ARMS)]
             j += 1
             for arm in order:
-                if (w, n, arm) in done:
+                if (w, n, arm) in done or ((arm, n) in SKIP and w >= SKIP[(arm, n)]):
                     continue
                 row = {"window": w, "n": n, "arm": arm}
                 try:
