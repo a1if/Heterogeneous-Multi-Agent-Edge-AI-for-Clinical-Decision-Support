@@ -42,6 +42,11 @@ class TrainingConfig:
     # Phase 1 B-null control: train on all-zero context vectors, so the linear adapter
     # can learn only its bias, i.e. one fixed learned prefix carrying no event information.
     zero_context: bool = False
+    # How the training examples are balanced. "true_class" (the dissertation's choice):
+    # per_class examples of each true AAMI class. "tier": the same total, split evenly
+    # across the three reference urgency tiers. Phase 1 found only 5 of the 64
+    # true-class-balanced examples were "priority", the tier behind most Arm B errors.
+    balance_by: str = "true_class"
 
 
 RESUME_EVERY_STEPS = 8  # ~1.5 min of training at ~10 s/step
@@ -88,6 +93,7 @@ def build_real_training_examples(
     *,
     per_class: int,
     max_examples: int | None = None,
+    balance_by: str = "true_class",
 ) -> list[dict]:
     """Disk-cached wrapper around the chronological DS1 replay below.
 
@@ -96,11 +102,14 @@ def build_real_training_examples(
     everything the result depends on: dataset bytes, Perception checkpoint bytes,
     per_class and max_examples.
     """
-    key = hashlib.sha256(json.dumps({
+    key_fields = {
         "dataset": _file_sha256(Path(dataset_path)),
         "perception": _file_sha256(PERCEPTION_CHECKPOINT_PATH),
         "per_class": per_class, "max_examples": max_examples,
-    }, sort_keys=True).encode()).hexdigest()[:16]
+    }
+    if balance_by != "true_class":  # the default keeps its original cache key
+        key_fields["balance_by"] = balance_by
+    key = hashlib.sha256(json.dumps(key_fields, sort_keys=True).encode()).hexdigest()[:16]
     cache_path = EXAMPLE_CACHE_DIR / f"examples_{key}.pkl"
     if cache_path.exists():
         with open(cache_path, "rb") as f:
@@ -108,7 +117,7 @@ def build_real_training_examples(
         print(f"Loaded {len(examples)} cached training examples from {cache_path}")
         return examples
     examples = _build_real_training_examples_uncached(
-        dataset_path, per_class=per_class, max_examples=max_examples)
+        dataset_path, per_class=per_class, max_examples=max_examples, balance_by=balance_by)
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     with open(cache_path, "wb") as f:
         pickle.dump(examples, f)
@@ -120,6 +129,7 @@ def _build_real_training_examples_uncached(
     *,
     per_class: int,
     max_examples: int | None = None,
+    balance_by: str = "true_class",
 ) -> list[dict]:
     """Extract real vectors/events before Gemma is loaded onto the GPU."""
     # Materialise the arrays once: indexing an NpzFile (data["features"][i]) re-reads
@@ -129,6 +139,12 @@ def _build_real_training_examples_uncached(
         data = {key: npz[key] for key in ("features", "labels", "rr_interval_ms", "record_ids")}
     perception = PerceptionAgent(checkpoint_path=str(PERCEPTION_CHECKPOINT_PATH))
     remaining = {int(class_id): per_class for class_id in np.unique(data["labels"])}
+    if balance_by == "tier":
+        # Same total as true-class balancing, split as evenly as possible over the tiers.
+        total, tiers = sum(remaining.values()), ("routine", "priority", "urgent")
+        remaining = {t: total // len(tiers) + (i < total % len(tiers)) for i, t in enumerate(tiers)}
+    elif balance_by != "true_class":
+        raise ValueError(f"balance_by must be 'true_class' or 'tier', got {balance_by!r}")
     examples = []
     active_record_id = None
     for index in range(len(data["labels"])):
@@ -141,7 +157,8 @@ def _build_real_training_examples_uncached(
             data["features"][index], rr_interval_ms=float(data["rr_interval_ms"][index]), event_seq=index
         )
         source_class = int(data["labels"][index])
-        if remaining[source_class] <= 0:
+        bucket = urgency_tier_from_event(event) if balance_by == "tier" else source_class
+        if remaining[bucket] <= 0:
             continue
         examples.append(
             {
@@ -151,7 +168,7 @@ def _build_real_training_examples_uncached(
                 "health_event": event,
             }
         )
-        remaining[source_class] -= 1
+        remaining[bucket] -= 1
         if max_examples is not None and len(examples) >= max_examples:
             break
         if all(count == 0 for count in remaining.values()):
@@ -258,7 +275,8 @@ def train_adapter(config: TrainingConfig, *, output_path: Path = DEFAULT_OUTPUT)
         raise ValueError("tier_weight must be >= 1.0")
 
     examples = build_real_training_examples(
-        DEFAULT_DATASET, per_class=config.per_class, max_examples=config.max_examples
+        DEFAULT_DATASET, per_class=config.per_class, max_examples=config.max_examples,
+        balance_by=config.balance_by,
     )
     model, processor = load_model()
     freeze_language_model(model)
@@ -399,6 +417,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--num-tokens", type=int, default=TrainingConfig.num_tokens)
     parser.add_argument("--seed", type=int, default=TrainingConfig.seed)
     parser.add_argument("--zero-context", action="store_true")
+    parser.add_argument("--balance-by", choices=("true_class", "tier"), default=TrainingConfig.balance_by)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     return parser.parse_args()
 
@@ -416,6 +435,7 @@ if __name__ == "__main__":
             num_tokens=args.num_tokens,
             seed=args.seed,
             zero_context=args.zero_context,
+            balance_by=args.balance_by,
         ),
         output_path=args.output,
     )
