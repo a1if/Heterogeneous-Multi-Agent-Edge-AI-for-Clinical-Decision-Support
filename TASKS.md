@@ -34,7 +34,7 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 4. [x] E2 batched serving, identical scaffold (`results/p1_e2_batched.json`). GATE FAILS. B-4 vs A-compact throughput: b=1 -6.2%, b=4 -5.5%, b=8 -3.3%, b=16 +7.8% (per-rep +22.0 / +4.5 / -3.1, CI includes 0; b=16 is the largest batch where both fit). At b=32 every arm's peak allocation reaches or exceeds the 12,227 MB card (12.1-13.4 GB) and Windows pages to system RAM, so throughput collapses 6-10x for all arms. Not a ranking. A-full already collapses at b=16 (11.2 GB). For single events the payload is ~50 of ~540 prompt tokens, so memory per request barely differs (b=16: 10,605 vs 10,685 MB)
 5. [ ] Tier-balanced training, 3 seeds vs existing seeds 101/202 (Deviation 6; `p1_task5_tier_balanced.py`, queued)
 6. [ ] 5 seeds for the winning training regime + step 1 headline
-6b. [ ] Pilot: untrained single-event adapter on N-event prompts (`p1_pilot_multi_event.py`, running)
+6b. [x] Pilot, untrained single-event adapter on N-event prompts, most-urgent-tier task, 20 windows (`results/p1_pilot_multi_event.json`). Correct / 20 (A-compact | B-4 | always-routine): N=1 20 | 20 | 20 (uninformative: all references routine); N=5 17 | 15 (1 unparsed) | 16; N=10 17 | 11 (4 unparsed) | 13; N=20 15 | 0 (none parsed) | 9. B-4 never predicts priority/urgent at N >= 5, and at N = 20 its output degenerates (schema-invalid JSON, text in other scripts). As predicted: E3's efficiency regime needs an adapter trained on multi-event input (item 7)
 7. [ ] Architecture v2 temporal compressor, only if E3 passes the gate
 Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI excluding 0 (analysis plan, Deviation 5)
 
