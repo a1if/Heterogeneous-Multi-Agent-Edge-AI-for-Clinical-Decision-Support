@@ -24,7 +24,7 @@ import torch
 
 from ablation_common import prepare_events
 from measure_comm_cost import _HAS_NVML, sample_power_during
-from p1_e1_cached_scaffold import STATIC, language_model
+from p1_e1_cached_scaffold import STATIC, TAIL, language_model
 from p1_io import save_json_atomic
 from p1_step1_seeded_headline import provenance, sha256
 from p1_step4_baseline_family import B4_CHECKPOINT
@@ -57,7 +57,7 @@ def main():
     tok = processor.tokenizer
     tok.padding_side = "left"
     pad_id = model.config.text_config.pad_token_id
-    rendered, s0, s1 = _render_prompt_with_placeholder(processor, STATIC, "")
+    rendered, s0, s1 = _render_prompt_with_placeholder(processor, STATIC, TAIL)
     static_ids, tail_ids = (t.to(device) for t in _tokenize_and_remove_placeholder(processor, rendered, s0, s1))
 
     def batch_inputs(arm, evs):

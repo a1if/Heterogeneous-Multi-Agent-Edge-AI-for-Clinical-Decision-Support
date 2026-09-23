@@ -40,6 +40,10 @@ REPS = 5
 RESULTS_PATH = Path("results/p1_e1_cached_scaffold.json")
 STATIC = (f"{SYSTEM_PROMPT}\n\n--- Background context ---\n{NEUTRAL_CONTEXT}\n"
           f"--- Instructions ---\n{OUTPUT_INSTRUCTIONS}\n\n--- Event data ---\n")
+# A fixed closing line after the payload: the chat template trims trailing whitespace,
+# which would otherwise strip the placeholder's final newline and lose it. Identical
+# for every arm, so it is part of the shared (uncached) tail, not of any payload.
+TAIL = "\n--- End of event data ---"
 
 
 def language_model(model):
@@ -61,7 +65,7 @@ def main():
     tok = processor.tokenizer
     pad_id = model.config.text_config.pad_token_id
 
-    rendered, s0, s1 = _render_prompt_with_placeholder(processor, STATIC, "")
+    rendered, s0, s1 = _render_prompt_with_placeholder(processor, STATIC, TAIL)
     static_ids, tail_ids = (t.to(device) for t in _tokenize_and_remove_placeholder(processor, rendered, s0, s1))
     with torch.no_grad():
         torch.cuda.synchronize()
