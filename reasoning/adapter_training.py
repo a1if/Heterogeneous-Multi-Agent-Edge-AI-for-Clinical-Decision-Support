@@ -9,6 +9,7 @@ from tqdm import tqdm
 import argparse
 import hashlib
 import json
+import os
 import pickle
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -41,6 +42,37 @@ class TrainingConfig:
     # Phase 1 B-null control: train on all-zero context vectors, so the linear adapter
     # can learn only its bias, i.e. one fixed learned prefix carrying no event information.
     zero_context: bool = False
+
+
+RESUME_EVERY_STEPS = 8  # ~1.5 min of training at ~10 s/step
+
+
+def resume_path_for(output_path: Path) -> Path:
+    output_path = Path(output_path)
+    return output_path.with_name(output_path.stem + ".resume.pt")
+
+
+def _atomic_torch_save(obj, path: Path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_name(path.name + ".tmp")
+    torch.save(obj, tmp)
+    os.replace(tmp, path)
+
+
+def _save_resume(path, config, adapter, optimizer, losses, *, epoch, step, epoch_losses) -> None:
+    """Everything needed to continue training exactly where it stopped: adapter and
+    AdamW state, position (epoch, next example index), losses so far and RNG state.
+    Example order is fixed and Gemma runs in inference mode, so a resumed run
+    follows the same trajectory as an uninterrupted one."""
+    _atomic_torch_save({
+        "config": asdict(config),
+        "adapter_state_dict": adapter.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "losses": list(losses), "epoch": epoch, "step": step, "epoch_losses": list(epoch_losses),
+        "torch_rng_state": torch.get_rng_state(),
+        "cuda_rng_state": torch.cuda.get_rng_state_all() if torch.cuda.is_available() else None,
+    }, path)
 
 
 PERCEPTION_CHECKPOINT_PATH = Path("perception/checkpoints/cnn_lstm.pt")
@@ -240,13 +272,34 @@ def train_adapter(config: TrainingConfig, *, output_path: Path = DEFAULT_OUTPUT)
     adapter.train()
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=config.learning_rate, weight_decay=0.0)
 
+    # Mid-training checkpoint (see _save_resume): resume only if it was written
+    # for exactly this config, so two different runs can never be mixed.
+    resume_path = resume_path_for(output_path)
     losses: list[float] = []
-    for epoch in range(config.epochs):
-        epoch_losses = []
-        
+    start_epoch, start_step, resumed_epoch_losses = 0, 0, []
+    if resume_path.exists():
+        state = torch.load(resume_path, map_location="cpu", weights_only=False)
+        if state["config"] != asdict(config):
+            raise RuntimeError(f"{resume_path} was written for a different config: {state['config']} "
+                               f"vs {asdict(config)}. Delete it to start this run from scratch.")
+        adapter.load_state_dict(state["adapter_state_dict"])
+        optimizer.load_state_dict(state["optimizer_state_dict"])
+        torch.set_rng_state(state["torch_rng_state"])
+        if torch.cuda.is_available() and state["cuda_rng_state"] is not None:
+            torch.cuda.set_rng_state_all(state["cuda_rng_state"])
+        losses, start_epoch, start_step = state["losses"], state["epoch"], state["step"]
+        resumed_epoch_losses = state["epoch_losses"]
+        print(f"Resuming training from {resume_path}: epoch {start_epoch + 1}, step {start_step}")
+
+    for epoch in range(start_epoch, config.epochs):
+        resuming = epoch == start_epoch and start_step > 0
+        epoch_losses = list(resumed_epoch_losses) if resuming else []
+
         # Wrap the examples list in a tqdm progress bar
-        progress_bar = tqdm(examples, desc=f"Epoch {epoch + 1}/{config.epochs}")
-        
+        progress_bar = tqdm(examples[start_step:] if resuming else examples,
+                            desc=f"Epoch {epoch + 1}/{config.epochs}",
+                            initial=start_step if resuming else 0, total=len(examples))
+
         for example in progress_bar:
             context = torch.from_numpy(example["context_vector"]).unsqueeze(0)
             if config.zero_context:
@@ -296,8 +349,15 @@ def train_adapter(config: TrainingConfig, *, output_path: Path = DEFAULT_OUTPUT)
             if torch.cuda.is_available() and len(epoch_losses) % 10 == 0:
                 torch.cuda.empty_cache()
 
+            if len(epoch_losses) % RESUME_EVERY_STEPS == 0 and len(epoch_losses) < len(examples):
+                _save_resume(resume_path, config, adapter, optimizer, losses,
+                             epoch=epoch, step=len(epoch_losses), epoch_losses=epoch_losses)
+
         mean_loss = float(np.mean(epoch_losses))
         losses.append(mean_loss)
+        if epoch + 1 < config.epochs:
+            _save_resume(resume_path, config, adapter, optimizer, losses,
+                         epoch=epoch + 1, step=0, epoch_losses=[])
         # The progress bar will complete, and this prints the final summary for the epoch
         print(f"epoch={epoch + 1}/{config.epochs} mean_loss={mean_loss:.4f}")
 
@@ -313,7 +373,10 @@ def train_adapter(config: TrainingConfig, *, output_path: Path = DEFAULT_OUTPUT)
         "source_dataset": str(DEFAULT_DATASET),
         "source_indices": [example["source_index"] for example in examples],
     }
-    torch.save(checkpoint, output_path)
+    # Atomic: callers treat "output_path exists" as "training finished", so a
+    # half-written final checkpoint must never appear under that name.
+    _atomic_torch_save(checkpoint, output_path)
+    resume_path.unlink(missing_ok=True)
     summary = {
         "checkpoint": str(output_path),
         "example_count": len(examples),
