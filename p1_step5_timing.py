@@ -47,15 +47,28 @@ def timed_generate(model, processor, n_tokens, **inputs):
     """Greedy generation of exactly n_tokens; returns prompt length, TTFT and total ms."""
     streamer = TextIteratorStreamer(processor.tokenizer, skip_prompt=True, skip_special_tokens=False)
     kwargs = dict(inputs, do_sample=False, min_new_tokens=n_tokens, max_new_tokens=n_tokens, streamer=streamer)
+    errors = []
+
+    def run():
+        # An exception here (e.g. CUDA OOM on a long multi-event prompt) would otherwise
+        # die with the thread and leave the streamer open, hanging the loop below forever.
+        try:
+            model.generate(**kwargs)
+        except BaseException as e:
+            errors.append(e)
+            streamer.end()
+
     torch.cuda.synchronize()
     start = time.perf_counter()
-    thread = threading.Thread(target=model.generate, kwargs=kwargs)
+    thread = threading.Thread(target=run)
     thread.start()
     first = None
     for _ in streamer:
         if first is None:
             first = time.perf_counter()
     thread.join()
+    if errors:
+        raise errors[0]
     torch.cuda.synchronize()
     end = time.perf_counter()
     return {"ttft_ms": ((first or end) - start) * 1000, "total_ms": (end - start) * 1000}

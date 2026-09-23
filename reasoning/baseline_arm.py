@@ -23,7 +23,11 @@ from reasoning.output_schema import ReasoningOutput
 # Greedy decoding, per the design doc's controlled-variable table (Section 3).
 # do_sample=False makes temperature irrelevant to HF's generate(), but we keep
 # it explicit here for audit clarity against the original Ollama config.
-GENERATION_CONFIG = {"do_sample": False, "temperature": None, "max_new_tokens": 1024}
+# max_new_tokens was 1024 through the dissertation and Phase 1 step 5. The longest VALID
+# output ever observed is 140 tokens (476 step-4 outputs + the dissertation's Day 6 pass),
+# so 256 cannot truncate a valid answer; it only stops degenerate loops sooner (a failing
+# greedy generation cost up to 3 x 1024 tokens, ~8 min). Deviation 5, docs/analysis_plan.md.
+GENERATION_CONFIG = {"do_sample": False, "temperature": None, "max_new_tokens": 256}
 
 MAX_PARSE_RETRIES = 3
 

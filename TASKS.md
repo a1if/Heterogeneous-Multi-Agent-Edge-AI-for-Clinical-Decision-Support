@@ -25,7 +25,18 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 9. [x] Step 5, forced-length timing and energy (`results/p1_step5_timing.json`, 640 measurements, no missing energy). Prompt tokens / prefill ms / decode ms per token / J at 64 tokens:
    A-full 645 / 185.4 / 153.1 / 632.0; A-compact 458 / 196.2 / 159.0 / 640.4; A-label 414 / 196.0 / 160.6 / 651.3; B-4 486 / 196.2 / 156.4 / 631.1.
    With output length fixed, B-4 differs from every text arm by <= 6% in prefill and <= 3.1% in decode time, total time and energy. Prefill vs A-compact / A-label: +0.1% (p = 0.92 / 0.09). Energy vs A-full: -0.1% (p = 0.42). So the dissertation's -13.3% latency / -17.9% energy were output-length effects, not interface effects (blocker B2 confirmed). Prefill is flat across 414-645 prompt tokens at batch 1 (overhead-dominated); A-full is even slightly faster (185 vs 196 ms)
-10. [ ] Remaining GPU, in rising cost: step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
+## Efficiency + accuracy programme (Deviation 5, set 2026-09-23; cheapest compute first)
+0. [x] GPU speed-ups: `max_new_tokens` 1024 -> 256 (longest valid output ever seen: 140 tokens), retry rule unchanged; OOM inside the generation thread now raises instead of hanging
+1. [x] A-full TTFT "discrepancy": a mean inflated by outliers; median 189 ms at every order position = step 5's 185 ms. Report medians
+2. [ ] E3 multi-event context, N = 1/5/10/20/50 (`p1_e3_multi_event.py`, running)
+3. [ ] E1 cached-scaffold per-event cost
+4. [ ] E2 batched serving
+5. [ ] Tier-balanced training, 3 seeds vs existing seeds 101/202
+6. [ ] 5 seeds for the winning training regime + step 1 headline
+7. [ ] Architecture v2 temporal compressor, only if E3 passes the gate
+Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI excluding 0 (analysis plan, Deviation 5)
+
+10. [ ] Superseded by the programme above. Old remaining GPU list: step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
 
 ## Phase 1, step 1: seeded headline (stopped, resumable)
 - [x] Write and commit the analysis plan (`c779b80`)
