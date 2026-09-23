@@ -38,6 +38,9 @@ class TrainingConfig:
     max_examples: int | None = None
     num_tokens: int = 4  # E1 ablation varies this (k in {1,2,4,8}); 4 matches the existing headline checkpoint.
     seed: int | None = None  # E2 seed-variance sets this explicitly; None preserves prior (unseeded) behavior.
+    # Phase 1 B-null control: train on all-zero context vectors, so the linear adapter
+    # can learn only its bias, i.e. one fixed learned prefix carrying no event information.
+    zero_context: bool = False
 
 
 PERCEPTION_CHECKPOINT_PATH = Path("perception/checkpoints/cnn_lstm.pt")
@@ -246,6 +249,8 @@ def train_adapter(config: TrainingConfig, *, output_path: Path = DEFAULT_OUTPUT)
         
         for example in progress_bar:
             context = torch.from_numpy(example["context_vector"]).unsqueeze(0)
+            if config.zero_context:
+                context = torch.zeros_like(context)
             adapter_inputs = prepare_adapter_inputs(
                 model, processor, adapter, example["health_event"], context
             )
@@ -330,6 +335,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--max-examples", type=int)
     parser.add_argument("--num-tokens", type=int, default=TrainingConfig.num_tokens)
     parser.add_argument("--seed", type=int, default=TrainingConfig.seed)
+    parser.add_argument("--zero-context", action="store_true")
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     return parser.parse_args()
 
@@ -346,6 +352,7 @@ if __name__ == "__main__":
             max_examples=args.max_examples,
             num_tokens=args.num_tokens,
             seed=args.seed,
+            zero_context=args.zero_context,
         ),
         output_path=args.output,
     )
