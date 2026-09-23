@@ -63,8 +63,29 @@ def task5():
             f" | in-progress eval: {partial or '-'} | true-class baseline: 65, 63 /80")
 
 
+def pilot():
+    s = load("results/p1_pilot_multi_event.json")
+    if not s or not s.get("rows"):
+        return None
+    parts = []
+    for n in sorted({r["n"] for r in s["rows"]}):
+        cell = []
+        for arm in ("A-compact", "B-4"):
+            a = [r for r in s["rows"] if r["n"] == n and r["arm"] == arm]
+            if a:
+                cell.append(f"{arm} {sum(r['correct'] for r in a)}/{len(a)} (parsed {sum(r['parsed'] for r in a)})")
+        refs = [r["reference"] for r in s["rows"] if r["n"] == n and r["arm"] == "A-compact"]
+        parts.append(f"N={n}: " + ", ".join(cell) + f", always-routine {sum(x == 'routine' for x in refs)}/{len(refs)}")
+    return f"Pilot {len({r['window'] for r in s['rows']})}/20 windows | correct: " + "; ".join(parts)
+
+
+RUNNING = {"p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
+
 if __name__ == "__main__":
-    for fn in (task5, e2, e1, e3):
+    import sys
+    # With a job name (the running script's prefix) print that job; otherwise the latest with data.
+    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (task5, pilot, e2, e1, e3)
+    for fn in fns:
         line = fn()
         if line:
             print(line)
