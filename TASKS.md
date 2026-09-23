@@ -22,7 +22,7 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
    Also: A-compact is 100% accurate with FEWER end-to-end prompt tokens than B-4 (458 vs 486), because Arm B's scaffold (482) is longer than Arm A's (~402). Decode speed is identical (~169 ms/output token), so every latency gap is output length.
    Controls: B-4 beats B-null by 18.8 pp (urgent 11/12 vs 0/12), so the tokens carry event information; B-shuffle (50%) is below B-null. B-4 priority tier 4/18 (the item 4 failure, reproduced). B-4 = 65/80 = the E2 seed-101 figure from August exactly.
    Strict claim scoring (justification names a class other than the predicted one): A-full 1/80, A-compact 5/80, A-label 1/80, B-4 13/78, B-shuffle 27/78, B-null 30/80
-9. [ ] Remaining GPU, in rising cost: step 5 timing (~2 h), step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
+9. [ ] Remaining GPU, in rising cost (step 5 running: `p1_step5_timing.py`, Deviation 4, `logs/p1_step5.log`): step 5 timing (~2 h), step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
 
 ## Phase 1, step 1: seeded headline (stopped, resumable)
 - [x] Write and commit the analysis plan (`c779b80`)
