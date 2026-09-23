@@ -6,7 +6,9 @@ Arm B it is what the adapter's vector would have had to convey):
 
   class     a beat-class term (normal, supraventricular, ventricular, fusion,
             unclassifiable, or the "V-class" notation) must be the predicted
-            label or in the top-3
+            label (strict, default). The lenient variant also accepts any top-3
+            label, but "N" is in almost every top-3, so it hides a justification
+            that calls a V beat normal (B-null on step 4: 0 vs 30 flagged events)
   rate      a number followed by bpm must be within RATE_TOL of heart_rate_bpm
   rr        a number followed by ms next to "RR" must be within RR_TOL of rr_interval_ms
   run       "N consecutive" / "N beats in a row" must equal consecutive_abnormal_beats
@@ -35,8 +37,22 @@ CLASS_TERMS = {
 _NUM = r"(\d+(?:\.\d+)?)"
 
 
+# Justifications often restate the escalation rule itself ("a ventricular or fusion
+# beat with confidence greater than 0.85"); those are statements about the rule,
+# not claims about this beat, and are removed before extraction.
+RULE_RESTATEMENTS = (
+    r"\b(?:not\s+)?(?:a\s+)?ventricular\s+or\s+fusion(?:\s+beat)?",
+    r"(?:greater|higher|more|less|lower)\s+than\s+(?:or\s+equal\s+to\s+)?0?\.85",
+    r"(?:above|below|over|under|exceeds?|exceeding)\s+(?:the\s+)?(?:threshold\s+(?:of\s+)?)?0?\.85",
+    r"[<>]=?\s*0?\.85",
+    r"threshold\s+(?:of\s+)?0?\.85",
+)
+
+
 def extract_claims(text: str) -> list[dict]:
     t = text or ""
+    for pattern in RULE_RESTATEMENTS:
+        t = re.sub(pattern, " ", t, flags=re.I)
     claims = []
     for label, pattern in CLASS_TERMS.items():
         # "supraventricular" contains "ventricular"; strip S terms before looking for V.
@@ -55,11 +71,11 @@ def extract_claims(text: str) -> list[dict]:
     return claims
 
 
-def check_claim(claim: dict, event: dict) -> bool:
+def check_claim(claim: dict, event: dict, strict_class: bool = True) -> bool:
     c, sf = event["classification"], event["signal_features"]
     kind, v = claim["kind"], claim["value"]
     if kind == "class":
-        return v == c["label"] or v in {t["label"] for t in c["top_3"]}
+        return v == c["label"] or (not strict_class and v in {t["label"] for t in c["top_3"]})
     if kind == "rate":
         return abs(v - sf["heart_rate_bpm"]) <= RATE_TOL
     if kind == "rr":
@@ -71,7 +87,7 @@ def check_claim(claim: dict, event: dict) -> bool:
     raise ValueError(kind)
 
 
-def score_text(text: str, event: dict) -> dict:
+def score_text(text: str, event: dict, strict_class: bool = True) -> dict:
     claims = extract_claims(text)
-    unsupported = [cl for cl in claims if not check_claim(cl, event)]
+    unsupported = [cl for cl in claims if not check_claim(cl, event, strict_class)]
     return {"n_claims": len(claims), "n_unsupported": len(unsupported), "unsupported": unsupported}
