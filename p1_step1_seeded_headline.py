@@ -1,7 +1,9 @@
 """Phase 1, step 1: seeded headline adapter, training-determinism check, and the
 E60 invariance check (offline). Pre-specified in docs/analysis_plan.md (sections 2, 4, 6).
 
-Stages (each saved as soon as it finishes; rerunning resumes from the results file):
+Stages (saved atomically as they progress; rerunning resumes from the results file.
+Evaluation is checkpointed after every event; a seed's ~30-min training restarts
+from the beginning if interrupted):
   train     -- train k=4 adapters for seeds 101..505 with the headline config
                (read back from virtual_adapter_day5_larger.pt's own saved config)
                into reasoning/checkpoints/p1_k4_seed{seed}.pt. Existing
@@ -27,6 +29,7 @@ import numpy as np
 import torch
 
 from ablation_common import prepare_events, run_arm_b_eval, summarize_arm_b
+from p1_io import save_json_atomic
 from project_config import DS2_PATH, select_events
 from reasoning.adapter_arm import load_trained_adapter
 from reasoning.adapter_training import TrainingConfig, train_adapter
@@ -84,8 +87,7 @@ def load_state() -> dict:
 
 def save(state: dict) -> None:
     RESULTS_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(RESULTS_PATH, "w", encoding="utf-8") as f:
-        json.dump(state, f, indent=2, default=str)
+    save_json_atomic(RESULTS_PATH, state)
 
 
 def max_abs_diff(a: Path, b: Path) -> float:
@@ -136,12 +138,19 @@ def stage_eval_e80(state: dict, model, processor) -> None:
         if prepared is None:
             prepared = prepare_events(note=" (E80)")
         adapter = load_trained_adapter(str(checkpoint_path(seed)), model)
-        results = run_arm_b_eval(prepared, model, processor, adapter, label=f"p1 seed={seed}")
+        partial = state.setdefault("eval_e80_partial", {})
+
+        def checkpoint(rows, seed=seed):
+            partial[str(seed)] = rows
+            save(state)
+        results = run_arm_b_eval(prepared, model, processor, adapter, label=f"p1 seed={seed}",
+                                 resume_from=partial.get(str(seed)), on_event=checkpoint)
         summary = summarize_arm_b(results)
         if summary.get("tokens_mean") not in (None, 486.0):
             raise RuntimeError(f"seed={seed}: token mean {summary['tokens_mean']} != 486 "
                                "(gate 6b: construction fixes this; pipeline bug, stopping)")
         state["eval_e80"][str(seed)] = {"summary": summary, "per_event": results}
+        partial.pop(str(seed), None)
         save(state)
         del adapter
         torch.cuda.empty_cache()

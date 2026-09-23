@@ -14,7 +14,7 @@ Offline arm: A-rule (no LLM), urgency_tier_from_event on the predicted event.
 Interface-attributable tokens: text arms = prompt tokens minus the same prompt
 with an empty payload (scaffold); adapter arms = k.
 
-Rows are saved after every event; rerunning resumes.
+Rows are saved atomically after every arm (p1_io.save_json_atomic); rerunning resumes.
 
 Run (from repo root):
     python p1_step4_baseline_family.py
@@ -28,6 +28,7 @@ import numpy as np
 import torch
 
 from ablation_common import prepare_events
+from p1_io import save_json_atomic
 from p1_step1_seeded_headline import headline_config, provenance, sha256
 from project_config import measure_vram
 from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed
@@ -142,13 +143,13 @@ def main():
             except RuntimeError as err:
                 row.update({"generation_failed": True, "urgency_tier": None, "correct": False, "error": str(err)})
             state["rows"].append(row)
-        RESULTS_PATH.write_text(json.dumps(state, indent=2, default=str), encoding="utf-8")
+            save_json_atomic(RESULTS_PATH, state)  # checkpoint after every arm
         tiers = {r["arm"]: r["urgency_tier"] for r in state["rows"] if r["idx"] == e["idx"]}
         print(f"[{i+1}/{len(events)}] idx={e['idx']} ref={e['reference_tier']} {tiers} "
               f"elapsed={time.time() - t0:.0f}s", flush=True)
 
     state["summary"] = summarize(state["rows"], events)
-    RESULTS_PATH.write_text(json.dumps(state, indent=2, default=str), encoding="utf-8")
+    save_json_atomic(RESULTS_PATH, state)
     print(json.dumps(state["summary"], indent=2))
 
 

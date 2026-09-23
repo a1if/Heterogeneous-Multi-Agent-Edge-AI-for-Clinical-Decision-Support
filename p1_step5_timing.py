@@ -13,7 +13,8 @@ Content is not scored here (step 4 covers accuracy).
 
 Arms: A-full, A-compact, A-label (text family, step 4 prompts) and B-4 (seed 101).
 B-null / B-shuffle have B-4's input cost by construction and are not repeated.
-Arm order rotates per event; the two lengths alternate. Resumable.
+Arm order rotates per event; the two lengths alternate. Checkpointed atomically after
+every measurement (p1_io.save_json_atomic); rerunning resumes from the last saved one.
 
 Run (from repo root):
     python p1_step5_timing.py
@@ -29,6 +30,7 @@ from transformers import TextIteratorStreamer
 
 from ablation_common import prepare_events
 from measure_comm_cost import _HAS_NVML, idle_baseline, sample_power_during
+from p1_io import save_json_atomic
 from p1_step1_seeded_headline import provenance, sha256
 from p1_step4_baseline_family import B4_CHECKPOINT, chat_inputs
 from reasoning.adapter_arm import load_trained_adapter
@@ -71,7 +73,7 @@ def main():
     events = prepare_events(note=" (E80, step 5)")
     model, processor = load_model()
     adapter = load_trained_adapter(str(B4_CHECKPOINT), model)
-    state.setdefault("idle_w", {})["start"] = idle_baseline()
+    state.setdefault("idle_w", {}).setdefault("start", idle_baseline())  # kept on resume
 
     def inputs_for(arm, e):
         if arm == "B-4":
@@ -103,12 +105,12 @@ def main():
                 state["rows"].append({"idx": e["idx"], "arm": arm, "n_tokens": n, "prompt_tokens": prompt_tokens,
                                       **timing, "energy_j": joules, "mean_power_w": mean_w,
                                       "power_samples": n_samples, "position_in_order": order.index(arm)})
-        RESULTS_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
+                save_json_atomic(RESULTS_PATH, state)  # checkpoint after every measurement
         print(f"[{i+1}/{len(events)}] idx={e['idx']} elapsed={time.time() - t0:.0f}s", flush=True)
 
     state["idle_w"]["end"] = idle_baseline()
     state["summary"] = summarize(state)
-    RESULTS_PATH.write_text(json.dumps(state, indent=2), encoding="utf-8")
+    save_json_atomic(RESULTS_PATH, state)
     print(json.dumps(state["summary"], indent=2))
 
 
