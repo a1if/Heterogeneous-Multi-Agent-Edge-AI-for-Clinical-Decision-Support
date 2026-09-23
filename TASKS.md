@@ -42,6 +42,7 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 - [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
 
 ## Found along the way
+- [ ] Parse retries under greedy decoding are identical, and `max_new_tokens` is 1024: one degenerate arm costs up to ~6 min (3 x 1024 tokens at ~8 tok/s) and still fails. Consider a cap near the longest valid output (~150 tokens) and a single attempt, for runs after step 4 (logged as a deviation, since it changes the failure-counting rule)
 - [ ] Confidence IS in the adapter's tokens (MLP R² 0.96), and so is the tier (95%). Together with item 4, Arm B's priority-tier errors come from the adapter/LLM not using information that is present, pointing again at the 5-example training tier imbalance, not at an information gap
 - [ ] Fields the latent interface cannot carry (heart rate, RR, SQI, run length) are exactly what the JSON adds. State this as the interface's information cost alongside the class probe
 - [ ] Choose the anomaly-check threshold on DS1 (not E80) before it is used to route Arm B events to a JSON fallback
