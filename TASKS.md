@@ -28,7 +28,7 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 ## Efficiency + accuracy programme (Deviation 5, set 2026-09-23; cheapest compute first)
 0. [x] GPU speed-ups: `max_new_tokens` 1024 -> 256 (longest valid output ever seen: 140 tokens), retry rule unchanged; OOM inside the generation thread now raises instead of hanging
 1. [x] A-full TTFT "discrepancy": a mean inflated by outliers; median 189 ms at every order position = step 5's 185 ms. Report medians
-2. [ ] E3 multi-event context, N = 1/5/10/20/50 (`p1_e3_multi_event.py`, running in the queue E3 -> E1 -> E2 -> task 5). Interim, 8 windows: B-4 vs A-compact prefill N=1 -2.1%, N=5 +3.0%, N=10 -20.3%, N=20 -48.9%, N=50 -78.4% (gate passes for N >= 10). A-full N=50: 12.6k tokens, ~80 s prefill, 11.5 GB allocated (memory pressure); measured on 8 windows only (Deviation 7)
+2. [x] E3 multi-event context, 20 windows (`results/p1_e3_multi_event.json`). GATE PASSES for N >= 10. B-4 vs A-compact prefill: N=1 -2.3% [-4.7,-0.5]; N=5 +5.2% [+3.5,+7.2] (B slower); N=10 -18.7% [-21.7,-14.9]; N=20 -46.9% [-48.6,-45.0]; N=50 -76.5% [-77.3,-75.7]. Medians at N=50: A-compact 3,320 tok / 793 ms / 9,714 MB / 391 J (16 tokens); B-4 682 tok / 191 ms / 9,262 MB / 230 J. A-full N=50 (8 windows): 12,601 tok / 80.2 s / 11,542 MB / 5,150 J. Cost only: B-4 was never trained on N > 1 (accuracy needs item 7)
 3. [ ] E1 cached-scaffold per-event cost (`p1_e1_cached_scaffold.py`, queued)
 4. [ ] E2 batched serving (`p1_e2_batched.py`, queued)
 5. [ ] Tier-balanced training, 3 seeds vs existing seeds 101/202 (Deviation 6; `p1_task5_tier_balanced.py`, queued)
