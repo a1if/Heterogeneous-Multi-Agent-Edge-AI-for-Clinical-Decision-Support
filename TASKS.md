@@ -36,7 +36,16 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 6. [ ] 5 seeds for the winning training regime + step 1 headline
 6b. [x] Pilot, untrained single-event adapter on N-event prompts, most-urgent-tier task, 20 windows (`results/p1_pilot_multi_event.json`). Correct / 20 (A-compact | B-4 | always-routine): N=1 20 | 20 | 20 (uninformative: all references routine); N=5 17 | 15 (1 unparsed) | 16; N=10 17 | 11 (4 unparsed) | 13; N=20 15 | 0 (none parsed) | 9. B-4 never predicts priority/urgent at N >= 5, and at N = 20 its output degenerates (schema-invalid JSON, text in other scripts). As predicted: E3's efficiency regime needs an adapter trained on multi-event input (item 7)
 6c. [x] Pilot 2, tier-stratified windows, 20 per tier per N (`results/p1_pilot2_stratified.json`, Deviation 8). Balanced accuracy (recall R / P / U; parse rate): N=5 A-compact 0.83 (1.00 / 0.60 / 0.90; 100%) vs B-4 0.33 (1.00 / 0 / 0; 97%); N=10 A-compact 0.67 (1.00 / 0.60 / 0.40; 100%) vs B-4 0.33 (1.00 / 0 / 0; 87%); N=20 A-compact 0.67 (1.00 / 0.50 / 0.50; 100%) vs B-4 0.00 (parse 3%). No false alarms in either arm. The untrained B-4 answers only "routine" (chance level) and breaks at N=20. Compact text also misses priority and urgent windows as N grows: the bar for item 7 is A-compact's 0.83 / 0.67 / 0.67
-7. [ ] Architecture v2 temporal compressor, only if E3 passes the gate
+7. [ ] Item 7: trained multi-event adapter (MEA) on the RR encoder (Deviation 9; plan `C:/Users/alift/.claude/plans/yes-design-item-7-clever-adleman.md`)
+   - [ ] Stage 0: RR-encoder DS2 stratified windows + A-compact baseline (`p1_item7_baseline.py`)
+   - [ ] Parametrise `stratified_windows` (ns, per_cell), with a regression test against pilot 2's cells
+   - [ ] `reasoning/multi_event_adapter.py` + tests (shape, slot embeddings, norm scale)
+   - [ ] `canonical_window_target` + tests
+   - [ ] `p1_item7_train.py` (grad accumulation, validation early stopping, resumable) + resume test
+   - [ ] Stage 1 smoke test (memory at N = 20, token norms)
+   - [ ] Stage 2 seed 101 + Gate A
+   - [ ] Stage 3 seeds 202, 303 + DS2 evaluation (`p1_item7_eval.py`)
+   - [ ] 7b temporal compressor, only if MEA passes
 Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI excluding 0 (analysis plan, Deviation 5)
 
 10. [ ] Superseded by the programme above. Old remaining GPU list: step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
