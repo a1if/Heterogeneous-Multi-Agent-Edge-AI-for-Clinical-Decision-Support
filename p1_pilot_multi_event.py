@@ -52,18 +52,22 @@ def note(n):
             "beat and report the single most urgent tier among them.\n").format(n=n)
 
 
+def scaffold_parts(n):
+    """(prefix, suffix) text around the event payload of an N-event prompt: the
+    identical scaffold shared by pilots 1-2 and item 7 (neutral context, the
+    multi-event note, output instructions)."""
+    prefix = (f"{SYSTEM_PROMPT}\n\n--- Background context ---\n{NEUTRAL_CONTEXT}\n"
+              f"{note(n)}--- Event data ---\n")
+    return prefix, f"\n\n--- Instructions ---\n{OUTPUT_INSTRUCTIONS}"
+
+
 def make_generator(model, processor, adapter, replayed):
     """generate(arm, idx) -> raw model text for the events at indices idx (shared by both pilots)."""
     device = model.get_input_embeddings().weight.device
     tok = processor.tokenizer
 
-    def parts(n):
-        prefix = (f"{SYSTEM_PROMPT}\n\n--- Background context ---\n{NEUTRAL_CONTEXT}\n"
-                  f"{note(n)}--- Event data ---\n")
-        return prefix, f"\n\n--- Instructions ---\n{OUTPUT_INSTRUCTIONS}"
-
     def generate(arm, idx):
-        prefix, suffix = parts(len(idx))
+        prefix, suffix = scaffold_parts(len(idx))
         if arm == "B-4":
             rendered, s0, s1 = _render_prompt_with_placeholder(processor, prefix, suffix)
             pre, suf = _tokenize_and_remove_placeholder(processor, rendered, s0, s1)
