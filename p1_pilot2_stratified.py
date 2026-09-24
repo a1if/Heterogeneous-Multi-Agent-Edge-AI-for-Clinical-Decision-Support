@@ -38,30 +38,52 @@ ARMS = ("A-compact", "B-4")
 RESULTS_PATH = Path("results/p1_pilot2_stratified.json")
 
 
-def stratified_windows(tiers, record_ids, rng):
-    """{(n, tier): [start index, ...]} with PER_CELL windows per cell, each inside
-    one record, at most MAX_PER_RECORD per record per cell."""
+def stratified_windows(tiers, record_ids, rng, ns=NS, per_cell=PER_CELL, max_per_record=MAX_PER_RECORD,
+                       classes=None):
+    """{(n, tier): [start index, ...]} with per_cell windows per cell, each inside
+    one record, at most max_per_record per record per cell. Defaults reproduce
+    pilot 2 exactly. With ``classes`` (the predicted class of every beat), each
+    cell is filled round-robin over the class of the window's most urgent beat,
+    so a cell is not dominated by one class (used for item 7 training data)."""
     rank = np.array([RANK[t] for t in tiers])
     starts = np.flatnonzero(np.r_[True, np.diff(record_ids) != 0])
     ends = np.r_[starts[1:], len(record_ids)]
     cells = {}
-    for n in NS:
+    for n in ns:
         by_tier = {t: [] for t in TIERS}
         for s0, e0 in zip(starts, ends):
             for s in range(s0, e0 - n + 1, n):  # non-overlapping candidate windows
                 by_tier[TIERS[rank[s:s + n].max()]].append(s)
         for t in TIERS:
             cand = rng.permutation(by_tier[t])
+            if classes is not None:
+                cand = _round_robin_by_top_class(cand, n, rank, classes)
             chosen, per_rec = [], {}
             for s in cand:
                 r = int(record_ids[s])
-                if per_rec.get(r, 0) < MAX_PER_RECORD:
+                if per_rec.get(r, 0) < max_per_record:
                     chosen.append(int(s))
                     per_rec[r] = per_rec.get(r, 0) + 1
-                if len(chosen) == PER_CELL:
+                if len(chosen) == per_cell:
                     break
             cells[(n, t)] = chosen
     return cells
+
+
+def _round_robin_by_top_class(cand, n, rank, classes):
+    """Reorder candidate windows so the class of each window's most urgent beat
+    cycles (A, B, C, A, B, ...), keeping the random order within each class."""
+    groups = {}
+    for s in cand:
+        top = int(s) + int(np.argmax(rank[s:s + n]))
+        groups.setdefault(classes[top], []).append(s)
+    queues = [list(g) for _, g in sorted(groups.items())]
+    out = []
+    while any(queues):
+        for q in queues:
+            if q:
+                out.append(q.pop(0))
+    return out
 
 
 def main():
