@@ -1,0 +1,62 @@
+{
+  "analysis_plan": "docs/analysis_plan.md (Deviation 9)",
+  "provenance": {
+    "git_commit": "af26b8a92ace702d7daaddafe50f1fe5951b377f",
+    "git_dirty": false,
+    "python": "3.13.3",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "transformers": "5.14.1",
+    "bitsandbytes": "0.50.0",
+    "gpu": "NVIDIA GeForce RTX 5070"
+  },
+  "encoder": {
+    "path": "perception/checkpoints/cnn_lstm_rr_seed0.pt",
+    "sha256": "e0e953787691c522b87c0eb03829f76ab8919f04274835f77bd772cef3d8861d"
+  },
+  "seed": 101,
+  "n_train": 16,
+  "n_val": 3,
+  "init_scale": 61.5400390625,
+  "peak_mem_mb_n20_train_step": 9519.203125,
+  "memory_ok": true,
+  "loss_check": {
+    "full_logits": 3.836749792098999,
+    "logits_to_keep": 3.836749792098999
+  },
+  "scale_after": 61.5873908996582,
+  "seconds": 57.00856304168701,
+  "state": {
+    "history": [
+      {
+        "update": 1,
+        "loss": 4.056955337524414
+      },
+      {
+        "update": 2,
+        "loss": 3.5830444991588593,
+        "val": {
+          "balanced_accuracy": 0.0,
+          "parse_rate": 0.0,
+          "by_n": {
+            "1": 0.0
+          }
+        }
+      }
+    ],
+    "best_metric": 0.0,
+    "best_update": 2,
+    "evals_since_best": 0,
+    "epoch": 0,
+    "pos": 16,
+    "updates": 2,
+    "done": true,
+    "best_val": {
+      "balanced_accuracy": 0.0,
+      "parse_rate": 0.0,
+      "by_n": {
+        "1": 0.0
+      }
+    }
+  }
+}
