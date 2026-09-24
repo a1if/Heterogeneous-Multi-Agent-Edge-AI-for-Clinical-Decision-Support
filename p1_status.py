@@ -128,12 +128,26 @@ def item7_baseline():
             + (f" | natural windows done {len(nat)}" if nat else ""))
 
 
-RUNNING = {"p1_item7_baseline": item7_baseline, "p1_pilot2": pilot2, "p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
+def item7_train(tag="seed101"):
+    s = load(f"results/p1_item7_train_{tag}.json")
+    if not s:
+        return f"Item 7 {tag}: loading / replaying DS1" if Path(f"logs/p1_item7_{tag}.log").exists() else None
+    hist = s.get("history", [])
+    vals = [h for h in hist if "val" in h]
+    last = hist[-1] if hist else {}
+    v = (f" | last val @update {vals[-1]['update']}: bal-acc {vals[-1]['val']['balanced_accuracy']:.2f}, "
+         f"parse {vals[-1]['val']['parse_rate']:.2f}, by N {vals[-1]['val']['by_n']}") if vals else ""
+    best = f" | best bal-acc {s['best_metric']:.2f} @update {s['best_update']}" if s.get("best_update") else ""
+    return (f"Item 7 {tag}: epoch {s.get('epoch', 0) + 1}, update {s.get('updates', 0)}, "
+            f"loss {last.get('loss', float('nan')):.3f}{v}{best}")
+
+
+RUNNING = {"p1_item7_train": item7_train, "p1_item7_baseline": item7_baseline, "p1_pilot2": pilot2, "p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
 
 if __name__ == "__main__":
     import sys
     # With a job name (the running script's prefix) print that job; otherwise the latest with data.
-    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (item7_baseline, pilot2, task5, pilot, e2, e1, e3)
+    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (item7_train, item7_baseline, pilot2, task5, pilot, e2, e1, e3)
     for fn in fns:
         line = fn()
         if line:
