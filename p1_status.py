@@ -135,7 +135,7 @@ def item7_train(tag="seed101"):
     hist = s.get("history", [])
     vals = [h for h in hist if "val" in h]
     last = hist[-1] if hist else {}
-    v = (f" | last val @update {vals[-1]['update']}: bal-acc {vals[-1]['val']['balanced_accuracy']:.2f}, "
+    v = (f" | last val @update {vals[-1]['update']}{' (64-token, truncated)' if vals[-1]['val'].get('truncated_max_new_tokens_64') else ''}: bal-acc {vals[-1]['val']['balanced_accuracy']:.2f}, "
          f"parse {vals[-1]['val']['parse_rate']:.2f}, by N {vals[-1]['val']['by_n']}") if vals else ""
     best = f" | best bal-acc {s['best_metric']:.2f} @update {s['best_update']}" if s.get("best_update") else ""
     return (f"Item 7 {tag}: epoch {s.get('epoch', 0) + 1}, update {s.get('updates', 0)}, "

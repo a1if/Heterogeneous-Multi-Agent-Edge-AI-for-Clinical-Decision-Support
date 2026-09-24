@@ -36,7 +36,7 @@ TRAIN_PER_CELL, VAL_PER_CELL = 25, 5
 VAL_RECORDS = {109, 205, 223}  # = train_perception_agent.VAL_RECORDS (held out from encoder training too)
 LR, ACCUM, CLIP, TIER_WEIGHT = 1e-3, 8, 1.0, 4.0
 EVAL_EVERY, PATIENCE, MAX_EPOCHS, RESUME_EVERY = 20, 3, 3, 8
-VAL_MAX_NEW_TOKENS = 64
+VAL_MAX_NEW_TOKENS = 96  # longest window target is 66 tokens; 64 truncated priority/urgent answers (seed 101, updates 20-40)
 TIERS = ("routine", "priority", "urgent")
 
 
