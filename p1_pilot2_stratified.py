@@ -39,12 +39,14 @@ RESULTS_PATH = Path("results/p1_pilot2_stratified.json")
 
 
 def stratified_windows(tiers, record_ids, rng, ns=NS, per_cell=PER_CELL, max_per_record=MAX_PER_RECORD,
-                       classes=None):
+                       classes=None, records=None):
     """{(n, tier): [start index, ...]} with per_cell windows per cell, each inside
     one record, at most max_per_record per record per cell. Defaults reproduce
     pilot 2 exactly. With ``classes`` (the predicted class of every beat), each
     cell is filled round-robin over the class of the window's most urgent beat,
-    so a cell is not dominated by one class (used for item 7 training data)."""
+    so a cell is not dominated by one class (used for item 7 training data).
+    With ``records``, only windows inside those record ids are candidates (item 7's
+    train / validation split by whole records)."""
     rank = np.array([RANK[t] for t in tiers])
     starts = np.flatnonzero(np.r_[True, np.diff(record_ids) != 0])
     ends = np.r_[starts[1:], len(record_ids)]
@@ -52,6 +54,8 @@ def stratified_windows(tiers, record_ids, rng, ns=NS, per_cell=PER_CELL, max_per
     for n in ns:
         by_tier = {t: [] for t in TIERS}
         for s0, e0 in zip(starts, ends):
+            if records is not None and int(record_ids[s0]) not in records:
+                continue
             for s in range(s0, e0 - n + 1, n):  # non-overlapping candidate windows
                 by_tier[TIERS[rank[s:s + n].max()]].append(s)
         for t in TIERS:
