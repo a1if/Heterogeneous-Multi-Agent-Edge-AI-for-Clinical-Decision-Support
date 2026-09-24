@@ -159,6 +159,7 @@ def main():
 
     model, processor = load_model()
     freeze_language_model(model)
+    model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     torch.manual_seed(args.seed)
     device = model.get_input_embeddings().weight.device
     adapter = MultiEventVirtualAdapter.for_model(model).to(device)
@@ -181,14 +182,22 @@ def main():
         target_ids, weights = _target_ids_and_weights(processor, text, w["tier"], TIER_WEIGHT)
         embeds, mask, pli = _append_target_for_teacher_forcing(model, ai, target_ids)
         labels, lw = _labels_for_target(ai.sequence_length, target_ids.to(embeds.device), weights.to(embeds.device))
-        out = model(inputs_embeds=embeds, attention_mask=mask, per_layer_inputs=pli, use_cache=False)
+        # Memory (smoke test: 15.3 GB at N=20 on a 12 GB GPU). Neither change alters the loss:
+        # logits only for the last T+1 positions (the prompt's are masked out anyway; with a
+        # 262k vocabulary the full logits and their float copy cost GBs), and gradient
+        # checkpointing, which recomputes the frozen LM's activations in the backward pass.
+        keep = target_ids.shape[1] + 1
+        model.train()  # checkpointing is active only in train mode; the LM has no dropout
+        out = model(inputs_embeds=embeds, attention_mask=mask, per_layer_inputs=pli, use_cache=False,
+                    logits_to_keep=keep)
         step["i"] += 1
         if step["i"] % 10 == 0:
             torch.cuda.empty_cache()  # variable-length windows fragment the allocator (see train_adapter)
-        return _weighted_teacher_forcing_loss(out.logits, labels, lw)
+        return _weighted_teacher_forcing_loss(out.logits, labels[:, -keep:], lw[:, -keep:])
 
     def validate_fn(windows):
         adapter.eval()
+        model.eval()
         rows = []
         with torch.no_grad():
             for w in windows:
@@ -211,7 +220,20 @@ def main():
     if args.smoke:
         torch.cuda.reset_peak_memory_stats()
         n20 = [w for w in train if w["n"] == 20][0]
-        loss_fn(n20).backward()
+        with torch.no_grad():  # logits_to_keep must not change the loss: compare with full logits
+            ai = window_inputs(n20)
+            tid, tw = _target_ids_and_weights(processor, canonical_window_target(
+                r["events"][n20["start"]:n20["start"] + 20]), n20["tier"], TIER_WEIGHT)
+            e, m, p = _append_target_for_teacher_forcing(model, ai, tid)
+            lab, lw = _labels_for_target(ai.sequence_length, tid.to(e.device), tw.to(e.device))
+            full = float(_weighted_teacher_forcing_loss(model(inputs_embeds=e, attention_mask=m, per_layer_inputs=p,
+                                                              use_cache=False).logits, lab, lw))
+            del ai, e, m, p
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats()
+        kept = loss_fn(n20)
+        loss_check = {"full_logits": full, "logits_to_keep": float(kept.detach())}
+        kept.backward()
         peak_n20 = torch.cuda.max_memory_allocated() / 2 ** 20
         adapter.zero_grad(set_to_none=True)
         state = train_loop(adapter=adapter, optimizer=optimizer, train=train, val=val, loss_fn=loss_fn,
@@ -219,7 +241,7 @@ def main():
         with torch.no_grad():
             norms = window_inputs(n20).inputs_embeds.float().norm(dim=-1)[0]
         smoke = {**meta, "peak_mem_mb_n20_train_step": peak_n20, "memory_ok": peak_n20 < 11500,
-                 "scale_after": float(adapter.scale), "seconds": time.time() - t0, "state": state}
+                 "loss_check": loss_check, "scale_after": float(adapter.scale), "seconds": time.time() - t0, "state": state}
         save_json_atomic(Path("results/p1_item7_smoke.json"), smoke)
         print(json.dumps({k: v for k, v in smoke.items() if k != "state"}, indent=2))
         print("virtual-token norm range at N=20 (text tokens included):", float(norms.min()), float(norms.max()))

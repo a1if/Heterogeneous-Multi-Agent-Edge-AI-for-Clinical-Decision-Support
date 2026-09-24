@@ -42,7 +42,7 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
    - [x] `reasoning/multi_event_adapter.py` + 4 tests (shape, slot embeddings, slot independence, norm scale taken from the embedding layer's real outputs)
    - [x] `canonical_window_target` + test
    - [x] `p1_item7_train.py` (grad accumulation, validation early stopping, resumable, `--smoke`) + bit-identical resume test
-   - [ ] Stage 1 smoke test (memory at N = 20, token norms)
+   - [ ] Stage 1 smoke test (memory at N = 20, token norms). Run 1 (14:02-14:10): peak 15,349 MB at N = 20 (> 11,500 MB, over the 12 GB GPU), queue stopped before seed 101; init scale 61.5, unchanged after 2 updates; norms 47-71 incl. text (`results/p1_item7_smoke_run1_oom.json`). Fix (no change to the loss): logits only for the target's last T+1 positions (`logits_to_keep`; the 262k-vocab full logits cost GBs) + gradient checkpointing of the frozen LM. Smoke v2 also checks the loss matches the full-logits loss (within 1%). Seed 101 is queued behind it
    - [ ] Stage 2 seed 101 + Gate A
    - [ ] Stage 3 seeds 202, 303 + DS2 evaluation (`p1_item7_eval.py`)
    - [ ] 7b temporal compressor, only if MEA passes
