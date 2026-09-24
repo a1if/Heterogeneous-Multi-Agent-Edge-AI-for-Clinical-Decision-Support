@@ -92,12 +92,30 @@ def pilot():
     return f"Pilot {len({r['window'] for r in s['rows']})}/20 windows | correct: " + "; ".join(parts)
 
 
-RUNNING = {"p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
+def pilot2():
+    s = load("results/p1_pilot2_stratified.json")
+    if not s or not s.get("rows"):
+        return "Pilot 2: replaying DS2 / loading model" if s else None
+    parts = []
+    for n in sorted({r["n"] for r in s["rows"]}):
+        cells = []
+        for arm in ("A-compact", "B-4"):
+            a = [r for r in s["rows"] if r["n"] == n and r["arm"] == arm]
+            if a:
+                per = ", ".join(f"{t[0].upper()} {sum(r['correct'] for r in a if r['reference'] == t)}/"
+                                f"{sum(r['reference'] == t for r in a)}" for t in ("routine", "priority", "urgent")
+                                if any(r["reference"] == t for r in a))
+                cells.append(f"{arm} [{per}] parsed {sum(r['parsed'] for r in a)}/{len(a)}")
+        parts.append(f"N={n}: " + "; ".join(cells))
+    return f"Pilot 2 {len(s['rows'])}/360 generations | " + " || ".join(parts)
+
+
+RUNNING = {"p1_pilot2": pilot2, "p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
 
 if __name__ == "__main__":
     import sys
     # With a job name (the running script's prefix) print that job; otherwise the latest with data.
-    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (task5, pilot, e2, e1, e3)
+    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (pilot2, task5, pilot, e2, e1, e3)
     for fn in fns:
         line = fn()
         if line:
