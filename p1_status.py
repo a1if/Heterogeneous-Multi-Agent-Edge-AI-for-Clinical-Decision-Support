@@ -110,12 +110,30 @@ def pilot2():
     return f"Pilot 2 {len(s['rows'])}/360 generations | " + " || ".join(parts)
 
 
-RUNNING = {"p1_pilot2": pilot2, "p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
+def item7_baseline():
+    s = load("results/p1_item7_baseline.json")
+    if not s or not s.get("rows"):
+        return "Item 7 stage 0: RR replay / loading model" if s else None
+    rows, total = s["rows"], len(s.get("windows", []))
+    parts = []
+    for n in (1, 5, 10, 20):
+        a = [r for r in rows if r["set"] == "stratified" and r["n"] == n]
+        if a:
+            per = ", ".join(f"{t[0].upper()} {sum(r['correct'] for r in a if r['reference'] == t)}/"
+                            f"{sum(r['reference'] == t for r in a)}" for t in ("routine", "priority", "urgent")
+                            if any(r["reference"] == t for r in a))
+            parts.append(f"N={n} [{per}]")
+    nat = [r for r in rows if r["set"] == "natural"]
+    return (f"Item 7 stage 0 (A-compact, RR encoder) {len(rows)}/{total} | " + "; ".join(parts)
+            + (f" | natural windows done {len(nat)}" if nat else ""))
+
+
+RUNNING = {"p1_item7_baseline": item7_baseline, "p1_pilot2": pilot2, "p1_task5": task5, "p1_pilot": pilot, "p1_e2": e2, "p1_e1": e1, "p1_e3": e3}
 
 if __name__ == "__main__":
     import sys
     # With a job name (the running script's prefix) print that job; otherwise the latest with data.
-    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (pilot2, task5, pilot, e2, e1, e3)
+    fns = [RUNNING[sys.argv[1]]] if len(sys.argv) > 1 and sys.argv[1] in RUNNING else (item7_baseline, pilot2, task5, pilot, e2, e1, e3)
     for fn in fns:
         line = fn()
         if line:

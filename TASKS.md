@@ -37,11 +37,11 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
 6b. [x] Pilot, untrained single-event adapter on N-event prompts, most-urgent-tier task, 20 windows (`results/p1_pilot_multi_event.json`). Correct / 20 (A-compact | B-4 | always-routine): N=1 20 | 20 | 20 (uninformative: all references routine); N=5 17 | 15 (1 unparsed) | 16; N=10 17 | 11 (4 unparsed) | 13; N=20 15 | 0 (none parsed) | 9. B-4 never predicts priority/urgent at N >= 5, and at N = 20 its output degenerates (schema-invalid JSON, text in other scripts). As predicted: E3's efficiency regime needs an adapter trained on multi-event input (item 7)
 6c. [x] Pilot 2, tier-stratified windows, 20 per tier per N (`results/p1_pilot2_stratified.json`, Deviation 8). Balanced accuracy (recall R / P / U; parse rate): N=5 A-compact 0.83 (1.00 / 0.60 / 0.90; 100%) vs B-4 0.33 (1.00 / 0 / 0; 97%); N=10 A-compact 0.67 (1.00 / 0.60 / 0.40; 100%) vs B-4 0.33 (1.00 / 0 / 0; 87%); N=20 A-compact 0.67 (1.00 / 0.50 / 0.50; 100%) vs B-4 0.00 (parse 3%). No false alarms in either arm. The untrained B-4 answers only "routine" (chance level) and breaks at N=20. Compact text also misses priority and urgent windows as N grows: the bar for item 7 is A-compact's 0.83 / 0.67 / 0.67
 7. [ ] Item 7: trained multi-event adapter (MEA) on the RR encoder (Deviation 9; plan `C:/Users/alift/.claude/plans/yes-design-item-7-clever-adleman.md`)
-   - [ ] Stage 0: RR-encoder DS2 stratified windows + A-compact baseline (`p1_item7_baseline.py`)
-   - [ ] Parametrise `stratified_windows` (ns, per_cell), with a regression test against pilot 2's cells
-   - [ ] `reasoning/multi_event_adapter.py` + tests (shape, slot embeddings, norm scale)
-   - [ ] `canonical_window_target` + tests
-   - [ ] `p1_item7_train.py` (grad accumulation, validation early stopping, resumable) + resume test
+   - [ ] Stage 0: RR-encoder DS2 stratified windows + A-compact baseline (`p1_item7_baseline.py`), RUNNING; DS2 RR replay cached in `cache/item7/`
+   - [x] Parametrise `stratified_windows` (ns, per_cell, max_per_record, classes round-robin, records filter; defaults = pilot 2), tests
+   - [x] `reasoning/multi_event_adapter.py` + 4 tests (shape, slot embeddings, slot independence, norm scale taken from the embedding layer's real outputs)
+   - [x] `canonical_window_target` + test
+   - [x] `p1_item7_train.py` (grad accumulation, validation early stopping, resumable, `--smoke`) + bit-identical resume test
    - [ ] Stage 1 smoke test (memory at N = 20, token norms)
    - [ ] Stage 2 seed 101 + Gate A
    - [ ] Stage 3 seeds 202, 303 + DS2 evaluation (`p1_item7_eval.py`)
