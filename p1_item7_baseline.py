@@ -3,7 +3,9 @@
 Reference tiers come from the rule applied to the RR encoder's own events, so pilot
 2's windows are not reused. On DS2:
   stratified  N in {1, 5, 10, 20} x tier, 20 windows per cell, <= 3 per record per
-              cell, seed 0 (p1_pilot2_stratified.stratified_windows)
+              cell, seed 0 (p1_pilot2_stratified.stratified_windows), round-robin over
+              the predicted class of each window's most urgent beat (Deviation 10;
+              the tier-only run is kept as results/p1_item7_baseline_tieronly.json)
   natural     pilot-1-style random windows (p1_e3_multi_event.windows, seed 0), first
               N beats for N in {5, 10, 20}: the false-alarm view
 A-compact only, with pilots 1-2's scaffold, task and parsing
@@ -34,6 +36,7 @@ from reasoning.output_schema import ReasoningOutput
 NS_STRAT = (1, 5, 10, 20)
 NS_NATURAL = (5, 10, 20)
 RESULTS_PATH = Path("results/p1_item7_baseline.json")
+TIER_ONLY_PATH = Path("results/p1_item7_baseline_tieronly.json")
 
 
 class Replayed:
@@ -47,21 +50,34 @@ class Replayed:
 
 
 def build_windows(r):
-    cells = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=NS_STRAT, per_cell=20)
+    cells = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=NS_STRAT, per_cell=20,
+                               classes=r["classes"])  # Deviation 10: class-balanced within each cell
     nat = natural_windows({"record_ids": r["record_ids"]}, np.random.default_rng(0))
     windows = [{"set": "stratified", "n": n, "tier_cell": t, "start": s} for (n, t), ss in cells.items() for s in ss]
     windows += [{"set": "natural", "n": n, "tier_cell": None, "start": w[0]} for w in nat for n in NS_NATURAL]
+    labels = "NSVFQ"
     for w in windows:
-        w["reference"] = max((r["tiers"][i] for i in range(w["start"], w["start"] + w["n"])), key=RANK.get)
+        idx = range(w["start"], w["start"] + w["n"])
+        w["reference"] = max((r["tiers"][i] for i in idx), key=RANK.get)
+        top = max(idx, key=lambda i: RANK[r["tiers"][i]])  # earliest most urgent beat
+        w["top_class_predicted"], w["top_class_true"] = r["classes"][top], labels[int(r["labels"][top])]
     return windows
 
 
 def main():
     r = replay_split("ds2")
     state = json.loads(RESULTS_PATH.read_text(encoding="utf-8")) if RESULTS_PATH.exists() else {
-        "analysis_plan": "docs/analysis_plan.md (Deviation 9, stage 0)", "provenance": provenance(),
+        "analysis_plan": "docs/analysis_plan.md (Deviations 9 and 10, stage 0)", "provenance": provenance(),
         "encoder": {"path": RR_ENCODER, "sha256": sha256(Path(RR_ENCODER))}, "rows": []}
     state["windows"] = build_windows(r)
+    if not state["rows"] and TIER_ONLY_PATH.exists():
+        # Deviation 10: reuse generations for identical windows (same prompt, greedy decoding)
+        wanted = {(w["set"], w["n"], w["start"]): w for w in state["windows"]}
+        for x in json.loads(TIER_ONLY_PATH.read_text(encoding="utf-8"))["rows"]:
+            w = wanted.get((x["set"], x["n"], x["start"]))
+            if w is not None:
+                state["rows"].append({**x, **w, "reused_from_tier_only_run": True})
+        print(f"reused {len(state['rows'])} generations from the tier-only run", flush=True)
     save_json_atomic(RESULTS_PATH, state)
     done = {(w["set"], w["n"], w["start"]) for w in state["rows"]}
 
