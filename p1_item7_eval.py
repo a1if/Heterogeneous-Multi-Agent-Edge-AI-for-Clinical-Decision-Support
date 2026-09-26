@@ -82,14 +82,14 @@ def run(split, arms):
             scaffold[n] = _tokenize_and_remove_placeholder(processor, rendered, s0, s1)
         return scaffold[n]
 
-    def record(arm, w, text, info):
+    def record(arm, w, text, info, n_tokens):
         try:
             answer = ReasoningOutput(**_extract_last_json_object(text)).urgency_tier
         except (ValueError, TypeError):
             answer = None  # must not happen under constrained decoding; counted if it does
         state["rows"].append({**w, "arm": arm, "tier": answer, "parsed": answer is not None,
                               "correct": answer == w["reference"], "hit_field_cap": info["hit_field_cap"],
-                              "text": text})
+                              "n_tokens": n_tokens, "text": text})
 
     t0 = time.time()
     for arm in arms:
@@ -107,8 +107,9 @@ def run(split, arms):
                     out = model.generate(input_ids=ids["input_ids"].to(device),
                                          attention_mask=ids["attention_mask"].to(device), do_sample=False,
                                          max_new_tokens=MAX_NEW, logits_processor=[proc])
-                record(arm, w, tok.decode(out[0][ids["input_ids"].shape[1]:], skip_special_tokens=True),
-                       proc.summary()[0])
+                gen = out[0][ids["input_ids"].shape[1]:]
+                record(arm, w, tok.decode(gen, skip_special_tokens=True), proc.summary()[0],
+                       int((gen != tok.pad_token_id).sum()))
                 save_json_atomic(path, state)
                 if (k + 1) % 20 == 0:
                     print(f"[{arm} {k + 1}/{len(todo)}] elapsed {time.time() - t0:.0f}s", flush=True)
@@ -130,7 +131,7 @@ def run(split, arms):
                                          per_layer_inputs=torch.cat([a.per_layer_inputs for a in ais]),
                                          do_sample=False, max_new_tokens=MAX_NEW, logits_processor=[proc])
                 for w, o, info in zip(batch, out, proc.summary()):
-                    record(arm, w, tok.decode(o, skip_special_tokens=True), info)
+                    record(arm, w, tok.decode(o, skip_special_tokens=True), info, int((o != tok.pad_token_id).sum()))
                 save_json_atomic(path, state)
             del adapter
             torch.cuda.empty_cache()

@@ -4,13 +4,16 @@ A LogitsProcessor that makes every generation parse:
 
     {"urgency_tier":"<routine|priority|urgent>","justification":"<text>","referenced_guideline_fact":"<text>"}
 
-The literal parts are forced (the model may choose how to tokenise them), the tier is
-restricted to the three valid words, and the two free-text fields may contain any
-token without a double quote, backslash or control character, so they are always
-valid JSON strings. A field closes when the model emits the closing quote, or is
-closed after ``field_cap`` tokens. After the closing brace only an end-of-sequence
-token is allowed. The model's own preferences decide everything else, including the
-tier. Used identically for every arm.
+The literal parts are forced as the tokenizer's own tokenisation of each literal (so
+they always cost the same few tokens), the tier is restricted to the three valid words,
+and the two free-text fields may contain any token without a double quote, backslash,
+brace or control character, so they are always valid JSON strings that the project's
+last-JSON-object extractor reads correctly. A field ends when the model emits any token
+that starts the closing literal (e.g. '"' or '","'; the rest of the literal is then
+forced), or is closed after ``field_cap`` tokens; it cannot close before it holds a
+non-whitespace token (the schema rejects empty fields). After the closing
+brace only an end-of-sequence token is allowed. The model's own scores decide the tier,
+the text and when to close a field. Used identically for every arm.
 
 Each generate() call needs a fresh processor (it keeps per-row state across steps).
 """
@@ -20,6 +23,7 @@ from transformers import LogitsProcessor
 TIERS = ("routine", "priority", "urgent")
 PARTS = ('{"urgency_tier":"', "<tier>", '","justification":"', "<text>",
          '","referenced_guideline_fact":"', "<text>", '"}', "<end>")
+FORBIDDEN_IN_TEXT = '"\\{}'
 
 
 class TokenTable:
@@ -29,108 +33,112 @@ class TokenTable:
         n = len(tokenizer)
         self.strings = tokenizer.batch_decode([[i] for i in range(n)])
         special = set(tokenizer.all_special_ids)
-        self.by_string = {}
+        ok = [bool(s) and i not in special and not any(c in s for c in FORBIDDEN_IN_TEXT)
+              and "�" not in s and all(ord(c) >= 32 for c in s) for i, s in enumerate(self.strings)]
+        self.plain_ok = torch.tensor(ok, dtype=torch.bool, device=device)
+        self.content_ok = self.plain_ok & torch.tensor([bool(s.strip()) for s in self.strings], device=device)
+        self.size = n
+        encode = lambda s: list(tokenizer(s, add_special_tokens=False)["input_ids"])
+        self.canon = {p: encode(p) for p in PARTS if not p.startswith("<")}
+        self.tiers = {w: encode(w) for w in TIERS}
+        for p, ids in list(self.canon.items()) + list(self.tiers.items()):
+            assert "".join(self.strings[i] for i in ids) == p, (p, ids)  # tokenisation round-trips
+        # Ways to start closing a text field: a token spelling a prefix of the closing literal
+        # whose remainder has a round-tripping tokenisation -> {first id: forced remainder}.
+        by_string = {}
         for i, s in enumerate(self.strings):
             if i not in special and s:
-                self.by_string.setdefault(s, []).append(i)
-        ok = [bool(s) and i not in special and '"' not in s and "\\" not in s and "�" not in s
-              and all(ord(c) >= 32 for c in s) for i, s in enumerate(self.strings)]
-        self.plain_ok = torch.tensor(ok, dtype=torch.bool, device=device)
-        self.size = n
-
-    def prefix_ids(self, remaining):
-        """Token ids whose string is a non-empty prefix of ``remaining`` and whose
-        remainder can still be spelled with vocabulary tokens (no dead ends)."""
-        out = []
-        for k in range(1, len(remaining) + 1):
-            if self._completable(remaining[k:]):
-                out += self.by_string.get(remaining[:k], [])
-        return out
-
-    def _completable(self, s):
-        cache = self.__dict__.setdefault("_memo", {"": True})
-        if s not in cache:
-            cache[s] = any(s[:k] in self.by_string and self._completable(s[k:]) for k in range(1, len(s) + 1))
-        return cache[s]
+                by_string.setdefault(s, []).append(i)
+        self.closers = {}
+        for p in ('","referenced_guideline_fact":"', '"}'):
+            opts = {}
+            for k in range(1, len(p) + 1):
+                rest = encode(p[k:]) if p[k:] else []
+                if "".join(self.strings[i] for i in rest) != p[k:]:
+                    continue
+                for i in by_string.get(p[:k], []):
+                    opts.setdefault(i, rest)
+            self.closers[p] = opts
+        firsts = [ids[0] for ids in self.tiers.values()]
+        assert len(set(firsts)) == len(firsts), "tier words must differ in their first token"
 
 
 class _Row:
-    def __init__(self):
-        self.part, self.buf, self.count, self.done = 0, PARTS[0], 0, False
-        self.tier, self.hit_cap = None, False
+    def __init__(self, table):
+        self.table = table
+        self.tier, self.hit_cap, self.done, self.has_content = None, False, False, False
+        self._enter(0)
 
     def _enter(self, part):
-        self.part = part
-        p = PARTS[part]
-        self.buf = "" if p in ("<tier>", "<text>", "<end>") else p
-        self.count = 0
+        self.part, self.k, self.count, self.has_content = part, 0, 0, False
+        self.seq = self.table.canon.get(PARTS[part])  # forced token sequence for a literal, else None
 
-    def consume(self, s):
+    def _step_forced(self):
+        self.k += 1
+        if self.k == len(self.seq):
+            self._enter(self.part + 1)
+
+    def consume(self, tid):
         p = PARTS[self.part]
         if p == "<end>":
             self.done = True
         elif p == "<tier>":
-            self.buf += s
-            if self.buf in TIERS:
-                self.tier = self.buf
-                self._enter(self.part + 1)
+            if self.seq is None:  # the first tier token picks the tier
+                self.tier = next(w for w, ids in self.table.tiers.items() if ids[0] == tid)
+                self.seq = self.table.tiers[self.tier]
+            self._step_forced()
         elif p == "<text>":
-            closing = PARTS[self.part + 1]
-            if s and closing.startswith(s):
+            rest = self.table.closers[PARTS[self.part + 1]].get(tid)
+            if rest is not None:  # the model starts closing the field; force the remainder
                 self._enter(self.part + 1)
-                self._advance_literal(s)
+                self.seq, self.k = rest, 0
+                if not rest:
+                    self._enter(self.part + 1)
             else:
                 self.count += 1
+                self.has_content |= bool(self.table.strings[tid].strip())
         else:
-            self._advance_literal(s)
+            self._step_forced()
 
-    def _advance_literal(self, s):
-        assert self.buf.startswith(s), (self.buf, s)
-        self.buf = self.buf[len(s):]
-        if not self.buf:
-            self._enter(self.part + 1)
+    def allowed(self, device, eos_ids, field_cap):
+        t = self.table
+        a = torch.zeros(t.size, dtype=torch.bool, device=device)
+        p = PARTS[self.part]
+        if self.done or p == "<end>":
+            a[eos_ids] = True
+        elif p == "<tier>":
+            a[[ids[0] for ids in t.tiers.values()] if self.seq is None else [self.seq[self.k]]] = True
+        elif p == "<text>":
+            if not self.has_content:
+                a |= (t.content_ok if self.count >= field_cap else t.plain_ok).to(device)
+                return a  # a field may not close empty
+            if self.count >= field_cap:
+                self.hit_cap = True  # only the closing literal is allowed now
+            else:
+                a |= t.plain_ok.to(device)
+            a[list(t.closers[PARTS[self.part + 1]])] = True
+        else:
+            a[self.seq[self.k]] = True
+        return a
 
 
 class SchemaJsonProcessor(LogitsProcessor):
     def __init__(self, table: TokenTable, eos_ids, field_cap=40):
         self.table, self.eos_ids, self.field_cap = table, list(eos_ids), field_cap
-        self.rows, self.start, self.seen = None, None, 0
+        self.rows, self.seen = None, 0
 
     def __call__(self, input_ids, scores):
-        b = input_ids.shape[0]
         if self.rows is None:
-            self.rows, self.start = [_Row() for _ in range(b)], input_ids.shape[1]
-            self.seen = self.start
+            self.rows = [_Row(self.table) for _ in range(input_ids.shape[0])]
+            self.seen = input_ids.shape[1]  # prompt length (0 when generating from inputs_embeds)
         for t in range(self.seen, input_ids.shape[1]):  # tokens generated since the last call
             for i, row in enumerate(self.rows):
                 if not row.done:
-                    row.consume(self.table.strings[int(input_ids[i, t])])
+                    row.consume(int(input_ids[i, t]))
         self.seen = input_ids.shape[1]
-
-        mask = torch.zeros_like(scores, dtype=torch.bool)
-        for i, row in enumerate(self.rows):
-            mask[i] = self._allowed(row, scores.device)
+        mask = torch.stack([row.allowed(scores.device, self.eos_ids, self.field_cap) for row in self.rows])
         return scores.masked_fill(~mask, float("-inf"))
 
-    def _allowed(self, row, device):
-        allowed = torch.zeros(self.table.size, dtype=torch.bool, device=device)
-        p = PARTS[row.part]
-        if row.done or p == "<end>":
-            allowed[self.eos_ids] = True
-        elif p == "<tier>":
-            ids = [i for w in TIERS if w.startswith(row.buf) for i in self.table.prefix_ids(w[len(row.buf):])]
-            allowed[ids] = True
-        elif p == "<text>":
-            closing = self.table.prefix_ids(PARTS[row.part + 1])
-            if row.count >= self.field_cap:
-                row.hit_cap = True  # only the closing quote is allowed now
-            else:
-                allowed |= self.table.plain_ok.to(device)
-            allowed[closing] = True
-        else:
-            allowed[self.table.prefix_ids(row.buf)] = True
-        return allowed
-
     def summary(self):
-        """Per row: the tier chosen and whether a field hit the cap."""
+        """Per row: the tier chosen and whether a free-text field hit the cap."""
         return [{"tier": r.tier, "hit_field_cap": r.hit_cap} for r in (self.rows or [])]
