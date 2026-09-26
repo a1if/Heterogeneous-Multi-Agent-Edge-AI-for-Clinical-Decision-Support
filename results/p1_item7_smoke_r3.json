@@ -1,0 +1,96 @@
+{
+  "analysis_plan": "docs/analysis_plan.md (Deviation 9, Deviation 11)",
+  "recipe": "r3",
+  "recipe_params": {
+    "lr": 0.0005,
+    "accum": 1,
+    "warmup_frac": 0.05,
+    "min_lr_frac": 0.1,
+    "val_per_cell": 10,
+    "val_max_per_record": 5,
+    "eval_every": 93,
+    "patience": 3,
+    "max_epochs": 3,
+    "resume_every": 25,
+    "val_batch": 8,
+    "min_updates": 750,
+    "ns": [
+      1,
+      5,
+      10,
+      20,
+      50
+    ],
+    "max_events": 50
+  },
+  "provenance": {
+    "git_commit": "d25857c8f3f1b0126f1bdff4736fe9fcd85b26da",
+    "git_dirty": false,
+    "python": "3.13.3",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "transformers": "5.14.1",
+    "bitsandbytes": "0.50.0",
+    "gpu": "NVIDIA GeForce RTX 5070"
+  },
+  "encoder": {
+    "path": "perception/checkpoints/cnn_lstm_rr_seed0.pt",
+    "sha256": "e0e953787691c522b87c0eb03829f76ab8919f04274835f77bd772cef3d8861d"
+  },
+  "seed": 101,
+  "n_train": 16,
+  "n_val": 11,
+  "init_scale": 61.5400390625,
+  "largest_n": 50,
+  "peak_mem_mb_n20_train_step": 9559.94140625,
+  "peak_mem_mb_loop_incl_validation": 10311.1982421875,
+  "memory_ok": true,
+  "batch_check": {
+    "n": 11,
+    "same_answer": 10,
+    "same_text": 7
+  },
+  "loss_check": {
+    "full_logits": 3.8961217403411865,
+    "logits_to_keep": 3.8961217403411865
+  },
+  "scale_after": 61.518123626708984,
+  "seconds": 198.20543217658997,
+  "state": {
+    "history": [
+      {
+        "update": 1,
+        "loss": 3.9076669216156006,
+        "lr": 0.0005
+      },
+      {
+        "update": 2,
+        "loss": 4.257500648498535,
+        "lr": 0.0005,
+        "val": {
+          "balanced_accuracy": 0.5,
+          "parse_rate": 0.5454545454545454,
+          "by_n": {
+            "1": 0.0,
+            "50": 0.5
+          }
+        }
+      }
+    ],
+    "best_metric": 0.5,
+    "best_update": 2,
+    "evals_since_best": 0,
+    "epoch": 0,
+    "pos": 2,
+    "updates": 2,
+    "done": true,
+    "best_val": {
+      "balanced_accuracy": 0.5,
+      "parse_rate": 0.5454545454545454,
+      "by_n": {
+        "1": 0.0,
+        "50": 0.5
+      }
+    }
+  }
+}
