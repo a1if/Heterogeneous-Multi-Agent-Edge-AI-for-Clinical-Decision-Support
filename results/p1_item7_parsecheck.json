@@ -1,0 +1,4405 @@
+{
+  "design": "Item 7 diagnostic: are the recipe-r2 parse failures truncation or malformed output?\n\nValidation (Gate A) generates at most 96 new tokens; the DS2 evaluation protocol\nallows 256 (the pilots' cap). For each r2 best checkpoint, generate on the same 120\nvalidation windows with 256 tokens (greedy, batches of 8 same-N windows as in\ntraining), then score each output twice: in full (256) and cut to its first 96\ntokens (greedy decoding makes that prefix the 96-token output). Categories as in\np1_item7_diagnose. Diagnostic only: Gate A stays as pre-registered (96 tokens).\n\nRun (from repo root):\n    python p1_item7_parsecheck.py\n",
+  "rows": [
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47678,
+      "tier": "priority",
+      "n_tokens": 62,
+      "text": "```json\n{\n  \"urgency_tier\": \"routine\",\n  \"justification\": \"The beat is classified as normal, so routine ongoing monitoring is appropriate.\",\n  \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"\n}\n```",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 48196,
+      "tier": "priority",
+      "n_tokens": 108,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as an abnormal beat, but it does not meet the criteria for urgent review based on the provided features.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 8035,
+      "tier": "priority",
+      "n_tokens": 98,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is an isolated ectopic beat, which warrants prompt clinical review according to the background context.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47185,
+      "tier": "priority",
+      "n_tokens": 60,
+      "text": "```json\n{\n  \"urgency_tier\": \"routine\",\n  \"justification\": \"The beat is classified as normal, requiring routine ongoing monitoring.\",\n  \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"\n}\n```",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47795,
+      "tier": "priority",
+      "n_tokens": 79,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat requires prompt clinical review because the beat is classified as a ventricular ectopy, which meets the criteria for an urgent classification.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "wrong_over",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_over",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 7903,
+      "tier": "priority",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is non-normal, but does not meet the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular ectopic beat is usually benign on its own.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47023,
+      "tier": "priority",
+      "n_tokens": 79,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is an isolated abnormal beat, which warrants prompt clinical review.\",\"referenced_guideline_fact\":\"An isolated supraventricular ectopic or ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 8082,
+      "tier": "priority",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is non-normal, but does not meet the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular ectopic beat is usually benign on its own.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat requires prompt clinical review because it is classified as a ventricular ectopic beat.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "wrong_over",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_over",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 7957,
+      "tier": "priority",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is non-normal, but does not meet the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular ectopic beat is usually benign on its own.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 48400,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 6253,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 5876,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47880,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 6189,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47853,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 6702,
+      "tier": "routine",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is classified as normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47660,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is a normal sinus beat, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 31111,
+      "tier": "routine",
+      "n_tokens": 49,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal, so routine ongoing monitoring is appropriate.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 31865,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 1 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47003,
+      "tier": "urgent",
+      "n_tokens": 102,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is an isolated ectopic beat, which warrants prompt clinical review according to the background context.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 6521,
+      "tier": "urgent",
+      "n_tokens": 82,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the count of consecutive abnormal beats is three or more.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 48369,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "```json\n{\n  \"urgency_tier\": \"routine\",\n  \"justification\": \"The beat is classified as normal, so routine ongoing monitoring is appropriate.\",\n  \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"\n}\n```",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 48060,
+      "tier": "urgent",
+      "n_tokens": 82,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the count of consecutive abnormal beats is three or more.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 47686,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "```json\n{\n  \"urgency_tier\": \"routine\",\n  \"justification\": \"The beat is classified as normal, so routine ongoing monitoring is appropriate.\",\n  \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"\n}\n```",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 48142,
+      "tier": "urgent",
+      "n_tokens": 82,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the count of consecutive abnormal beats is three or more.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 32444,
+      "tier": "urgent",
+      "n_tokens": 82,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the count of consecutive abnormal beats is three or more.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 30709,
+      "tier": "urgent",
+      "n_tokens": 82,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the count of consecutive abnormal beats is three or more.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 30720,
+      "tier": "urgent",
+      "n_tokens": 84,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the event data indicates there are three or more consecutive abnormal beats.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 1,
+      "start": 32250,
+      "tier": "urgent",
+      "n_tokens": 82,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat warrants an urgent tier because the count of consecutive abnormal beats is three or more.\",\n  \"referenced_guideline_fact\": \"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 46313,
+      "tier": "priority",
+      "n_tokens": 67,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The input data indicates a pattern of three or more consecutive abnormal beats, which warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 46763,
+      "tier": "priority",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The input data shows five consecutive normal beats, so the urgency tier is routine.\",\"referenced_guideline_fact\":\"Routine ongoing monitoring is appropriate for a normal sinus pattern.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 5651,
+      "tier": "priority",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"All 5 beats are urgent due to the presence of frequent ventricular beats.\",\"referenced_guideline_fact\":\"Frequent ventricular beats or more than three consecutive beats are urgent.\"}",
+      "at256": {
+        "category": "wrong_over",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_over",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 47043,
+      "tier": "priority",
+      "n_tokens": 75,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The input data indicates a pattern of non-normal beats, which warrants priority review.\",\"referenced_guideline_fact\":\"An isolated ventricular or fusion pattern is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats or a high-confidence ventricular or fusion classification warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 47278,
+      "tier": "priority",
+      "n_tokens": 65,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 3 of 5 of 5 calls for priority review due to the presence of three or more consecutive abnormal beats.\",\"referenced_guideline_fact\":\"Frequent occurrences: three or more consecutive abnormal beats or a high-confidence ventricular or fusion beat.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": true
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": true
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 47618,
+      "tier": "priority",
+      "n_tokens": 91,
+      "text": "{\"urgency_tier\": \"priority\", \"justification\": \"The beat is classified as an isolated abnormal beat, which warrants prompt clinical review according to the background context.\", \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 7966,
+      "tier": "priority",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_context\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 7906,
+      "tier": "priority",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus beat needs routine monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 88,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is an isolated supraventricular ectopic beat, which warrants prompt clinical review based on the background context.\",\"referenced_guideline_fact\":\"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 8131,
+      "tier": "priority",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The input provided is a sequence of normal beats, so the urgency tier is routine.\",\"referenced_guideline_fact\":\"A normal sinus pattern is the only routine state.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 47143,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 46558,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 7611,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 46218,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 47288,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 5926,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 46893,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 6711,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 30477,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 31197,
+      "tier": "routine",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 47003,
+      "tier": "urgent",
+      "n_tokens": 68,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The input provided is a sequence of beats, and the most urgent beat is the most recent beat, which is classified as V-class.\",\"referenced_guideline_fact\":\"The most recent beat is the most recent beat of the input input\",\"beat_class\":\"V\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 48058,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is urgent because there are three or more ventricular ectopy events in a row.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy or more than three or more beats of any abnormal type in a row warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 31667,
+      "tier": "urgent",
+      "n_tokens": 61,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 3 of 5 is the most urgent: The V-class event is the most urgent of the 5 beats.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy or sustained ventricular ectopy warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 48538,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is escalated to urgent due to the presence of three or more ventricular ectopy events in the sequence.\",\"referenced_guideline_fact\":\"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 48548,
+      "tier": "urgent",
+      "n_tokens": 54,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is urgent because there are three or more ventricular ectopy events in a row.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy, three or more beats, warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 48103,
+      "tier": "urgent",
+      "n_tokens": 75,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 3 of 5 is the most urgent event, as it meets the rule for V-Ectopic/Ventricular/Fusion-related escalation.\",\"referenced_guideline_fact\":\"Frequent ventricular ectal beats or more than two beats in a row of ventricular ectopy warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 7886,
+      "tier": "urgent",
+      "n_tokens": 56,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The input provided is a sequence of identical beats, so the most appropriate tier is routine.\",\"referenced_guideline_fact\":\"The input is a sequence of identical beats, so the most appropriate tier is routine.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 32387,
+      "tier": "urgent",
+      "n_tokens": 67,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is urgent because there are three or more ventricular beats in a row.\",\n  \"referenced_guideline_fact\": \"Frequent ventricular beats (three or more) warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 7951,
+      "tier": "urgent",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The input data indicates a sequence of normal beats, requiring routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 5,
+      "start": 7996,
+      "tier": "urgent",
+      "n_tokens": 50,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but does not meet the criteria for urgent review.\",\"referenced_guideline_fact\":\"An isolated ventricular or fusion beat is usually benign on its own.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 47038,
+      "tier": "priority",
+      "n_tokens": 74,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 10 is the most urgent of 10 beats, as the last beat is the first to meet the criteria for priority/urgent in the input data.\",\"referenced_guideline_fact\":\"The last beat is the first to meet the criteria for priority/urgent in the input data.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 47118,
+      "tier": "priority",
+      "n_tokens": 87,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 5 is the most urgent of 10 beats, as it is the first non-normal beat in a sequence of 10, which warrants priority clinical review.\",\"referenced_guideline_fact\":\"An isolated supraventricular or ventricular ectopic beat is usually benign on its own, but frequent occurrences or three or more consecutive abnormal beats escalate to priority.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 8091,
+      "tier": "priority",
+      "n_tokens": 256,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is normal, so routine monitoring is appropriate.\",\"referenced_guideline_context_for_routine_beat_in_contextual_contextual_context_contextual_context_contextual_context_contextual_context_contextual_context_contextual_context_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual_contextual",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is a normal sinus pattern, requiring routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 47258,
+      "tier": "priority",
+      "n_tokens": 65,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 3 of 10 is the most urgent for review due to the presence of three or more consecutive abnormal beats.\",\"referenced_guideline_fact\":\"Frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": true
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": true
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 47708,
+      "tier": "priority",
+      "n_tokens": 54,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 5 is the most urgent of 10 beats, as the input is the most frequent pattern of the input: 10:10s is the most frequent pattern of the input.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 48318,
+      "tier": "priority",
+      "n_tokens": 64,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 4 of 10 is the most urgent: The last beat is the most frequent: The last beat is the most frequent of 10: The last beat is the most frequent: The last beat is the most frequent of 10\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 8061,
+      "tier": "priority",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 5661,
+      "tier": "priority",
+      "n_tokens": 51,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are routine: All 10 beats are normal, so this is the appropriate tier.\",\"referenced_guideline_fact\":\"A normal sinus pattern is routine.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 8041,
+      "tier": "priority",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern beats needs routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 46428,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 47948,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 46618,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 48408,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 6001,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 7151,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 6121,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 6951,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 31902,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 32402,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 46988,
+      "tier": "urgent",
+      "n_tokens": 58,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification warrants prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 48718,
+      "tier": "urgent",
+      "n_tokens": 256,
+      "text": "{\"urgency_beat_beats_in_beat_rate_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_beats_",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 46288,
+      "tier": "urgent",
+      "n_tokens": 78,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The input data indicates a state of sustained ventricular ectopy, which warrants urgent review based on the rule for three or more beats of a kind.\",\"referenced_guideline_fact\":\"Escalation to urgent review is warranted for three or more beats of the same type, or a high-confidence ventricular or fusion beat.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 6961,
+      "tier": "urgent",
+      "n_tokens": 63,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 5 is the most urgent of 10 beats, as the V-class beats are the most frequent in the sequence.\",\"referenced_guideline_fact\":\"Frequent ventricular beats or three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 5991,
+      "tier": "urgent",
+      "n_tokens": 57,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The event is escalated to urgent because there are 10\\. ventricular beats in a row.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy, three or more consecutive abnormal beats, warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 6941,
+      "tier": "urgent",
+      "n_tokens": 58,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 5 is the most urgent: The V-class event is the most urgent of the 10 beats.\",\"referenced_guideline_fact\":\"Frequent ventricular beats or beats with high confidence warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 48168,
+      "tier": "urgent",
+      "n_tokens": 57,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The input data indicates a state of sustained ventricular ectopy, which meets the criteria for urgent review.\",\"referenced_guideline_fact\":\"A ventricular or fusion beat at a high level of abnormality warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 47478,
+      "tier": "urgent",
+      "n_tokens": 64,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 4 of 10 is the most urgent for review due to the presence of 3 or more consecutive abnormal beats.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy or more than 3 consecutive abnormal beats warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 6611,
+      "tier": "urgent",
+      "n_tokens": 65,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 10 is the most urgent of 10 beats, as the last beat is ventricular and the beat is the most frequent in the sequence.\",\"referenced_guideline_fact\":\"Frequent ventricular beats or beats with high confidence warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 10,
+      "start": 30802,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 10 is urgent due to the presence of a ventricular ectopy in the last of the 10 beats.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy or three or more consecutive abnormal beats warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 47108,
+      "tier": "priority",
+      "n_tokens": 56,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 20 is the most urgent of 20 beats, which is a sustained sustained on the last 20 beats.\",\"referenced_guideline_fact\":\"Frequent or sustained beats require clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 46908,
+      "tier": "priority",
+      "n_tokens": 55,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 20 is the most urgent of 20 beats, which is a sustained pattern of low-grade ectopy.\",\"referenced_guideline_fact\":\"Frequent ectopy warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 47268,
+      "tier": "priority",
+      "n_tokens": 57,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 19 of 20 is the most urgent: The last beat is ventricular, so priority clinical review is needed.\",\"referenced_guideline_fact\":\"An isolated ventricular ectopic beat warrants priority clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 8091,
+      "tier": "priority",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_context:The input data indicates all beats are normal.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is normal, requiring routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 8051,
+      "tier": "priority",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_context\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 46748,
+      "tier": "priority",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 5651,
+      "tier": "priority",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 7711,
+      "tier": "priority",
+      "n_tokens": 52,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 20 is the most urgent: The last beat is ventricular, so this is the most urgent.\",\"referenced_guideline_fact\":\"An isolated ventricular pattern calls for priority review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 46148,
+      "tier": "priority",
+      "n_tokens": 59,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 20 of 20 is the most urgent: The last beat is ventricular, so this warrants priority clinical review.\",\"referenced_guideline_fact\":\"An isolated ventricular or fusion pattern calls for prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 47908,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 31932,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 31812,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 5911,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 31352,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 31412,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 30532,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 6711,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 6871,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 6651,
+      "tier": "routine",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 47568,
+      "tier": "urgent",
+      "n_tokens": 57,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 20 is the most urgent of 20 beats, which is a sustained ventricular tachycardia (sustained ventricular ectopy).\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 7491,
+      "tier": "urgent",
+      "n_tokens": 79,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 20 of 20 is the most urgent: The last beat is ventricular, so this warrants priority clinical review.\",\"referenced_guideline_fact\":\"An isolated ventricular or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion %}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 7171,
+      "tier": "urgent",
+      "n_tokens": 54,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 20 of 20 is the most urgent: The last beat is ventricular, so the urgency is urgent.\",\"referenced_guideline_fact\":\"Frequent ventricular beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 46368,
+      "tier": "urgent",
+      "n_tokens": 64,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"Beat 20 of 20 is the most urgent: The last beat is ventricular, so this warrants priority clinical correlation under the fixed background context.\",\"referenced_guideline_fact\":\"An isolated ventricular or fusion pattern calls for prompt clinical review.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 46968,
+      "tier": "urgent",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\": \"urgent\", \"justification\": \"The beat is ventricular.\", \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 30712,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 3 of 20 is the most urgent based on the presence of three or more ventricular beats in a row.\",\"referenced_guideline_fact\":\"Frequent ventricular beats or three or more beats in a row warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": true
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": true
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 48528,
+      "tier": "urgent",
+      "n_tokens": 54,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The input data indicates a state of sustained ventricular ectopy, which warrants an urgent review based on the provided escalation criteria.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 46888,
+      "tier": "urgent",
+      "n_tokens": 59,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 20 of 20 is the most urgent: The last beat is ventricular, so the urgency is urgent.\",\"referenced_guideline_fact\":\"Frequent ventricular beats or beats with high confidence warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": true
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": true
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 6251,
+      "tier": "urgent",
+      "n_tokens": 47,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 20 is the most urgent of the 20 beats reviewed.\",\"referenced_guideline_fact\":\"Frequent beats or ventricular ectopy warrants urgent review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed101",
+      "n": 20,
+      "start": 32372,
+      "tier": "urgent",
+      "n_tokens": 56,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"Beat 2 of 20 is the most urgent: The ventricular ectopy is the most frequent pattern in the input data.\",\"referenced_guideline_fact\":\"Frequent ventricular ectopy warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47678,
+      "tier": "priority",
+      "n_tokens": 53,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but it does not meet the criteria for an urgent tier based on the provided context.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\")",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 48196,
+      "tier": "priority",
+      "n_tokens": 93,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 8035,
+      "tier": "priority",
+      "n_tokens": 87,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat.\",\n  \"referenced_guideline_fact\": \"An isolated ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47185,
+      "tier": "priority",
+      "n_tokens": 84,
+      "text": "{\n\"urgency_tier\":\"priority\",\"justification\":\"The beat is non-normal, but does not meet the criteria for urgent review based on the provided context.\",\"referenced_guideline_fact\":\"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47795,
+      "tier": "priority",
+      "n_tokens": 105,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as S-type, which is not a normal sinus beat.\",\n  \"referenced_guideline_fact\": \"The background context states that an isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 7903,
+      "tier": "priority",
+      "n_tokens": 87,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat.\",\n  \"referenced_guideline_fact\": \"An isolated ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47023,
+      "tier": "priority",
+      "n_tokens": 59,
+      "text": "{\"urgency_tier\": \"priority\", \"justification\": \"The beat is not normal, but it does not meet the criteria for urgent review.\", \"referenced_guideline_fact\": \"The beat is not normal, but it does not meet the criteria for urgent review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 8082,
+      "tier": "priority",
+      "n_tokens": 58,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat.\",\n  \"referenced_guideline_fact\": \"The beat is classified as a ventricular ectopic beat.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 114,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as a supraventricular ectopic beat, which is considered benign on its own but requires clinical review if it is part of a sequence.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 7957,
+      "tier": "priority",
+      "n_tokens": 87,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat.\",\n  \"referenced_guideline_fact\": \"An isolated ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 48400,
+      "tier": "routine",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal, requiring only routine ongoing monitoring.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 6253,
+      "tier": "routine",
+      "n_tokens": 49,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is classified as normal (N-class) and requires only routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 5876,
+      "tier": "routine",
+      "n_tokens": 49,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is classified as normal (N-class) and requires only routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47880,
+      "tier": "routine",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal, requiring only routine ongoing monitoring.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 6189,
+      "tier": "routine",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal, requiring only routine ongoing monitoring.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47853,
+      "tier": "routine",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal, requiring only routine ongoing monitoring.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 6702,
+      "tier": "routine",
+      "n_tokens": 52,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal (N-class), requiring only routine ongoing monitoring.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47660,
+      "tier": "routine",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is classified as normal (N-class) and requires routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 31111,
+      "tier": "routine",
+      "n_tokens": 102,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is classified as non-normal, but does not meet the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "wrong_over",
+        "answer": "priority",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 31865,
+      "tier": "routine",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\": \"routine\", \"justification\": \"The beat is classified as normal, requiring only routine ongoing monitoring.\", \"referenced_guideline_fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47003,
+      "tier": "urgent",
+      "n_tokens": 115,
+      "text": "{\"urgency_tier\": \"priority\", \"justification_for_tier\": \"The beat is classified as a ventricular ectopic beat, which is not a normal sinus beat, and does not meet the criteria for an urgent classification based on the provided background context.\", \"referenced_guideline_fact_from_background_context\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 6521,
+      "tier": "urgent",
+      "n_tokens": 72,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as V-ectopic, which meets the criteria for an urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 48369,
+      "tier": "urgent",
+      "n_tokens": 111,
+      "text": "{\"urgency_tier\": \"priority\", \"justification_tier\": \"The beat is classified as a ventricular ectopic beat, which is not a normal sinus beat, and does not meet the criteria for an urgent tier based on the provided context.\", \"referenced_guideline_fact_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 48060,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular ectopic, which meets the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 47686,
+      "tier": "urgent",
+      "n_tokens": 84,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but it does not meet the criteria for urgent review based on the provided context.\",\"referenced_guideline_fact\":\"An isolated supraventricular or ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion beat, is not the case.\")",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 48142,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular ectopic, which meets the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 32444,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular ectopic, which meets the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 30709,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular ectopic, which meets the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 30720,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular ectopic, which meets the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 1,
+      "start": 32250,
+      "tier": "urgent",
+      "n_tokens": 69,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as ventricular ectopic, which meets the criteria for urgent review.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 46313,
+      "tier": "priority",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The provided input is insufficient to determine the urgency tier.\",\"referenced_guideline_fact\":\"The input is missing the required event data for this output.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 46763,
+      "tier": "priority",
+      "n_tokens": 56,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but it is not urgent.\",\"referenced_guideline_fact\":\"An isolated, non-normal beat is usually benign, but frequent, non-normal beats require prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 5651,
+      "tier": "priority",
+      "n_tokens": 51,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The input contains no beat data, so the outputting a priority tier based on the provided context is impossible.\",\"referenced_guideline_fact\":\"The input is missing for this output.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 47043,
+      "tier": "priority",
+      "n_tokens": 51,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The input of 5 beats is not enough to determine the urgency tier.\",\"referenced_guideline_fact\":\"The input of 5 beats is not enough to determine an urgency tier.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 47278,
+      "tier": "priority",
+      "n_tokens": 51,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but it is not urgent.\",\"referenced_guideline_fact\":\"An isolated, non-normal beat is usually benign, but frequent beats need prompt review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 47618,
+      "tier": "priority",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but it is not urgent.\",\"referenced_guideline_fact\":\"An isolated beat is usually benign, but frequent beats are not necessarily urgent.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 7966,
+      "tier": "priority",
+      "n_tokens": 59,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The input data is insufficient to determine the appropriate urgency tier.\",\n  \"referenced_guideline_fact\":\"The input data is insufficient to determine an appropriate urgency tier.\")\n```",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 7906,
+      "tier": "priority",
+      "n_tokens": 102,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is not classified as normal, but it is not classified as urgent based on the provided context.\",\n  \"referenced_guideline_fact\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion beat each independently warrant prompt clinical review.\")\n```",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 51,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but it is not urgent.\",\"referenced_guideline_fact\":\"An isolated supraventricular beat is usually benign, but frequent beats require prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 8131,
+      "tier": "priority",
+      "n_tokens": 59,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The input data is insufficient to determine the appropriate urgency tier.\",\n  \"referenced_guideline_fact\":\"The input data is insufficient to determine the appropriate urgency tier.\")\n```",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 47143,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 46558,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 7611,
+      "tier": "routine",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern is only routine for normal beats.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 46218,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 47288,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 5926,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 46893,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 6711,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 30477,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 31197,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 5 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal beat needs routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 47003,
+      "tier": "urgent",
+      "n_tokens": 256,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because it is part of a sustained sequence of abnormal beats, specifically V-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-F-",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 48058,
+      "tier": "urgent",
+      "n_tokens": 58,
+      "text": "{\"urgency_tier\": \"urgent\", \"justification\": \"The presence of multiple consecutive abnormal beats (V-V-V) warrants prompt clinical review.\", \"referenced_guideline_fact\": \"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 31667,
+      "tier": "urgent",
+      "n_tokens": 47,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The presence of multiple consecutive abnormal beats warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 48538,
+      "tier": "urgent",
+      "n_tokens": 65,
+      "text": "{\"urgency_tier\": \"urgent\", \"justification\": \"The presence of multiple consecutive abnormal beats (V-V-V-V) warrants prompt clinical review according to the escalation criteria.\", \"referenced_guideline_fact\": \"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 48548,
+      "tier": "urgent",
+      "n_tokens": 53,
+      "text": "{\"urgency_tier\": \"urgent\", \"justification\": \"The presence of three or more consecutive abnormal beats warrants prompt clinical review.\", \"referenced_guideline_fact\": \"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 48103,
+      "tier": "urgent",
+      "n_tokens": 53,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because it is part of a sustained sequence of abnormal beats.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 7886,
+      "tier": "urgent",
+      "n_tokens": 93,
+      "text": "```json\n{\n  \"urgency-tier\": \"priority\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat, which warrants prompt clinical review.\",\n  \"referenced-guideline_fact\": \"An isolated ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion classification each independently warrant prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 32387,
+      "tier": "urgent",
+      "n_tokens": 66,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because it is a ventricular beat with a confidence of 0.95, which is greater than 0.85.\",\"referenced_guideline_fact\":\"A high-confidence ventricular or fusion beat warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 7951,
+      "tier": "urgent",
+      "n_tokens": 65,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\":\"The beat is not normal, but it is not high-confidence ventricular or fusion, so the beat is not urgent\",\"The background context is not sufficient to determine the appropriate tier for this beat.\"\n}\n```",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 5,
+      "start": 7996,
+      "tier": "urgent",
+      "n_tokens": 105,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is not normal, but it does not meet the criteria for urgent review based on the provided context.\",\n  \"referenced_guideline_fact\":\"The background context states that an isolated supraventricular or ventricular ectopic beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion beat each independently warrant prompt clinical review.\"\n```",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 47038,
+      "tier": "priority",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_fact\":\"A non-normal beat is never routine.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 47118,
+      "tier": "priority",
+      "n_tokens": 59,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not necessarily urgent, but the pattern of the beats is not necessarily routine.\",\"referenced_guideline_fact\":\"Isolated non-normal beats are usually benign, but three or more consecutive abnormal beats require prompt review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 8091,
+      "tier": "priority",
+      "n_tokens": 86,
+      "text": "```json\n{\n  \"urgency_tier\": \"routine\",\n  \"justification\": \"The beat is classified as normal, so routine ongoing monitoring is appropriate.\",\n  \"referenced_guideline-factureference\": \"AAMI beat-type criteria (normal, supraventricular ectopic, ventricular ectopic, fusion, or unclassifiable) is the appropriate guideline for this beat.\"\n}\n```",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 53,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_fact\":\"An isolated supraventricular or ventricular pattern is usually benign, but frequent patterns require prompt review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 47258,
+      "tier": "priority",
+      "n_tokens": 52,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the pattern of the beats is not urgent enough for a priority protocol.\",\"referenced_guideline_fact\":\"Frequent occurrences of abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 47708,
+      "tier": "priority",
+      "n_tokens": 51,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_fact\":\"An isolated supraventricular pattern is usually benign, but frequent patterns need prompt review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 48318,
+      "tier": "priority",
+      "n_tokens": 46,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is not urgent, as the beat is normal, and the beat is not urgent.\",\"referenced_guideline_fact\":\"A normal beat is routine.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 8061,
+      "tier": "priority",
+      "n_tokens": 53,
+      "text": "{\"urgency-tier\":\"priority\",\"justification\":\"The beat is not normal, but is not urgent enough for a priority tier.\",\"referenced_guideline_fact\":\"The beat is not normal, but is not urgent enough for an urgent tier.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 5661,
+      "tier": "priority",
+      "n_tokens": 76,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but is not urgent enough for a priority status.\",\"referenced_guideline_fact\":\"An isolated supraventricular or ventricular beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion beat is not present.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 8041,
+      "tier": "priority",
+      "n_tokens": 102,
+      "text": "```json\n{\n  \"urgency_tier\": \"priority\",\n  \"justification\": \"The beat is not classified as normal, but it is not classified as urgent based on the provided context.\",\n  \"referenced_guideline_factible_context\": \"An isolated supraventricular, ventricular, or fusion beat is usually benign on its own, but frequent occurrences, three or more consecutive abnormal beats, or a high-confidence ventricular or fusion beat is not present.\")\n```",
+      "at256": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_truncated",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 46428,
+      "tier": "routine",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 47948,
+      "tier": "routine",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 46618,
+      "tier": "routine",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 48408,
+      "tier": "routine",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 6001,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not routine, but is not urgent.\",\"referenced_guideline_fact\":\"A non-normal beat is never routine.\"}",
+      "at256": {
+        "category": "wrong_over",
+        "answer": "priority",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "wrong_over",
+        "answer": "priority",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 7151,
+      "tier": "routine",
+      "n_tokens": 56,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but is not urgent enough for a priority protocol review.\",\"referenced_guideline_fact\":\"An isolated non-normal beat is usually benign, but frequent occurrences warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "wrong_over",
+        "answer": "priority",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "wrong_over",
+        "answer": "priority",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 6121,
+      "tier": "routine",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"The beat is normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 6951,
+      "tier": "routine",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 31902,
+      "tier": "routine",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal sinus pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 32402,
+      "tier": "routine",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 10 beats are normal, so routine monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 46988,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "{\"urgency-tier\":\"urgent\",\"justification\":\"The beat is classified as a ventricular ectopic beat, and it is part of a sustained sequence of abnormal beats, which warrants prompt clinical review.\",\"referenced_guideline-fact\":\"A high-confidence ventricular or fusion beat warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 48718,
+      "tier": "urgent",
+      "n_tokens": 52,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The presence of three or more consecutive abnormal beats in a row warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 46288,
+      "tier": "urgent",
+      "n_tokens": 62,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because there are three or more consecutive abnormal beats in this event, and the beat is not normal.\",\"referenced_guideline_fact\":\"Prompt clinical review is warranted if there are three or more consecutive abnormal beats.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 6961,
+      "tier": "urgent",
+      "n_tokens": 49,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is urgent because there are three or more consecutive abnormal beats.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 5991,
+      "tier": "urgent",
+      "n_tokens": 67,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as a ventricular beat with a confidence of 1.0, which is considered a high-confidence ventricular beat, thus warrants prompt clinical review.\",\"referenced_guideline_fact\":\"A high-confidence ventricular or fusion beat warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 6941,
+      "tier": "urgent",
+      "n_tokens": 53,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is not routine because the pattern of three or more consecutive abnormal beats is present.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 48168,
+      "tier": "urgent",
+      "n_tokens": 53,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because the beat is part of a rapid sequence of abnormal beats.\",\"referenced_guideline_fact\":\"A high-confidence ventricular or fusion beat warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 47478,
+      "tier": "urgent",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is urgent because it is a sustained sequence of abnormal beats, and the beat is not only sustained, but is also the most of the input pattern.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 6611,
+      "tier": "urgent",
+      "n_tokens": 49,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is urgent because there are three or more consecutive abnormal beats.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 10,
+      "start": 30802,
+      "tier": "urgent",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The presence of three or more consecutive abnormal beats warrants prompt review.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats require prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 47108,
+      "tier": "priority",
+      "n_tokens": 55,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_fact\":\"An isolated non-normal beat is usually benign, but frequent occurrences of the beat warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 46908,
+      "tier": "priority",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 47268,
+      "tier": "priority",
+      "n_tokens": 56,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not necessarily urgent, but the beat is not normal.\",\"referenced_guideline_fact\":\"An isolated non-normal beat is usually benign, but frequent or high-confidence beats require prompt review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 8091,
+      "tier": "priority",
+      "n_tokens": 60,
+      "text": "```json\n{\n  \"urgency_tier\": \"routine\",\n  \"justification\": \"The beat is classified as normal, requiring routine ongoing monitoring.\",\n  \"referenced_guideline-fact\": \"A normal sinus beat needs only routine ongoing monitoring.\"\n}\n```",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 32072,
+      "tier": "priority",
+      "n_tokens": 82,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not urgent because the beat is not 100% ventricular or is not 100% normal.\",\"referenced_guideline_confident_by_3-rule_or_confident-by-3-rule_or_urgent-by-confident-pattern_in_urgent-by-confident-pattern\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 8051,
+      "tier": "priority",
+      "n_tokens": 55,
+      "text": "```json\n{\n  \"urgency_tier\":\"routine\",\n  \"justification\":\"The beat is classified as normal, requiring routine ongoing monitoring.\",\"referenced_guideline_fact\":\"A normal sinus beat needs only routine ongoing monitoring.\"\n}\n```",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 46748,
+      "tier": "priority",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern requires routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 5651,
+      "tier": "priority",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_fact\":\"A non-normal beat is never routine.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 7711,
+      "tier": "priority",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_fact\":\"A non-normal beat is never routine.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "priority",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 46148,
+      "tier": "priority",
+      "n_tokens": 44,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "wrong_under",
+        "answer": "routine",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 47908,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 31932,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 31812,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 5911,
+      "tier": "routine",
+      "n_tokens": 55,
+      "text": "{\"urgency_tier\":\"priority\",\"justification\":\"The beat is not normal, but the beat is not urgent.\",\"referenced_guideline_context\":\"An isolated non-normal beat is usually benign, but frequent or high-confidence beats require prompt review.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 31352,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 31412,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 30532,
+      "tier": "routine",
+      "n_tokens": 41,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern warrants routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 6711,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 6871,
+      "tier": "routine",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All 20 beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"Normal beats require routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 6651,
+      "tier": "routine",
+      "n_tokens": 42,
+      "text": "{\"urgency_tier\":\"routine\",\"justification\":\"All beats are normal, so routine ongoing monitoring is appropriate.\",\"referenced_guideline_fact\":\"A normal pattern calls for routine ongoing monitoring.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "routine",
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 47568,
+      "tier": "urgent",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The presence of three or more consecutive abnormal beats warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 7491,
+      "tier": "urgent",
+      "n_tokens": 61,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because the beat is the fourth consecutive abnormal beat, which meets the escalation criterion for prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of three or more consecutive abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 7171,
+      "tier": "urgent",
+      "n_tokens": 52,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as the last of 20 consecutive abnormal beats, which warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 46368,
+      "tier": "urgent",
+      "n_tokens": 48,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as the fourth consecutive abnormal beat, which warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 46968,
+      "tier": "urgent",
+      "n_tokens": 78,
+      "text": "```json\n{\n  \"urgency-tier\": \"urgent\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat, which warrants prompt clinical review due to the presence of multiple consecutive ventricular ectopics.\",\n  \"referenced-guideline-fact\": \"A high-confidence ventricular or fusion beat warrants prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 30712,
+      "tier": "urgent",
+      "n_tokens": 76,
+      "text": "```json\n{\n  \"urgency_tier\": \"urgent\",\n  \"justification\": \"The beat is classified as a ventricular ectopic beat, which warrants prompt clinical review due to the presence of three or more consecutive abnormal beats.\",\n  \"referenced_guideline_fact\": \"A high-confidence ventricular beat warrants prompt clinical review.\"\n}\n```",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 48528,
+      "tier": "urgent",
+      "n_tokens": 59,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as a ventricular ectopic beat, which warrants prompt clinical review due to the high confidence in the beat pattern.\",\"referenced_guideline_fact\":\"A high-confidence ventricular or fusion beat warrants prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 46888,
+      "tier": "urgent",
+      "n_tokens": 43,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as a ventricular pattern, as the beat is present in the sequence of 20 beats, and the pattern is not normal.\"}",
+      "at256": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      },
+      "at96": {
+        "category": "unparsed_invalid",
+        "answer": null,
+        "beat_ok": null
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 6251,
+      "tier": "urgent",
+      "n_tokens": 47,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The beat is classified as urgent because there are three or more consecutive abnormal beats.\",\"referenced_guideline_fact\":\"Frequent occurrences of abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    },
+    {
+      "ckpt": "r2_seed202",
+      "n": 20,
+      "start": 32372,
+      "tier": "urgent",
+      "n_tokens": 45,
+      "text": "{\"urgency_tier\":\"urgent\",\"justification\":\"The presence of three or more consecutive abnormal beats warrants prompt clinical review.\",\"referenced_guideline_fact\":\"Frequent occurrences of abnormal beats warrant prompt clinical review.\"}",
+      "at256": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      },
+      "at96": {
+        "category": "ok",
+        "answer": "urgent",
+        "beat_ok": false
+      }
+    }
+  ],
+  "summary": {
+    "r2_seed101|at96": {
+      "balanced_accuracy": 0.7416666666666667,
+      "parse_rate": 0.9083333333333333,
+      "by_n": {
+        "1": 0.7333333333333334,
+        "5": 0.7666666666666666,
+        "10": 0.7000000000000001,
+        "20": 0.7666666666666666
+      },
+      "categories": {
+        "wrong_under": 17,
+        "unparsed_truncated": 4,
+        "ok": 89,
+        "wrong_over": 3,
+        "unparsed_invalid": 7
+      }
+    },
+    "r2_seed101|at256": {
+      "balanced_accuracy": 0.75,
+      "parse_rate": 0.925,
+      "by_n": {
+        "1": 0.7666666666666666,
+        "5": 0.7666666666666666,
+        "10": 0.7000000000000001,
+        "20": 0.7666666666666666
+      },
+      "categories": {
+        "wrong_under": 18,
+        "ok": 90,
+        "wrong_over": 3,
+        "unparsed_invalid": 7,
+        "unparsed_truncated": 2
+      }
+    },
+    "r2_seed101|tokens": {
+      "median": 54.0,
+      "over_96": 5,
+      "hit_256": 2
+    },
+    "r2_seed202|at96": {
+      "balanced_accuracy": 0.7416666666666667,
+      "parse_rate": 0.8,
+      "by_n": {
+        "1": 0.7666666666666666,
+        "5": 0.7666666666666666,
+        "10": 0.7333333333333334,
+        "20": 0.7000000000000001
+      },
+      "categories": {
+        "unparsed_truncated": 13,
+        "ok": 89,
+        "unparsed_invalid": 11,
+        "wrong_under": 5,
+        "wrong_over": 2
+      }
+    },
+    "r2_seed202|at256": {
+      "balanced_accuracy": 0.7583333333333333,
+      "parse_rate": 0.825,
+      "by_n": {
+        "1": 0.8333333333333334,
+        "5": 0.7666666666666666,
+        "10": 0.7333333333333334,
+        "20": 0.7000000000000001
+      },
+      "categories": {
+        "unparsed_truncated": 8,
+        "ok": 91,
+        "wrong_over": 3,
+        "unparsed_invalid": 13,
+        "wrong_under": 5
+      }
+    },
+    "r2_seed202|tokens": {
+      "median": 51.5,
+      "over_96": 9,
+      "hit_256": 1
+    }
+  }
+}
