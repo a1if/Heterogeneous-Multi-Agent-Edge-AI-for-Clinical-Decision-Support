@@ -183,6 +183,8 @@ def primary(rows, mea, n_boot, seed):
     for x in rows:
         if x["set"] == "stratified":
             idx.setdefault((x["n"], x["reference"], x["start"]), {})[x["arm"]] = x["correct"]
+    need = set(mea) | {"A-compact"}
+    idx = {k: v for k, v in idx.items() if need <= set(v)}  # paired: windows every arm has answered
     out = {}
     for n in (5, 10, 20):
         cells = {t: [v for (nn, tt, _), v in idx.items() if nn == n and tt == t] for t in TIERS}
@@ -198,7 +200,7 @@ def primary(rows, mea, n_boot, seed):
             boots.append(diff({t: [v[i] for i in rng.integers(0, len(v), len(v))] for t, v in cells.items()}))
         lo, hi = np.percentile(boots, [2.5, 97.5])
         out[str(n)] = {"difference": point, "ci95": [float(lo), float(hi)], "non_inferior": bool(lo > MARGIN),
-                       "n_mea_seeds": len(mea)}
+                       "n_mea_seeds": len(mea), "n_windows": sum(len(v) for v in cells.values())}
     return out
 
 
