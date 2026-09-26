@@ -7,6 +7,8 @@ Window sets:
   --split val        the 120 recipe-r2 validation windows (DS1 held-out records): Gate A re-check
   --split ds2        the Deviation 10 DS2 windows saved by p1_item7_baseline.py (class-balanced
                      stratified + natural): the pre-registered test set
+  --split ds2_n50    Deviation 13: DS2 N = 50 windows, class-balanced by the same rule and seed
+                     (20 per tier) + 20 natural windows (first 50 beats of the E3 windows)
 Greedy decoding constrained to the ReasoningOutput schema (reasoning/constrained_json.py),
 128 new tokens, field cap 40. Per generation: the tier, whether a field hit the cap, the
 raw text. MEA windows are batched 8 per same-N group (no padding); A-compact runs one at a
@@ -43,10 +45,29 @@ def load_windows(split, r):
         rc = RECIPES["r2"]
         _, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"])
         return [{"set": "val", "n": w["n"], "start": w["start"], "reference": w["tier"]} for w in val]
+    if split == "ds2_n50":
+        return n50_windows(r)
     base = json.loads(Path("results/p1_item7_baseline.json").read_text(encoding="utf-8"))
     return [{"set": w["set"], "n": w["n"], "start": w["start"], "reference": w["reference"],
              "top_class_predicted": w.get("top_class_predicted"), "top_class_true": w.get("top_class_true")}
             for w in base["windows"]]
+
+
+def n50_windows(r):
+    from p1_e3_multi_event import windows as natural_windows
+    from p1_pilot2_stratified import RANK, stratified_windows
+    labels = "NSVFQ"
+    cells = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=(50,), per_cell=20,
+                               classes=r["classes"])
+    out = [{"set": "stratified", "n": 50, "start": s} for (n, t), ss in cells.items() for s in ss]
+    out += [{"set": "natural", "n": 50, "start": w[0]}
+            for w in natural_windows({"record_ids": r["record_ids"]}, np.random.default_rng(0))]
+    for w in out:
+        idx = range(w["start"], w["start"] + 50)
+        w["reference"] = max((r["tiers"][i] for i in idx), key=RANK.get)
+        top = max(idx, key=lambda i: RANK[r["tiers"][i]])
+        w["top_class_predicted"], w["top_class_true"] = r["classes"][top], labels[int(r["labels"][top])]
+    return out
 
 
 def run(split, arms):
@@ -115,8 +136,9 @@ def run(split, arms):
                     print(f"[{arm} {k + 1}/{len(todo)}] elapsed {time.time() - t0:.0f}s", flush=True)
         else:
             tag = arm.split(":", 1)[1]
-            adapter = MultiEventVirtualAdapter.for_model(model).to(device)
             ck = torch.load(f"reasoning/checkpoints/p1_item7_mea_{tag}.pt", map_location="cpu", weights_only=False)
+            slots = ck["adapter_state_dict"]["position"].shape[0]  # 20 (r2) or 50 (r3)
+            adapter = MultiEventVirtualAdapter.for_model(model, max_events=slots).to(device)
             adapter.load_state_dict(ck["adapter_state_dict"])
             adapter.eval()
             state.setdefault("checkpoints", {})[arm] = {"update": ck.get("update"), "val": ck.get("val")}
@@ -169,7 +191,7 @@ def summarize(rows, split, n_boot=10000, seed=0):
                                                             if x["n"] == n and x["reference"] == "routine"]))}
                 for n in sorted({x["n"] for x in nat})}
     mea = [a for a in arms if a.startswith("MEA:")]
-    if split == "ds2" and "A-compact" in arms and mea:
+    if split.startswith("ds2") and "A-compact" in arms and mea:
         out["primary"] = primary(rows, mea, n_boot, seed)
     return out
 
@@ -186,7 +208,7 @@ def primary(rows, mea, n_boot, seed):
     need = set(mea) | {"A-compact"}
     idx = {k: v for k, v in idx.items() if need <= set(v)}  # paired: windows every arm has answered
     out = {}
-    for n in (5, 10, 20):
+    for n in sorted({k[0] for k in idx} & {5, 10, 20, 50}):
         cells = {t: [v for (nn, tt, _), v in idx.items() if nn == n and tt == t] for t in TIERS}
         cells = {t: v for t, v in cells.items() if v}
 
@@ -206,7 +228,7 @@ def primary(rows, mea, n_boot, seed):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=("val", "ds2"), required=True)
+    ap.add_argument("--split", choices=("val", "ds2", "ds2_n50"), required=True)
     ap.add_argument("--arms", nargs="*", default=[])
     ap.add_argument("--summary", action="store_true")
     a = ap.parse_args()

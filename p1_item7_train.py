@@ -52,18 +52,24 @@ RECIPES = {
     "r2": dict(lr=5e-4, accum=1, warmup_frac=0.05, min_lr_frac=0.1, val_per_cell=10, val_max_per_record=5,
                eval_every=75, patience=3, max_epochs=3, resume_every=25, val_batch=8,
                min_updates=600),  # Deviation 11 amendment: no early stop before 2 epochs
+    # Deviation 13: r2 + N = 50 windows (375 training windows) and 50 position slots
+    "r3": dict(lr=5e-4, accum=1, warmup_frac=0.05, min_lr_frac=0.1, val_per_cell=10, val_max_per_record=5,
+               eval_every=93, patience=3, max_epochs=3, resume_every=25, val_batch=8, min_updates=750,
+               ns=(1, 5, 10, 20, 50), max_events=50),
 }
 
 
-def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3):
-    """Deterministic train / validation windows from the DS1 replay dict r."""
+def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3, ns=NS):
+    """Deterministic train / validation windows from the DS1 replay dict r. Cells are
+    drawn in N order from one generator, so appending a larger N (recipe r3) leaves
+    the smaller-N windows unchanged."""
     from p1_pilot2_stratified import stratified_windows
     all_records = {int(x) for x in np.unique(r["record_ids"])}
     def cells_to_list(cells):
         return [{"n": n, "tier": t, "start": s} for (n, t), ss in sorted(cells.items()) for s in ss]
-    train = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=NS,
+    train = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=ns,
                                per_cell=TRAIN_PER_CELL, classes=r["classes"], records=all_records - VAL_RECORDS)
-    val = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(1), ns=NS,
+    val = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(1), ns=ns,
                              per_cell=val_per_cell, max_per_record=val_max_per_record,
                              classes=r["classes"], records=VAL_RECORDS)
     return cells_to_list(train), cells_to_list(val)
@@ -186,22 +192,23 @@ def main():
 
     rc = RECIPES[args.recipe]
     r = replay_split("ds1")
-    train, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"])
+    train, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"], rc.get("ns", NS))
     prefix = "" if args.recipe == "r1" else f"{args.recipe}_"  # r1 keeps its original file names
     tag = f"{prefix}smoke" if args.smoke else f"{prefix}seed{args.seed}"
     paths = {"resume": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.resume.pt"),
              "best": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.pt"),
              "state": Path(f"results/p1_item7_train_{tag}.json")}
     if args.smoke:
-        train = [w for w in train if w["n"] == 20][:8] + [w for w in train if w["n"] != 20][:8]
-        val = [w for w in val if w["n"] == 20][:rc["val_batch"]] + [w for w in val if w["n"] == 1][:3]
+        big = max(w["n"] for w in train)
+        train = [w for w in train if w["n"] == big][:8] + [w for w in train if w["n"] != big][:8]
+        val = [w for w in val if w["n"] == big][:rc["val_batch"]] + [w for w in val if w["n"] == 1][:3]
 
     model, processor = load_model()
     freeze_language_model(model)
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     torch.manual_seed(args.seed)
     device = model.get_input_embeddings().weight.device
-    adapter = MultiEventVirtualAdapter.for_model(model).to(device)
+    adapter = MultiEventVirtualAdapter.for_model(model, max_events=rc.get("max_events", 20)).to(device)
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=rc["lr"], weight_decay=0.0)
     total_steps = rc["max_epochs"] * (len(train) // rc["accum"])
     scheduler = torch.optim.lr_scheduler.LambdaLR(
@@ -268,11 +275,11 @@ def main():
     t0 = time.time()
     if args.smoke:
         torch.cuda.reset_peak_memory_stats()
-        n20 = [w for w in train if w["n"] == 20][0]
+        n20 = [w for w in train if w["n"] == big][0]  # the largest N (20 for r1/r2, 50 for r3)
         with torch.no_grad():  # logits_to_keep must not change the loss: compare with full logits
             ai = window_inputs(n20)
             tid, tw = _target_ids_and_weights(processor, canonical_window_target(
-                r["events"][n20["start"]:n20["start"] + 20]), n20["tier"], TIER_WEIGHT)
+                r["events"][n20["start"]:n20["start"] + n20["n"]]), n20["tier"], TIER_WEIGHT)
             e, m, p = _append_target_for_teacher_forcing(model, ai, tid)
             lab, lw = _labels_for_target(ai.sequence_length, tid.to(e.device), tw.to(e.device))
             full = float(_weighted_teacher_forcing_loss(model(inputs_embeds=e, attention_mask=m, per_layer_inputs=p,
@@ -298,7 +305,7 @@ def main():
                        "same_text": sum(a["text"] == b["text"] for a, b in zip(rb, r1))}
         with torch.no_grad():
             norms = window_inputs(n20).inputs_embeds.float().norm(dim=-1)[0]
-        smoke = {**meta, "peak_mem_mb_n20_train_step": peak_n20, "peak_mem_mb_loop_incl_validation": peak_loop,
+        smoke = {**meta, "largest_n": big, "peak_mem_mb_n20_train_step": peak_n20, "peak_mem_mb_loop_incl_validation": peak_loop,
                  "memory_ok": max(peak_n20, peak_loop) < 11500, "batch_check": batch_check,
                  "loss_check": loss_check, "scale_after": float(adapter.scale), "seconds": time.time() - t0, "state": state}
         save_json_atomic(Path("results/p1_item7_smoke.json" if args.recipe == "r1"
