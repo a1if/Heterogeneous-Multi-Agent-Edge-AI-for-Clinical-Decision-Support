@@ -50,7 +50,8 @@ RECIPES = {
     "r1": dict(lr=1e-3, accum=8, warmup_frac=0.0, min_lr_frac=1.0, val_per_cell=5, val_max_per_record=3,
                eval_every=20, patience=3, max_epochs=3, resume_every=8, val_batch=1),
     "r2": dict(lr=5e-4, accum=1, warmup_frac=0.05, min_lr_frac=0.1, val_per_cell=10, val_max_per_record=5,
-               eval_every=75, patience=3, max_epochs=3, resume_every=25, val_batch=8),
+               eval_every=75, patience=3, max_epochs=3, resume_every=25, val_batch=8,
+               min_updates=600),  # Deviation 11 amendment: no early stop before 2 epochs
 }
 
 
@@ -92,7 +93,7 @@ def warmup_cosine(total_steps, warmup_frac, min_lr_frac):
 
 def train_loop(*, adapter, optimizer, train, val, loss_fn, validate_fn, seed, paths, log=print,
                accum=ACCUM, eval_every=EVAL_EVERY, patience=PATIENCE, max_epochs=MAX_EPOCHS,
-               resume_every=RESUME_EVERY, max_updates=None, scheduler=None):
+               resume_every=RESUME_EVERY, max_updates=None, scheduler=None, min_updates=0):
     """Model-agnostic training loop. loss_fn(window) -> scalar loss tensor for one
     window; validate_fn(val) -> metrics dict with 'balanced_accuracy'. paths: dict
     with 'resume', 'best', 'state' (JSON). Returns the final state dict."""
@@ -147,7 +148,7 @@ def train_loop(*, adapter, optimizer, train, val, loss_fn, validate_fn, seed, pa
                                         "update": state["updates"], "seed": seed}, paths["best"])
                 else:
                     state["evals_since_best"] += 1
-                    if state["evals_since_best"] >= patience:
+                    if state["evals_since_best"] >= patience and state["updates"] >= min_updates:
                         state["done"] = True
             if state["updates"] % resume_every == 0 or state["done"]:
                 save_resume()
@@ -309,7 +310,7 @@ def main():
     state = train_loop(adapter=adapter, optimizer=optimizer, train=train, val=val, loss_fn=loss_fn,
                        validate_fn=validate_fn, seed=args.seed, paths=paths, accum=rc["accum"],
                        eval_every=rc["eval_every"], patience=rc["patience"], max_epochs=rc["max_epochs"],
-                       resume_every=rc["resume_every"], scheduler=scheduler)
+                       resume_every=rc["resume_every"], scheduler=scheduler, min_updates=rc.get("min_updates", 0))
     best = state.get("best_val") or {}
     gate = {"n10_balanced_accuracy": (best.get("by_n") or {}).get("10"), "parse_rate": best.get("parse_rate")}
     gate["passes"] = bool(gate["n10_balanced_accuracy"] is not None and gate["n10_balanced_accuracy"] >= 0.60
