@@ -17,10 +17,18 @@ RESUME_EVERY updates; rerunning continues from it.
 Gate A (reported, applied by the user / next stage): the best checkpoint's
 validation balanced accuracy at N = 10 >= 0.60 and parse rate >= 95%.
 
+Recipes (--recipe): r1 = the above (Deviation 9; seeds 101, 202 on record). r2 =
+Deviation 11 (default): batch 1 (no accumulation, ~900 steps), lr 5e-4 with linear
+warm-up (5% of max steps) and cosine decay to 10%, 120 validation windows (10 per
+cell, <= 5 per record per cell) evaluated every 75 steps with batched generation.
+Diagnostics showed r1 under-trains (seed 202: train = val balanced accuracy ~0.38).
+
 Run (from repo root):
-    python p1_item7_train.py --seed 101
-    python p1_item7_train.py --smoke        # 16 windows, 2 updates: memory and norm check
+    python p1_item7_train.py --seed 101                 # recipe r2
+    python p1_item7_train.py --seed 101 --recipe r1     # Deviation 9 recipe
+    python p1_item7_train.py --smoke                    # memory and norm check
 """
+import math
 import argparse
 import json
 import time
@@ -38,9 +46,15 @@ LR, ACCUM, CLIP, TIER_WEIGHT = 1e-3, 8, 1.0, 4.0
 EVAL_EVERY, PATIENCE, MAX_EPOCHS, RESUME_EVERY = 20, 3, 3, 8
 VAL_MAX_NEW_TOKENS = 96  # longest window target is 66 tokens; 64 truncated priority/urgent answers (seed 101, updates 20-40)
 TIERS = ("routine", "priority", "urgent")
+RECIPES = {
+    "r1": dict(lr=1e-3, accum=8, warmup_frac=0.0, min_lr_frac=1.0, val_per_cell=5, val_max_per_record=3,
+               eval_every=20, patience=3, max_epochs=3, resume_every=8, val_batch=1),
+    "r2": dict(lr=5e-4, accum=1, warmup_frac=0.05, min_lr_frac=0.1, val_per_cell=10, val_max_per_record=5,
+               eval_every=75, patience=3, max_epochs=3, resume_every=25, val_batch=8),
+}
 
 
-def build_windows(r):
+def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3):
     """Deterministic train / validation windows from the DS1 replay dict r."""
     from p1_pilot2_stratified import stratified_windows
     all_records = {int(x) for x in np.unique(r["record_ids"])}
@@ -49,7 +63,8 @@ def build_windows(r):
     train = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=NS,
                                per_cell=TRAIN_PER_CELL, classes=r["classes"], records=all_records - VAL_RECORDS)
     val = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(1), ns=NS,
-                             per_cell=VAL_PER_CELL, classes=r["classes"], records=VAL_RECORDS)
+                             per_cell=val_per_cell, max_per_record=val_max_per_record,
+                             classes=r["classes"], records=VAL_RECORDS)
     return cells_to_list(train), cells_to_list(val)
 
 
@@ -62,9 +77,22 @@ def balanced_metrics(rows):
             "by_n": {str(n): bal([x for x in rows if x["n"] == n]) for n in sorted({x["n"] for x in rows})}}
 
 
+def warmup_cosine(total_steps, warmup_frac, min_lr_frac):
+    """LambdaLR factor: linear warm-up, then cosine decay to min_lr_frac of the peak.
+    warmup_frac 0 and min_lr_frac 1 give a constant learning rate (recipe r1)."""
+    warm = int(round(total_steps * warmup_frac))
+
+    def f(step):
+        if step < warm:
+            return (step + 1) / warm
+        t = min(1.0, (step - warm) / max(1, total_steps - warm))
+        return min_lr_frac + (1 - min_lr_frac) * 0.5 * (1 + math.cos(math.pi * t))
+    return f
+
+
 def train_loop(*, adapter, optimizer, train, val, loss_fn, validate_fn, seed, paths, log=print,
                accum=ACCUM, eval_every=EVAL_EVERY, patience=PATIENCE, max_epochs=MAX_EPOCHS,
-               resume_every=RESUME_EVERY, max_updates=None):
+               resume_every=RESUME_EVERY, max_updates=None, scheduler=None):
     """Model-agnostic training loop. loss_fn(window) -> scalar loss tensor for one
     window; validate_fn(val) -> metrics dict with 'balanced_accuracy'. paths: dict
     with 'resume', 'best', 'state' (JSON). Returns the final state dict."""
@@ -77,12 +105,16 @@ def train_loop(*, adapter, optimizer, train, val, loss_fn, validate_fn, seed, pa
         adapter.load_state_dict(ck["adapter_state_dict"])
         optimizer.load_state_dict(ck["optimizer_state_dict"])
         torch.set_rng_state(ck["torch_rng_state"])
+        if scheduler is not None:
+            scheduler.load_state_dict(ck["scheduler_state_dict"])
         state = ck["state"]
         log(f"resuming at epoch {state['epoch'] + 1}, position {state['pos']}, update {state['updates']}")
 
     def save_resume():
         _atomic_torch_save({"adapter_state_dict": adapter.state_dict(), "optimizer_state_dict": optimizer.state_dict(),
-                            "torch_rng_state": torch.get_rng_state(), "state": state}, paths["resume"])
+                            "torch_rng_state": torch.get_rng_state(), "state": state,
+                            "scheduler_state_dict": scheduler.state_dict() if scheduler is not None else None},
+                           paths["resume"])
 
     adapter.train()
     while not state["done"] and state["epoch"] < max_epochs:
@@ -96,9 +128,12 @@ def train_loop(*, adapter, optimizer, train, val, loss_fn, validate_fn, seed, pa
                 total += float(loss.detach())
             torch.nn.utils.clip_grad_norm_(adapter.parameters(), CLIP)
             optimizer.step()
+            if scheduler is not None:
+                scheduler.step()
             state["pos"] += accum
             state["updates"] += 1
-            state["history"].append({"update": state["updates"], "loss": total})
+            state["history"].append({"update": state["updates"], "loss": total,
+                                     "lr": optimizer.param_groups[0]["lr"]})
             if state["updates"] % eval_every == 0:
                 m = validate_fn(val)
                 adapter.train()
@@ -132,6 +167,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--seed", type=int, default=101)
     ap.add_argument("--smoke", action="store_true")
+    ap.add_argument("--recipe", choices=sorted(RECIPES), default="r2")
     args = ap.parse_args()
 
     from p1_item7_common import RR_ENCODER, replay_split
@@ -147,15 +183,17 @@ def main():
     from reasoning.virtual_adapter import (_render_prompt_with_placeholder, _tokenize_and_remove_placeholder,
                                            freeze_language_model)
 
+    rc = RECIPES[args.recipe]
     r = replay_split("ds1")
-    train, val = build_windows(r)
-    tag = "smoke" if args.smoke else f"seed{args.seed}"
+    train, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"])
+    prefix = "" if args.recipe == "r1" else f"{args.recipe}_"  # r1 keeps its original file names
+    tag = f"{prefix}smoke" if args.smoke else f"{prefix}seed{args.seed}"
     paths = {"resume": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.resume.pt"),
              "best": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.pt"),
              "state": Path(f"results/p1_item7_train_{tag}.json")}
     if args.smoke:
         train = [w for w in train if w["n"] == 20][:8] + [w for w in train if w["n"] != 20][:8]
-        val = val[:3]
+        val = [w for w in val if w["n"] == 20][:rc["val_batch"]] + [w for w in val if w["n"] == 1][:3]
 
     model, processor = load_model()
     freeze_language_model(model)
@@ -163,7 +201,10 @@ def main():
     torch.manual_seed(args.seed)
     device = model.get_input_embeddings().weight.device
     adapter = MultiEventVirtualAdapter.for_model(model).to(device)
-    optimizer = torch.optim.AdamW(adapter.parameters(), lr=LR, weight_decay=0.0)
+    optimizer = torch.optim.AdamW(adapter.parameters(), lr=rc["lr"], weight_decay=0.0)
+    total_steps = rc["max_epochs"] * (len(train) // rc["accum"])
+    scheduler = torch.optim.lr_scheduler.LambdaLR(
+        optimizer, warmup_cosine(total_steps, rc["warmup_frac"], rc["min_lr_frac"]))
     tok = processor.tokenizer
 
     scaffold = {}
@@ -195,25 +236,32 @@ def main():
             torch.cuda.empty_cache()  # variable-length windows fragment the allocator (see train_adapter)
         return _weighted_teacher_forcing_loss(out.logits, labels[:, -keep:], lw[:, -keep:])
 
-    def validate_fn(windows):
+    def validate_fn(windows, batch_size=None, return_rows=False):
+        batch_size = batch_size or rc["val_batch"]
         adapter.eval()
         model.eval()
         rows = []
+        # Batches of windows with the same N have identical prompt lengths: no padding.
+        groups = [[w for w in windows if w["n"] == n] for n in sorted({w["n"] for w in windows})]
+        batches = [g[i:i + batch_size] for g in groups for i in range(0, len(g), batch_size)]
         with torch.no_grad():
-            for w in windows:
-                ai = window_inputs(w)
-                out = model.generate(inputs_embeds=ai.inputs_embeds, attention_mask=ai.attention_mask,
-                                     per_layer_inputs=ai.per_layer_inputs, do_sample=False,
-                                     max_new_tokens=VAL_MAX_NEW_TOKENS)
-                text = tok.decode(out[0], skip_special_tokens=True)
-                try:
-                    answer, parsed = ReasoningOutput(**_extract_last_json_object(text)).urgency_tier, True
-                except (ValueError, TypeError):
-                    answer, parsed = None, False
-                rows.append({"n": w["n"], "tier": w["tier"], "answer": answer, "parsed": parsed})
-        return balanced_metrics(rows)
+            for batch in batches:
+                ais = [window_inputs(w) for w in batch]
+                out = model.generate(inputs_embeds=torch.cat([a.inputs_embeds for a in ais]),
+                                     attention_mask=torch.cat([a.attention_mask for a in ais]),
+                                     per_layer_inputs=torch.cat([a.per_layer_inputs for a in ais]),
+                                     do_sample=False, max_new_tokens=VAL_MAX_NEW_TOKENS)
+                for w, o in zip(batch, out):
+                    text = tok.decode(o, skip_special_tokens=True)
+                    try:
+                        answer, parsed = ReasoningOutput(**_extract_last_json_object(text)).urgency_tier, True
+                    except (ValueError, TypeError):
+                        answer, parsed = None, False
+                    rows.append({"n": w["n"], "tier": w["tier"], "answer": answer, "parsed": parsed, "text": text})
+        return rows if return_rows else balanced_metrics(rows)
 
-    meta = {"analysis_plan": "docs/analysis_plan.md (Deviation 9)", "provenance": provenance(),
+    meta = {"analysis_plan": "docs/analysis_plan.md (Deviation 9" + (")" if args.recipe == "r1" else ", Deviation 11)"),
+            "recipe": args.recipe, "recipe_params": rc, "provenance": provenance(),
             "encoder": {"path": RR_ENCODER, "sha256": sha256(Path(RR_ENCODER))}, "seed": args.seed,
             "n_train": len(train), "n_val": len(val), "init_scale": float(adapter.scale)}
     t0 = time.time()
@@ -236,19 +284,32 @@ def main():
         kept.backward()
         peak_n20 = torch.cuda.max_memory_allocated() / 2 ** 20
         adapter.zero_grad(set_to_none=True)
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_memory_stats()
         state = train_loop(adapter=adapter, optimizer=optimizer, train=train, val=val, loss_fn=loss_fn,
-                           validate_fn=validate_fn, seed=args.seed, paths=paths, eval_every=2, max_updates=2)
+                           validate_fn=validate_fn, seed=args.seed, paths=paths, accum=rc["accum"],
+                           eval_every=2, max_updates=2, scheduler=scheduler)
+        peak_loop = torch.cuda.max_memory_allocated() / 2 ** 20  # includes batched N=20 validation
+        # Batched vs one-at-a-time greedy generation on the same windows (numerics may differ slightly)
+        rb = validate_fn(val, return_rows=True)
+        r1 = validate_fn(val, batch_size=1, return_rows=True)
+        batch_check = {"n": len(rb), "same_answer": sum(a["answer"] == b["answer"] for a, b in zip(rb, r1)),
+                       "same_text": sum(a["text"] == b["text"] for a, b in zip(rb, r1))}
         with torch.no_grad():
             norms = window_inputs(n20).inputs_embeds.float().norm(dim=-1)[0]
-        smoke = {**meta, "peak_mem_mb_n20_train_step": peak_n20, "memory_ok": peak_n20 < 11500,
+        smoke = {**meta, "peak_mem_mb_n20_train_step": peak_n20, "peak_mem_mb_loop_incl_validation": peak_loop,
+                 "memory_ok": max(peak_n20, peak_loop) < 11500, "batch_check": batch_check,
                  "loss_check": loss_check, "scale_after": float(adapter.scale), "seconds": time.time() - t0, "state": state}
-        save_json_atomic(Path("results/p1_item7_smoke.json"), smoke)
+        save_json_atomic(Path("results/p1_item7_smoke.json" if args.recipe == "r1"
+                              else f"results/p1_item7_smoke_{args.recipe}.json"), smoke)
         print(json.dumps({k: v for k, v in smoke.items() if k != "state"}, indent=2))
         print("virtual-token norm range at N=20 (text tokens included):", float(norms.min()), float(norms.max()))
         return
 
     state = train_loop(adapter=adapter, optimizer=optimizer, train=train, val=val, loss_fn=loss_fn,
-                       validate_fn=validate_fn, seed=args.seed, paths=paths)
+                       validate_fn=validate_fn, seed=args.seed, paths=paths, accum=rc["accum"],
+                       eval_every=rc["eval_every"], patience=rc["patience"], max_epochs=rc["max_epochs"],
+                       resume_every=rc["resume_every"], scheduler=scheduler)
     best = state.get("best_val") or {}
     gate = {"n10_balanced_accuracy": (best.get("by_n") or {}).get("10"), "parse_rate": best.get("parse_rate")}
     gate["passes"] = bool(gate["n10_balanced_accuracy"] is not None and gate["n10_balanced_accuracy"] >= 0.60
