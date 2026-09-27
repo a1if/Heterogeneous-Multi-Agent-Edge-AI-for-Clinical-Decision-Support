@@ -108,8 +108,12 @@ def run():
             clock = Clock(t0)
             out = model.generate(**kw, do_sample=False, max_new_tokens=TIER_TOKEN_INDEX, logits_processor=[proc],
                                  stopping_criteria=StoppingCriteriaList([clock]))
+        # The processor only sees a token on the next step, and generation stops right after the
+        # tier token, so the tier is read from the generated tokens themselves.
+        gen = tok.decode(out[0][-TIER_TOKEN_INDEX:], skip_special_tokens=True)
+        tier = next((t for t in TIERS if gen.endswith(t)), None)
         return {"ttft_ms": clock.times[0] * 1000, "ttd_ms": clock.times[-1] * 1000, "n_tokens": len(clock.times),
-                "prompt_tokens": n_prompt, "tier": proc.summary()[0]["tier"]}
+                "prompt_tokens": n_prompt, "tier": tier, "generated": gen}
 
     for w in windows[:3]:  # warm-up
         timed("A-compact", w)
