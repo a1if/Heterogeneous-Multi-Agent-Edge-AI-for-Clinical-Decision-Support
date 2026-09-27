@@ -35,8 +35,8 @@ NS_TEST = (1, 5, 10, 20)
 MARGIN = -0.05
 
 
-def results_path(split):
-    return Path(f"results/p1_item7_eval_{split}.json")
+def results_path(split, suffix=""):
+    return Path(f"results/p1_item7_eval_{split}{'_' + suffix if suffix else ''}.json")
 
 
 def load_windows(split, r):
@@ -70,7 +70,7 @@ def n50_windows(r):
     return out
 
 
-def run(split, arms):
+def run(split, arms, suffix=""):
     from p1_item7_common import replay_split
     from p1_pilot_multi_event import scaffold_parts
     from reasoning.baseline_arm import _extract_last_json_object
@@ -83,9 +83,15 @@ def run(split, arms):
 
     r = replay_split("ds1" if split == "val" else "ds2")
     windows = load_windows(split, r)
-    path = results_path(split)
+    path = results_path(split, suffix)
     state = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {
-        "analysis_plan": "docs/analysis_plan.md (Deviations 9-12)", "design": __doc__, "rows": []}
+        "analysis_plan": "docs/analysis_plan.md (Deviations 9-13)", "design": __doc__, "rows": []}
+    base = results_path(split)
+    if suffix and not state["rows"] and base.exists():
+        # Separate results file (e.g. recipe r3 at N = 5-20): reuse the A-compact generations for the
+        # same windows (identical prompts, constrained greedy decoding), flagged as reused.
+        state["rows"] = [{**x, "reused_from": str(base)} for x in json.loads(base.read_text(encoding="utf-8"))["rows"]
+                         if x["arm"] == "A-compact"]
     done = {(x["arm"], x["set"], x["n"], x["start"]) for x in state["rows"]}
 
     model, processor = load_model()
@@ -231,9 +237,10 @@ if __name__ == "__main__":
     ap.add_argument("--split", choices=("val", "ds2", "ds2_n50"), required=True)
     ap.add_argument("--arms", nargs="*", default=[])
     ap.add_argument("--summary", action="store_true")
+    ap.add_argument("--suffix", default="", help="separate results file, e.g. r3 -> p1_item7_eval_ds2_r3.json")
     a = ap.parse_args()
     if a.summary:
-        p = results_path(a.split)
+        p = results_path(a.split, a.suffix)
         print(json.dumps(summarize(json.loads(p.read_text(encoding="utf-8"))["rows"], a.split), indent=1))
     else:
-        run(a.split, a.arms)
+        run(a.split, a.arms, a.suffix)
