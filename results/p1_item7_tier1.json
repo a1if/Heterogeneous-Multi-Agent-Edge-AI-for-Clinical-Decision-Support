@@ -1,0 +1,586 @@
+{
+  "design": "Item 7, Deviation 15 (EXPLORATORY): robustness analyses on the saved outputs. CPU only.\n\nSets (all constrained decoding, DS2):\n  r2      results/p1_item7_eval_ds2.json      MEA r2 seeds 101/202/303 + A-compact, N 1-20\n  r3      results/p1_item7_eval_ds2_r3.json   MEA r3 seeds + A-compact (reused), N 1-20\n  r3_n50  results/p1_item7_eval_ds2_n50.json  MEA r3 seeds + A-compact, N 50\nAnalyses:\n  1 cluster  paired balanced-accuracy difference (MEA seed mean - A-compact), 95% CI from\n             resampling DS2 records (all windows of a record together), vs the window bootstrap\n  2 truth    escalation (answer != routine) scored against \"the window holds >= 1 truly\n             abnormal beat (annotation S/V/F/Q)\": sensitivity / specificity, per arm and for\n             the encoder-rule reference itself (the ceiling from these events)\n  3 ensemble majority vote of the 3 MEA seeds (median tier rank) per window\n  4 routing  MEA majority when all 3 seeds agree, else A-compact; share routed to text\n\nRun (from repo root):\n    python p1_item7_tier1.py\n",
+  "sets": {
+    "r2": {
+      "mea_arms": [
+        "MEA:r2_seed101",
+        "MEA:r2_seed202",
+        "MEA:r2_seed303"
+      ],
+      "by_n": {
+        "1": {
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.42857142857142855,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "A-compact": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.42857142857142855,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA:r2_seed101": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.42857142857142855,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA:r2_seed202": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA:r2_seed303": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "router": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.9500000000000001,
+            "MEA_seed_mean": 0.7388888888888889,
+            "MEA_majority_vote": 0.7333333333333334,
+            "router_agree_else_text": 0.8333333333333334
+          },
+          "router_share_to_text": 0.2833333333333333
+        },
+        "5": {
+          "cluster": {
+            "difference": -0.0444444444444444,
+            "cluster_ci95": [
+              -0.14248084291187726,
+              0.08564814814814803
+            ],
+            "n_windows": 60,
+            "n_records": 19,
+            "non_inferior": false,
+            "superior": false
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 1.0,
+              "specificity": 0.4878048780487805,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "A-compact": {
+              "sensitivity": 0.9473684210526315,
+              "specificity": 0.5609756097560976,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA:r2_seed101": {
+              "sensitivity": 1.0,
+              "specificity": 0.4634146341463415,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA:r2_seed202": {
+              "sensitivity": 1.0,
+              "specificity": 0.5609756097560976,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA:r2_seed303": {
+              "sensitivity": 1.0,
+              "specificity": 0.43902439024390244,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 1.0,
+              "specificity": 0.43902439024390244,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "router": {
+              "sensitivity": 1.0,
+              "specificity": 0.4634146341463415,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.7999999999999999,
+            "MEA_seed_mean": 0.7555555555555555,
+            "MEA_majority_vote": 0.7999999999999999,
+            "router_agree_else_text": 0.8166666666666668
+          },
+          "router_share_to_text": 0.21666666666666667
+        },
+        "10": {
+          "cluster": {
+            "difference": 0.1333333333333333,
+            "cluster_ci95": [
+              0.0044858532608079045,
+              0.2786205307038639
+            ],
+            "n_windows": 60,
+            "n_records": 20,
+            "non_inferior": true,
+            "superior": true
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.8571428571428571,
+              "specificity": 0.4358974358974359,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "A-compact": {
+              "sensitivity": 0.7619047619047619,
+              "specificity": 0.6153846153846154,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA:r2_seed101": {
+              "sensitivity": 0.9047619047619048,
+              "specificity": 0.41025641025641024,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA:r2_seed202": {
+              "sensitivity": 0.9523809523809523,
+              "specificity": 0.46153846153846156,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA:r2_seed303": {
+              "sensitivity": 0.9047619047619048,
+              "specificity": 0.38461538461538464,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.9047619047619048,
+              "specificity": 0.38461538461538464,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "router": {
+              "sensitivity": 0.8571428571428571,
+              "specificity": 0.48717948717948717,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.6166666666666667,
+            "MEA_seed_mean": 0.75,
+            "MEA_majority_vote": 0.7833333333333333,
+            "router_agree_else_text": 0.75
+          },
+          "router_share_to_text": 0.23333333333333334
+        },
+        "20": {
+          "cluster": {
+            "difference": 0.2055555555555557,
+            "cluster_ci95": [
+              0.049970366843936506,
+              0.3768382352941172
+            ],
+            "n_windows": 60,
+            "n_records": 21,
+            "non_inferior": true,
+            "superior": true
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.5135135135135135,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "A-compact": {
+              "sensitivity": 0.6521739130434783,
+              "specificity": 0.7567567567567568,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA:r2_seed101": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.4864864864864865,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA:r2_seed202": {
+              "sensitivity": 0.8260869565217391,
+              "specificity": 0.5945945945945946,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA:r2_seed303": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.4594594594594595,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.4594594594594595,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "router": {
+              "sensitivity": 0.8260869565217391,
+              "specificity": 0.6486486486486487,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.5499999999999999,
+            "MEA_seed_mean": 0.7555555555555556,
+            "MEA_majority_vote": 0.8333333333333334,
+            "router_agree_else_text": 0.7166666666666667
+          },
+          "router_share_to_text": 0.3333333333333333
+        }
+      }
+    },
+    "r3": {
+      "mea_arms": [
+        "MEA:r3_seed101",
+        "MEA:r3_seed202",
+        "MEA:r3_seed303"
+      ],
+      "by_n": {
+        "1": {
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.42857142857142855,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "A-compact": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.42857142857142855,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA:r3_seed101": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA:r3_seed202": {
+              "sensitivity": 0.8333333333333334,
+              "specificity": 0.42857142857142855,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA:r3_seed303": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.38095238095238093,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            },
+            "router": {
+              "sensitivity": 0.8888888888888888,
+              "specificity": 0.40476190476190477,
+              "n_truly_abnormal": 18,
+              "n_truly_normal": 42
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.9500000000000001,
+            "MEA_seed_mean": 0.7388888888888889,
+            "MEA_majority_vote": 0.7333333333333334,
+            "router_agree_else_text": 0.7999999999999999
+          },
+          "router_share_to_text": 0.13333333333333333
+        },
+        "5": {
+          "cluster": {
+            "difference": -0.061111111111111005,
+            "cluster_ci95": [
+              -0.15263137863841195,
+              0.05980639730639711
+            ],
+            "n_windows": 60,
+            "n_records": 19,
+            "non_inferior": false,
+            "superior": false
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 1.0,
+              "specificity": 0.4878048780487805,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "A-compact": {
+              "sensitivity": 0.9473684210526315,
+              "specificity": 0.5609756097560976,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA:r3_seed101": {
+              "sensitivity": 1.0,
+              "specificity": 0.4146341463414634,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA:r3_seed202": {
+              "sensitivity": 1.0,
+              "specificity": 0.43902439024390244,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA:r3_seed303": {
+              "sensitivity": 0.9473684210526315,
+              "specificity": 0.4634146341463415,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 1.0,
+              "specificity": 0.43902439024390244,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            },
+            "router": {
+              "sensitivity": 0.9473684210526315,
+              "specificity": 0.43902439024390244,
+              "n_truly_abnormal": 19,
+              "n_truly_normal": 41
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.7999999999999999,
+            "MEA_seed_mean": 0.7388888888888889,
+            "MEA_majority_vote": 0.7666666666666666,
+            "router_agree_else_text": 0.7666666666666666
+          },
+          "router_share_to_text": 0.21666666666666667
+        },
+        "10": {
+          "cluster": {
+            "difference": 0.12777777777777777,
+            "cluster_ci95": [
+              0.009259259259259406,
+              0.2656289826967575
+            ],
+            "n_windows": 60,
+            "n_records": 20,
+            "non_inferior": true,
+            "superior": true
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.8571428571428571,
+              "specificity": 0.4358974358974359,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "A-compact": {
+              "sensitivity": 0.7619047619047619,
+              "specificity": 0.6153846153846154,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA:r3_seed101": {
+              "sensitivity": 0.9047619047619048,
+              "specificity": 0.358974358974359,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA:r3_seed202": {
+              "sensitivity": 0.8571428571428571,
+              "specificity": 0.38461538461538464,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA:r3_seed303": {
+              "sensitivity": 0.9047619047619048,
+              "specificity": 0.46153846153846156,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.9047619047619048,
+              "specificity": 0.38461538461538464,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            },
+            "router": {
+              "sensitivity": 0.8095238095238095,
+              "specificity": 0.48717948717948717,
+              "n_truly_abnormal": 21,
+              "n_truly_normal": 39
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.6166666666666667,
+            "MEA_seed_mean": 0.7444444444444445,
+            "MEA_majority_vote": 0.7666666666666666,
+            "router_agree_else_text": 0.7833333333333333
+          },
+          "router_share_to_text": 0.3333333333333333
+        },
+        "20": {
+          "cluster": {
+            "difference": 0.20000000000000007,
+            "cluster_ci95": [
+              0.05292024802894358,
+              0.3538760504201679
+            ],
+            "n_windows": 60,
+            "n_records": 21,
+            "non_inferior": true,
+            "superior": true
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.5135135135135135,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "A-compact": {
+              "sensitivity": 0.6521739130434783,
+              "specificity": 0.7567567567567568,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA:r3_seed101": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.4594594594594595,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA:r3_seed202": {
+              "sensitivity": 0.9130434782608695,
+              "specificity": 0.4864864864864865,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA:r3_seed303": {
+              "sensitivity": 0.9130434782608695,
+              "specificity": 0.4594594594594595,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.9565217391304348,
+              "specificity": 0.4594594594594595,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            },
+            "router": {
+              "sensitivity": 0.782608695652174,
+              "specificity": 0.5675675675675675,
+              "n_truly_abnormal": 23,
+              "n_truly_normal": 37
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.5499999999999999,
+            "MEA_seed_mean": 0.75,
+            "MEA_majority_vote": 0.7666666666666666,
+            "router_agree_else_text": 0.7166666666666668
+          },
+          "router_share_to_text": 0.31666666666666665
+        }
+      }
+    },
+    "r3_n50": {
+      "mea_arms": [
+        "MEA:r3_seed101",
+        "MEA:r3_seed202",
+        "MEA:r3_seed303"
+      ],
+      "by_n": {
+        "50": {
+          "cluster": {
+            "difference": 0.22777777777777775,
+            "cluster_ci95": [
+              0.050667388167388215,
+              0.40277777777777785
+            ],
+            "n_windows": 60,
+            "n_records": 18,
+            "non_inferior": true,
+            "superior": true
+          },
+          "truth": {
+            "encoder_rule_reference": {
+              "sensitivity": 0.9090909090909091,
+              "specificity": 0.47368421052631576,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            },
+            "A-compact": {
+              "sensitivity": 0.6363636363636364,
+              "specificity": 0.6578947368421053,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            },
+            "MEA:r3_seed101": {
+              "sensitivity": 1.0,
+              "specificity": 0.47368421052631576,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            },
+            "MEA:r3_seed202": {
+              "sensitivity": 0.9545454545454546,
+              "specificity": 0.5526315789473685,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            },
+            "MEA:r3_seed303": {
+              "sensitivity": 0.9545454545454546,
+              "specificity": 0.47368421052631576,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            },
+            "MEA_majority_vote": {
+              "sensitivity": 0.9545454545454546,
+              "specificity": 0.47368421052631576,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            },
+            "router": {
+              "sensitivity": 0.8181818181818182,
+              "specificity": 0.5789473684210527,
+              "n_truly_abnormal": 22,
+              "n_truly_normal": 38
+            }
+          },
+          "balanced_accuracy": {
+            "A-compact": 0.5666666666666667,
+            "MEA_seed_mean": 0.7944444444444444,
+            "MEA_majority_vote": 0.85,
+            "router_agree_else_text": 0.75
+          },
+          "router_share_to_text": 0.3
+        }
+      }
+    }
+  }
+}
