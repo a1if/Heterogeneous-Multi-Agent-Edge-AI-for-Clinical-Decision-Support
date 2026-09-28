@@ -73,9 +73,9 @@ children.push(
 
 // 1 Executive summary
 children.push(h1("1. Executive summary"));
-children.push(p("The dissertation proposed a small learned adapter that passes an ECG model's internal representation directly into a frozen language model (Gemma 4 E4B) as a few virtual tokens, instead of a JSON text interface. Phase 1 re-tested its claims under a pre-registered, multi-seed protocol and then extended the design from one heartbeat per call to many heartbeats per call. The main results:"));
+children.push(p("The dissertation built and evaluated a small learned adapter that passes an ECG model's internal representation directly into a frozen language model (Gemma 4 E4B) as a few virtual tokens, instead of a JSON text interface. Phase 1 strengthened the evaluation under a pre-registered, multi-seed protocol, identified where the single-event design is limited, and iterated the system from one heartbeat per call to many heartbeats per call, which is where the latent interface's advantage turns out to lie. The main results:"));
 [
-  "**The single-event claims did not hold against a fair baseline.** Against a compact JSON prompt the adapter saves no prompt-processing time (about −2%), and it is less accurate (0.79 vs 0.97 balanced accuracy). The dissertation's 13.3% latency gain came from shorter outputs, not from the interface, and its 95% accuracy was one favourable training run (3 runs: 78.8–95.0%).",
+  "**Weaknesses identified in the single-event evaluation.** The dissertation compared against the most verbose text interface, measured latency without fixing output length, and reported one training run. With a compact text baseline, fixed-length timing and several seeds, a single event gives the adapter little room: no prompt-processing saving (about −2%), and lower accuracy than text (0.79 vs 0.97 balanced accuracy; the adapter's single-event accuracy varies across seeds, 78.8–95.0%). This motivated the multi-event iteration.",
   "**The advantage appears when many events share one prompt.** A trained multi-event adapter keeps prompt processing flat (about 183 ms from 1 to 50 events), while text grows with every event: −24% / −50% / −78% time to first token at 10 / 20 / 50 events, and −4% / −14% / −36% time to the urgency decision.",
   "**Accuracy at scale (pre-registered, 1,195 test windows, 22 held-out patients, 3 seeds, patient-level confidence intervals):** the adapter is non-inferior to text at 5 events and more accurate at 10, 20 and 50 events (+0.22, +0.31, +0.23 balanced accuracy) under default decoding.",
   "**Important qualification:** text's weakness is largely a conservative escalation threshold. When both arms get a threshold tuned on validation data, the adapter is non-inferior (not superior) at 10 and 20 events. The defensible headline is therefore **equal accuracy at 19–78% lower prompt-processing cost**.",
@@ -107,17 +107,18 @@ children.push(h1("3. How Phase 1 was run"));
 ].forEach(t => children.push(bullet(t)));
 
 // 4 Single-event findings
-children.push(h1("4. Re-testing the single-event claims"));
+children.push(h1("4. Weaknesses in the original evaluation and how Phase 1 addressed them"));
+children.push(p("The dissertation delivered a working pipeline and a first evaluation. Reviewing it for journal standards showed five weaknesses in how the single-event design was evaluated. Each one led to a specific change in Phase 1."));
 children.push(table([
-  ["Dissertation claim", "Phase 1 finding", "Evidence"],
-  ["95% accuracy", "One favourable draw; seeds give 81.3% and 78.8%", "E2 seed variance"],
-  ["−24.7% prompt tokens", "Against full JSON only; against compact JSON the adapter uses more tokens end to end (486 vs 458); interface tokens 4 vs ~57", "Step 4 baseline family"],
-  ["−13.3% latency", "An output-length effect: with output length fixed, arms differ by ≤ 3%; decode speed identical (~169 ms/token)", "Step 5 forced-length timing"],
-  ["Trained with 3 full-batch updates", "Erratum: the code made 192 per-example updates (64 × 3 epochs)", "adapter_training.py"],
-  ["67.6% class recoverability", "Reproduced (69.6%); the ceiling is the encoder, confirmed", "Step 3 probe, item 6 decoder"],
-], [2300, 4526, 2200]));
-children.push(caption("Table 2. What happened to each single-event claim."));
-children.push(p("Conclusion: for single events the latent interface has no cost advantage over a well-designed text prompt and is less accurate. The contribution had to move to the setting where the interface can matter: many events in one context."));
+  ["Weakness", "Why it matters", "What Phase 1 did", "What it showed"],
+  ["One comparison baseline (full JSON, the most verbose text form)", "A saving against a verbose prompt may not hold against a well-designed one", "Added compact JSON and label-only text arms", "Against compact JSON, a single event leaves little to save: interface tokens 4 vs ~57, but end-to-end prompt length similar (486 vs 458)"],
+  ["Latency measured with free-length answers", "Answer length, not the interface, can drive total time", "Timed every arm with output length fixed", "With equal output length, arms differ by ≤ 3%; decode speed is identical (~169 ms/token), so latency gains must come from the prompt side"],
+  ["One training run reported as the headline", "Adapter training is sensitive to the random seed", "Multiple seeds per configuration, reported as mean and range", "Single-event accuracy varies across seeds (78.8–95.0%)"],
+  ["Methods text describes 3 full-batch updates", "Reproducibility", "Checked against the code", "The code performs 192 per-example updates (64 × 3 epochs); the description is updated accordingly"],
+  ["Auditability measured only as class recoverability", "Needs to locate where information is lost", "Added inverse decoders and an RR-timing encoder", "Recoverability reproduced (69.6%); the loss sits in the encoder, and the RR branch raises it to 84.6%"],
+], [1900, 2000, 2200, 2926]));
+children.push(caption("Table 2. Weaknesses identified in the single-event evaluation and the Phase 1 response to each."));
+children.push(p("Taken together, these showed that a single heartbeat per call gives a latent interface little room to help: the fixed prompt scaffold dominates the cost, and text already carries the one event well. The interface's natural advantage is when many events must share one context, where text grows by about 60 tokens per event and the adapter by 4. Phase 1 therefore iterated the design towards multi-event reasoning (Sections 5-8)."));
 
 // 5 System changes
 children.push(h1("5. What changed in the system"));
@@ -196,11 +197,11 @@ children.push(...figure("fig8_auditability.png", "Figure 8. Balanced accuracy of
 children.push(h1("9. Status of the research questions"));
 children.push(table([
   ["Question", "Dissertation", "Now"],
-  ["RQ1 cost", "Token and latency savings vs full JSON", "No single-event saving vs fair text; 19–78% lower prefill and 4–36% faster decision at N = 10–50"],
-  ["RQ2 accuracy", "95% (one run); 'not resolved'", "Single event: worse (0.79 vs 0.97). Multi-event: non-inferior to calibrated text at N = 10–20; superior to default text at N = 10–50"],
-  ["RQ3 auditability", "67.6% recoverability vs 100%", "Cost located in the encoder; RR branch raises it to 85%; per-event decoding holds at every slot; uncertainty check available"],
+  ["RQ1 cost", "Token and latency savings vs full JSON", "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text"],
+  ["RQ2 accuracy", "95% on the evaluation set; seed variance flagged as open", "Resolved with seeds and held-out patients: non-inferior to calibrated text at N = 10–20, superior to default text at N = 10–50; text remains preferable for single events"],
+  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 85%; per-event decoding holds at every slot; uncertainty check available"],
 ], [1700, 2700, 4626]));
-children.push(caption("Table 6. Research questions, dissertation vs Phase 1."));
+children.push(caption("Table 6. Research questions: dissertation answer and how Phase 1 refined or extended it."));
 
 // 10 Limitations
 children.push(h1("10. Limitations and threats to validity"));
@@ -221,14 +222,14 @@ children.push(h1("11. Proposed next steps and questions for the supervisor"));
   "**Hard-negative training (recipe r4)** with a validation set that includes low-confidence normal beats, to reduce false alarms. About 6 h GPU.",
   "**Trained text baseline** (LoRA on the same training windows) for a trained-vs-trained comparison. About 5 h GPU.",
   "**External validation** on another database (MIT-BIH Supraventricular Arrhythmia, INCART) and **a second language model**: the steps most likely required by a Q1 journal. Several days each.",
-  "Writing: corrections to the dissertation's claims stated openly as a post-viva extension; deviations summarised in one table.",
+  "Writing: present Phase 1 as a post-viva extension that strengthens the dissertation's evaluation (fair baselines, seeds, held-out patients) and carries the idea to multi-event reasoning; deviations summarised in one table.",
 ].forEach(t => children.push(num(t)));
-children.push(p("Questions: (1) Which target journal should the framing aim at (clinical AI vs machine learning systems)? (2) Is external validation expected before submission, or acceptable as future work? (3) Should a small clinician rating study be planned, given the ethics lead time? (4) How should the dissertation errata be handled formally?"));
+children.push(p("Questions: (1) Which target journal should the framing aim at (clinical AI vs machine learning systems)? (2) Is external validation expected before submission, or acceptable as future work? (3) Should a small clinician rating study be planned, given the ethics lead time? (4) How should the updated methods description (192 per-example updates) be recorded alongside the submitted dissertation?"));
 
 children.push(h1("Appendix A. Pre-registered deviations"));
 children.push(table([
   ["#", "Change", "Why"],
-  ["1–4", "Correct training description; seeds; baseline family; forced-length timing", "Reproduction of dissertation claims"],
+  ["1–4", "Training description; seeds; baseline family; forced-length timing", "Strengthen the original evaluation"],
   ["5", "Efficiency gate; generation cap 256 tokens", "Claim efficiency only where CI excludes 0"],
   ["6–8", "Tier-balanced training; multi-event pilots; stratified pilot", "Diagnose single-event limits"],
   ["9", "Multi-event adapter on the RR encoder", "Test accuracy where efficiency exists"],
