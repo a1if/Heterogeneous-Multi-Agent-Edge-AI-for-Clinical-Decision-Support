@@ -9,8 +9,9 @@ they always cost the same few tokens), the tier is restricted to the three valid
 and the two free-text fields may contain any token without a double quote, backslash,
 brace or control character, so they are always valid JSON strings that the project's
 last-JSON-object extractor reads correctly. A field ends when the model emits any token
-that starts the closing literal (e.g. '"' or '","'; the rest of the literal is then
-forced), or is closed after ``field_cap`` tokens; it cannot close before it holds a
+that starts the closing literal (e.g. '"' or '","'), or a merged token of safe text followed
+by the start of it (e.g. '."', how the targets end: 'monitoring' + '."' + '}'); the rest of
+the literal is then forced, or is closed after ``field_cap`` tokens; it cannot close before it holds a
 non-whitespace token (the schema rejects empty fields). After the closing
 brace only an end-of-sequence token is allowed. The model's own scores decide the tier,
 the text and when to close a field. Used identically for every arm.
@@ -43,22 +44,29 @@ class TokenTable:
         self.tiers = {w: encode(w) for w in TIERS}
         for p, ids in list(self.canon.items()) + list(self.tiers.items()):
             assert "".join(self.strings[i] for i in ids) == p, (p, ids)  # tokenisation round-trips
-        # Ways to start closing a text field: a token spelling a prefix of the closing literal
-        # whose remainder has a round-tripping tokenisation -> {first id: forced remainder}.
+        # Ways to start closing a text field -> {first id: forced remainder}: a token spelling a
+        # prefix of the closing literal, or safe text + such a prefix (merged, e.g. '."'), whose
+        # remainder has a round-tripping tokenisation. closer_text[p][id] = the text part.
         by_string = {}
         for i, s in enumerate(self.strings):
             if i not in special and s:
                 by_string.setdefault(s, []).append(i)
-        self.closers = {}
+        safe = lambda t: not any(c in t for c in FORBIDDEN_IN_TEXT) and "�" not in t and all(ord(c) >= 32 for c in t)
+        self.closers, self.closer_text = {}, {}
         for p in ('","referenced_guideline_fact":"', '"}'):
-            opts = {}
-            for k in range(1, len(p) + 1):
-                rest = encode(p[k:]) if p[k:] else []
-                if "".join(self.strings[i] for i in rest) != p[k:]:
+            opts, texts = {}, {}
+            for i, s in enumerate(self.strings):
+                if i in special or '"' not in s:
                     continue
-                for i in by_string.get(p[:k], []):
-                    opts.setdefault(i, rest)
-            self.closers[p] = opts
+                q = s.index('"')
+                head, tail = s[:q], s[q:]
+                if not safe(head) or not p.startswith(tail):
+                    continue
+                rest = encode(p[len(tail):]) if p[len(tail):] else []
+                if "".join(self.strings[j] for j in rest) != p[len(tail):]:
+                    continue
+                opts[i], texts[i] = rest, head
+            self.closers[p], self.closer_text[p] = opts, texts
         firsts = [ids[0] for ids in self.tiers.values()]
         assert len(set(firsts)) == len(firsts), "tier words must differ in their first token"
 
@@ -109,14 +117,17 @@ class _Row:
         elif p == "<tier>":
             a[[ids[0] for ids in t.tiers.values()] if self.seq is None else [self.seq[self.k]]] = True
         elif p == "<text>":
+            closing = PARTS[self.part + 1]
             if not self.has_content:
                 a |= (t.content_ok if self.count >= field_cap else t.plain_ok).to(device)
-                return a  # a field may not close empty
+                # a field may not close empty; a merged closer whose text part has content may
+                a[[i for i, h in t.closer_text[closing].items() if h.strip()]] = True
+                return a
             if self.count >= field_cap:
                 self.hit_cap = True  # only the closing literal is allowed now
             else:
                 a |= t.plain_ok.to(device)
-            a[list(t.closers[PARTS[self.part + 1]])] = True
+            a[list(t.closers[closing])] = True
         else:
             a[self.seq[self.k]] = True
         return a

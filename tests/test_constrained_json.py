@@ -10,7 +10,7 @@ from reasoning.output_schema import ReasoningOutput
 
 PIECES = ['{"', "urg", "ency", "_", "tier", '":"', ":", "u", "r", "g", "routine", "priority", "urgent", '","', "just", "ification",
           "referenced", "guid", "eline", "fact", '"}', '"', "}", "{", ",", "\\", "\n", "The", " beat", " is", " V",
-          ".", '".', "```", "json", " urgent", "a", "b", "c", "x"]
+          ".", '".', "```", "json", " urgent", "a", "b", "c", "x", '."']
 EOS = 0
 
 
@@ -122,3 +122,23 @@ def test_lone_quote_closes_a_field():
     obj = json.loads(text(greedy(proc, scorer, batch=1)[0].tolist()))
     ReasoningOutput(**obj)  # fields are never empty, even when the model wants to close at once
     assert len(obj["justification"]) > 0 and proc.summary()[0]["hit_field_cap"] is False
+
+
+def test_merged_text_and_quote_token_closes_a_field():
+    """Targets end 'monitoring' + '."' + '}': the merged '."' must be able to close a field."""
+    table = TokenTable(ToyTok())
+    merged = PIECES.index('."') + 1
+    assert merged in table.closers['"}'] and table.closer_text['"}'][merged] == "."
+    word = PIECES.index(" beat") + 1
+
+    def scorer(ids):
+        s = torch.zeros((ids.shape[0], len(PIECES) + 1))
+        s[:, word] = 3.0
+        s[:, merged] = 5.0  # wants to end every field with '."'
+        return s
+
+    proc = SchemaJsonProcessor(table, [EOS], field_cap=5)
+    obj = json.loads(text(greedy(proc, scorer, batch=1)[0].tolist()))
+    ReasoningOutput(**obj)
+    assert obj["referenced_guideline_fact"].endswith(".") and obj["justification"].endswith(".")
+    assert proc.summary()[0]["hit_field_cap"] is False

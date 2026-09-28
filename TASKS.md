@@ -120,7 +120,7 @@ Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI 
 
 ## Run order from 2026-09-28 (after item 7)
 Order = dependencies first, CPU before GPU, and one GPU pass for everything that needs the fixed decoder.
-1. [ ] Decoder fix (CPU, ~30 min): allow text fields to close on merged tokens such as `."` / `.",` (safe text + start of the closing literal), force the rest; unit test; log as a Deviation 12 implementation correction. Tier is decided before free text, so accuracy cannot change
+1. [x] Decoder fix DONE (merged closers: 153 / 115 tokens in Gemma's vocabulary; '."' now closes a field; 5 decoder tests pass) (CPU, ~30 min): allow text fields to close on merged tokens such as `."` / `.",` (safe text + start of the closing literal), force the rest; unit test; log as a Deviation 12 implementation correction. Tier is decided before free text, so accuracy cannot change
 2. [ ] Retire step 1 as the headline (writing, CPU): log the deviation; single-event accuracy is reported from the 3 existing draws (79-95%) + item 7's N=1 cells
 3. [ ] Build + pre-register the enlarged DS2 test set (CPU, ~30 min; Deviation 16): stratified 60 per tier per N (N=1-20) and ~40 per tier at N=50, cap 3 per record, same sampler and seed (the current windows are a subset); natural-prevalence windows ~100 per N; record-level bootstrap as the primary CI
 4. [ ] ONE GPU pass with the fixed decoder on the enlarged sets (~4-5 h): MEA r3 seeds 101/202/303 (fast, batched) then A-compact (slow, batch 1). Check: on the old windows every tier matches the earlier run
