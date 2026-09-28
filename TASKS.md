@@ -58,21 +58,21 @@ Step 1 was stopped during its CPU-only data replay (no GPU used yet); it resumes
    - [x] Secondary endpoint: per-event auditability of the MEA (`p1_item7_slot_decoder.py`, `results/p1_item7_slot_decoder.json`, CPU, item 6 method: DS1 1,500/class train, DS2 500/class test, PCA-32, MLP). r3 seeds 101/202/303 x slots 0/9/19/49 of a 50-event window vs the 32-d input: label bal-acc 0.92-0.97 (input 0.975), tier 0.86-0.93 (0.90), urgent 0.93-0.94 (0.94); confidence R2 median 0.70 (0.75), margin 0.67 (0.72); heart rate / RR not carried (R2 <= 0.19, as in the input). Every slot keeps what its event's vector has, at any position. BUT decoders are slot-specific: trained on slot 0, applied to slot 49: label 0.74/0.91/0.75, tier 0.70/0.73/0.64 -> an auditor needs a position-aware (or per-slot) decoder
    - [x] Deviation 14 (user decision): time to the urgency decision, A-compact vs MEA r3 seed 101, batch 1, constrained, stop after the tier token; 21 DS2 windows per N in {1,5,10,20,50} (`p1_item7_ttd.py` -> `results/p1_item7_ttd.json`), DONE 00:43 (run 1 had a broken tier read-out, timings unaffected, archived as `_run1_tierbug`). Median MEA vs A-compact [95% CI], TTFT / time to tier: N=1 -0% / +1%; N=5 -8% / -1%; N=10 -24% [-25,-23] / -4% [-5,-3]; N=20 -50% / -14% [-16,-12]; N=50 -78% [-79,-78] / -36% [-38,-35] (1,812 vs 1,161 ms). Decision latency is dominated by the 6 forced tokens before the tier (~160 ms each), so it gains less than prefill; the saving only becomes large at N=50. Tier = reference on these 21-window subsets: A-compact 0.90/0.71/0.62/0.48/0.52, MEA 0.71/0.67/0.67/0.76/0.86 (consistent with the full evaluation)
    - [x] Deviation 15 Tier 1 EXPLORATORY analyses (`p1_item7_tier1.py`, `results/p1_item7_tier1.json`, CPU). (1) Record-cluster bootstrap keeps every conclusion: diff [cluster CI] r2/r3: N=5 -0.04 [-0.14,+0.09] / -0.06 [-0.15,+0.06] (not NI); N=10 +0.13 [0.00,+0.28] / +0.13 [+0.01,+0.27] (NI); N=20 +0.21 [+0.05,+0.38] / +0.20 [+0.05,+0.35] (superior); N=50 r3 +0.23 [+0.05,+0.40] (superior). (2) True labels (window holds >= 1 truly abnormal beat): the encoder-rule reference itself has sensitivity 0.86-1.00 but specificity only 0.43-0.51 -> the clinical bottleneck is the encoder's false positives; MEA tracks the reference (sens 0.83-1.00, spec 0.36-0.59), A-compact misses more truly abnormal windows at N>=10 (sens 0.64-0.76) with higher spec (0.62-0.76). Caveat: windows are sampled by predicted tier, not at natural prevalence. (3) 3-seed majority vote lifts MEA: bal-acc N=5/10/20 r2 0.80/0.78/0.83, r3 0.77/0.77/0.77, N=50 0.85 (vs text 0.80/0.62/0.55/0.57). (4) Defer-to-text-on-disagreement router is WORSE than the vote at N>=10 (0.72-0.78; 22-33% of windows to text) because text is weak there; only helps at N=1 (0.80-0.83) -> route by N instead (text for N<10)
-   - [ ] 7b temporal compressor, only if MEA passes
+   - [x] 7b temporal compressor, only if MEA passes (MEA passed; deferred to Phase 2, only needed for N >> 50 / long-window monitoring)
 Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI excluding 0 (analysis plan, Deviation 5)
 
-10. [ ] Superseded by the programme above. Old remaining GPU list: step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h)
+10. [x] Superseded by the programme above. Old remaining GPU list: step 3 nondeterminism (~3 h), step 6 seeds × k (~4.5 h), step 1 seeds (~4 h, replay now ~1 min), RR-encoder adapters (~6 h), step 10 E400 (~8 h) (closed)
 
 ## Phase 1, step 1: seeded headline (stopped, resumable)
 - [x] Write and commit the analysis plan (`c779b80`)
 - [x] Step 1 harness `p1_step1_seeded_headline.py`
 - [x] Drop the GPU E60 rerun; E60 is a subset of E80, so compute it offline (Deviation 1, `c6402c5`)
 - [x] Cache the DS1 training-example replay (~70 min/seed) on disk (`fccb6ba`)
-- [ ] Train seeds 101, 202, 303, 404, 505 (`reasoning/checkpoints/p1_k4_seed*.pt`)
-- [ ] Determinism gate 6a (seeds 101/202 vs the E2 checkpoints)
-- [ ] E80 evaluation for all seeds; token-count gate 6b
-- [ ] E60/E80 offline invariance figures (gate 6c)
-- [ ] Add step 1 results to `results_ledger.json`
+- [x] Train seeds 101, 202, 303, 404, 505 (`reasoning/checkpoints/p1_k4_seed*.pt`) (RETIRED, Deviation 16a)
+- [x] Determinism gate 6a (seeds 101/202 vs the E2 checkpoints) (RETIRED with step 1, Deviation 16a)
+- [x] E80 evaluation for all seeds; token-count gate 6b (RETIRED with step 1, Deviation 16a)
+- [x] E60/E80 offline invariance figures (gate 6c) (RETIRED with step 1, Deviation 16a)
+- [x] Add step 1 results to `results_ledger.json` (RETIRED with step 1; ledger gets item 7 results instead, see writing)
 
 ## Phase 1, new step: RR-branch encoder (encoder sweep, plan §2.6.2)
 - [x] Log Deviation 2 in the analysis plan (new, unplanned encoder arm)
@@ -85,18 +85,18 @@ Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI 
 - [x] Compare DS2 accuracy and per-class Se/+P against the reference (same metric code): see run-order item 2
 - [x] Integrate into `PerceptionAgent`: encoder chosen by checkpoint format; per-record RR history cleared by `reset_state()`; post-RR via `next_rr_interval_ms`, supplied by `replay_selected`; reference encoder bit-identical on 320 golden events; 4 parity tests
 - [x] Probe recoverability at the encoder's context vector (see run-order item 3). The probe must replay with `replay_selected`: `day7_auditability_probe.py` and similar call `agent.predict(X[idx])` with no RR and out of order, which the RR agent now rejects on purpose
-- [ ] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter
+- [x] Retrain k=4 adapters (5 seeds) on the RR encoder's context vectors, then run the E80 Arm B eval, so the encoder sweep reaches the adapter (SUPERSEDED: item 7 trained the multi-event adapter on the RR encoder)
 
 ## Found along the way
-- [ ] Adapter training at batch 1 already uses ~11.8 of 12.2 GB. Steps slow from ~8-14 s to ~29 s once other GPU users push it over the limit (task 5 seed 101, epoch 3). Item 7 (multi-event, longer sequences) needs memory-saving training (gradient checkpointing and/or a shorter scaffold) before it can run on this GPU
+- [x] Adapter training at batch 1 already uses ~11.8 of 12.2 GB. Steps slow from ~8-14 s to ~29 s once other GPU users push it over the limit (task 5 seed 101, epoch 3). Item 7 (multi-event, longer sequences) needs memory-saving training (gradient checkpointing and/or a shorter scaffold) before it can run on this GPU (SOLVED: logits_to_keep + gradient checkpointing, 9.5-10.3 GB at N=50)
 - [ ] Idle power drifted from 19.9 W (start) to ~47 W (end) of step 5, so "net of idle" energy is unreliable; report gross energy as primary. The same drift could affect the dissertation's energy figure
 - [ ] Step 4's A-full time-to-first-token (396 ms) is ~2x its forced-length prefill in step 5 (185 ms), while the other text arms match (~200 ms both times). A-full goes through `run_baseline_arm_timed` rather than the family runner; check what that path adds inside the timer before any TTFT figure is reported
 - [x] Checkpointing: results files are written atomically (`p1_io.save_json_atomic`); step 5 saves after every measurement, step 4 after every arm, step 1's evaluation after every event (`729db50`, tests in `tests/test_p1_checkpointing.py`). Rerunning any of them resumes from the last save.
 - [x] Training checkpoints: `train_adapter` saves adapter + AdamW + position + RNG state every 8 steps and at each epoch end to `<output>.resume.pt` (atomic), resumes only for an identical config, and deletes the file when done; the final checkpoint is written atomically too. Resumed runs are bit-identical to uninterrupted ones (`tests/test_adapter_training_resume.py`, CPU stand-in model)
-- [ ] Claim scorer v1 flagged rule restatements ("confidence greater than 0.85", "ventricular or fusion beat") as claims, and its top-3 class leniency hid B-null calling V beats normal. Fixed: rule restatements excluded, strict class matching by default (8 tests)
+- [x] Claim scorer v1 flagged rule restatements ("confidence greater than 0.85", "ventricular or fusion beat") as claims, and its top-3 class leniency hid B-null calling V beats normal. Fixed: rule restatements excluded, strict class matching by default (8 tests) (FIXED, as the item says)
 - [ ] The dissertation's RQ1 token headline compares against A-full only. Against A-compact (100% accurate), Arm B uses MORE prompt tokens end to end (486 vs 458). Arm B's advantage is limited to interface tokens (4 vs 57), and it's outweighed by its longer scaffold. The paper must report this
 - [ ] Arm B's scaffold (neutral context) and Arm A's scaffold (class-specific context) differ in length (482 vs ~402 tokens). This is a confound for end-to-end token comparisons: report interface tokens as the primary endpoint (as pre-specified, P1)
-- [ ] Parse retries under greedy decoding are identical, and `max_new_tokens` is 1024: one degenerate arm costs up to ~6 min (3 x 1024 tokens at ~8 tok/s) and still fails. Consider a cap near the longest valid output (~150 tokens) and a single attempt, for runs after step 4 (logged as a deviation, since it changes the failure-counting rule)
+- [x] Parse retries under greedy decoding are identical, and `max_new_tokens` is 1024: one degenerate arm costs up to ~6 min (3 x 1024 tokens at ~8 tok/s) and still fails. Consider a cap near the longest valid output (~150 tokens) and a single attempt, for runs after step 4 (logged as a deviation, since it changes the failure-counting rule) (SOLVED for item 7 by constrained decoding, Deviation 12)
 - [ ] Confidence IS in the adapter's tokens (MLP R² 0.96), and so is the tier (95%). Together with item 4, Arm B's priority-tier errors come from the adapter/LLM not using information that is present, pointing again at the 5-example training tier imbalance, not at an information gap
 - [ ] Fields the latent interface cannot carry (heart rate, RR, SQI, run length) are exactly what the JSON adds. State this as the interface's information cost alongside the class probe
 - [ ] Choose the anomaly-check threshold on DS1 (not E80) before it is used to route Arm B events to a JSON fallback
@@ -105,7 +105,7 @@ Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI 
 - [ ] `estimate_qrs_duration_ms` is miscalibrated: median 36-44 ms on DS2 (physiological ~80-120 ms). Arm A's JSON has been passing this value (and the `beat_morphology` derived from it) to the LLM. Disclose, or fix and check effect on Arm A
 - [ ] `compute_sqi` barely varies on MIT-BIH (median 0.87, 99% < 0.95); it's uninformative as a transmitted field
 - [ ] Canonical adapter targets contain only class claims (no numbers), so the claim scorer on Arm B output will mostly test class claims
-- [ ] New arm to test (log as a Deviation before running): adapter training examples stratified by reference tier (or predicted label) instead of true class. Directly targets the priority-tier failure behind the seed spread. GPU: training ~30 min/seed, plus E80 eval
+- [x] New arm to test (log as a Deviation before running): adapter training examples stratified by reference tier (or predicted label) instead of true class. Directly targets the priority-tier failure behind the seed spread. GPU: training ~30 min/seed, plus E80 eval (DONE as task 5 / Deviation 6: worse, 71.7% vs 80.0%)
 - [ ] Dissertation §5.3 also says "three full-batch gradient steps" (same erratum as §3.5.1: 192 per-example updates)
 - [x] Pre-check: RR features separate S from N in held-out data (DS2: 85% of S vs 4% of N have pre-RR ratio < 0.85)
 - [ ] F-class RR distribution shifts between splits (DS1 post-ratio median 0.76, DS2 1.00); the RR encoder's F Se is 0.0%. Check whether this shift explains it
