@@ -117,3 +117,18 @@ Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI 
 ## Session paused 2026-09-23 17:18 (PC shut down on request) -- RESUMED 2026-09-24, task 5 finished 11:22
 - Task 5: seed 303 evaluation paused at 53/80 events (saved per event). Resume with: `python p1_task5_tier_balanced.py` (training is done; it continues the evaluation from event 54)
 - Then: REMIND THE USER about pilot 2 (item 6c, tier-stratified, `p1_task5` must finish first) and wait for their go-ahead; then decide item 7's training regime (tier balancing alone did not fix accuracy)
+
+## Run order from 2026-09-28 (after item 7)
+Order = dependencies first, CPU before GPU, and one GPU pass for everything that needs the fixed decoder.
+1. [ ] Decoder fix (CPU, ~30 min): allow text fields to close on merged tokens such as `."` / `.",` (safe text + start of the closing literal), force the rest; unit test; log as a Deviation 12 implementation correction. Tier is decided before free text, so accuracy cannot change
+2. [ ] Retire step 1 as the headline (writing, CPU): log the deviation; single-event accuracy is reported from the 3 existing draws (79-95%) + item 7's N=1 cells
+3. [ ] Build + pre-register the enlarged DS2 test set (CPU, ~30 min; Deviation 16): stratified 60 per tier per N (N=1-20) and ~40 per tier at N=50, cap 3 per record, same sampler and seed (the current windows are a subset); natural-prevalence windows ~100 per N; record-level bootstrap as the primary CI
+4. [ ] ONE GPU pass with the fixed decoder on the enlarged sets (~4-5 h): MEA r3 seeds 101/202/303 (fast, batched) then A-compact (slow, batch 1). Check: on the old windows every tier matches the earlier run
+5. [ ] Analysis (CPU, ~30 min): primary tests with record-level CIs, confusion matrices, per-class recall, true-label view, seed vote, false-alarm rate on the natural set, field-cap rate after the fix
+6. [ ] Writing (no GPU): communication-fidelity framing of the task; deviations 9-16 summary; gross energy as primary; QRS / SQI disclosure; dissertation errata (192 updates); latency = prefill + time-to-decision, not end-to-end; encoder specificity as the clinical bottleneck
+Decisions for the user after step 5 (not queued):
+7. [ ] Fixed-list `referenced_guideline_fact` (and optional `beat` field) schema: new deviation, re-run both arms
+8. [ ] Tier-first short schema (decision latency closer to the prefill saving)
+9. [ ] r3 seeds 404/505 (~2 h each) for a 5-seed result
+10. [ ] External data (SVDB / INCART): training + external test (days)
+11. [ ] Second LLM replication (days)
