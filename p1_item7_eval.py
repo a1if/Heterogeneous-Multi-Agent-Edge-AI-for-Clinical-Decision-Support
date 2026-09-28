@@ -47,6 +47,10 @@ def load_windows(split, r):
         return [{"set": "val", "n": w["n"], "start": w["start"], "reference": w["tier"]} for w in val]
     if split == "ds2_n50":
         return n50_windows(r)
+    if split == "ds2v2":  # Deviation 16: the frozen enlarged set (p1_item7_testset_v2.py)
+        keep = ("set", "n", "start", "reference", "top_class_predicted", "top_class_true", "record")
+        v2 = json.loads(Path("results/p1_item7_testset_v2.json").read_text(encoding="utf-8"))
+        return [{k: w[k] for k in keep} for w in v2["windows"]]
     base = json.loads(Path("results/p1_item7_baseline.json").read_text(encoding="utf-8"))
     return [{"set": w["set"], "n": w["n"], "start": w["start"], "reference": w["reference"],
              "top_class_predicted": w.get("top_class_predicted"), "top_class_true": w.get("top_class_true")}
@@ -81,7 +85,7 @@ def run(split, arms, suffix=""):
     from reasoning.prompt_template_family import _payload
     from reasoning.virtual_adapter import _render_prompt_with_placeholder, _tokenize_and_remove_placeholder
 
-    r = replay_split("ds1" if split == "val" else "ds2")
+    r = replay_split("ds1" if split == "val" else "ds2")  # ds2, ds2_n50 and ds2v2 are all DS2
     windows = load_windows(split, r)
     path = results_path(split, suffix)
     state = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {
@@ -234,7 +238,7 @@ def primary(rows, mea, n_boot, seed):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--split", choices=("val", "ds2", "ds2_n50"), required=True)
+    ap.add_argument("--split", choices=("val", "ds2", "ds2_n50", "ds2v2"), required=True)
     ap.add_argument("--arms", nargs="*", default=[])
     ap.add_argument("--summary", action="store_true")
     ap.add_argument("--suffix", default="", help="separate results file, e.g. r3 -> p1_item7_eval_ds2_r3.json")
