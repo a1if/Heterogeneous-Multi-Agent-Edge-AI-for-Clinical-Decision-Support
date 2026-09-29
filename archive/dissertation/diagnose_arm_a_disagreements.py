@@ -21,7 +21,7 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root, for perception./reasoning.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root, for perception./reasoning.
 
 from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.baseline_arm import run_baseline_arm_timed

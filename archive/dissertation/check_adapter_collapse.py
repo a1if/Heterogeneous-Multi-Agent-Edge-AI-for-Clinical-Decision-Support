@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))  # repo root, for perception./reasoning.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))  # repo root, for perception./reasoning.
 
 from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.adapter_arm import load_trained_adapter, run_adapter_arm_timed

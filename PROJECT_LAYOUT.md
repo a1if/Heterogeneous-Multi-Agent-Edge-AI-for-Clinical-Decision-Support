@@ -6,36 +6,29 @@
 - `data/` — MIT-BIH raw records (`mitdb/`) and processed DS1/DS2 splits (`processed/`).
 - `tests/` — pytest suite (`conftest.py` at root adds the repo root to `sys.path` for this).
 
-## Active pipeline scripts — deliberately flat at repo root
-`data_prep.py`, `train_perception_agent.py`, `day6_run_comparison.py`,
-`day7_auditability_probe.py`, `day3_norm_check.py`, `e0_statistics.py`,
-`perception_eval.py`, `s_class_matched_check.py`, `render_ledger.py`,
-plus (added after this doc was first written, same constraint applies):
-`ablation_common.py`, `e1_ablation.py`, `e2_seed_variance.py`,
-`merge_e1_e2_to_ledger.py`, `merge_gpu_checks_to_ledger.py`,
-`run_gpu_checks_combined.py`, `s_class_expanded_check.py`,
-`check_s_class_per_record.py`, `check_s_class_headroom.py`,
-`find_additional_s_events.py`, `export_norm_check_raw.py`,
-`day6_class_heading_ablation.py`, and `quantization_coupling_pilot.py`.
+## Scripts at the repository root
 
-These all do bare `from perception.X import Y` / `from reasoning.X import Y` imports,
-which only resolve because Python adds a directly-invoked script's own directory to
-`sys.path[0]` — i.e. they work *because* they sit next to the `perception/`/`reasoning/`
-packages. Moving them into a subfolder would break every one of these imports project-wide
-(verified while organizing this folder). Not worth the risk this close to the Day 3+ GPU
-runs, so they stay put. **Always run them from the repo root** (`python <name>.py`), same
-as their docstrings say.
+Phase 1 (journal extension) scripts: `p1_*.py`. Shared infrastructure that current
+code still imports: `project_config.py`, `p1_io.py`, `ablation_common.py`,
+`day7_auditability_probe.py`, `measure_comm_cost.py`, `data_prep.py`,
+`train_perception_agent.py`, `train_perception_agent_rr.py`, `perception_eval.py`,
+`render_ledger.py`.
 
-`day7_auditability_probe.py` is bare-imported (`from day7_auditability_probe import
-select_events`) by SIX other root scripts — `ablation_common.py`, `day3_norm_check.py`,
-`find_additional_s_events.py`, `export_norm_check_raw.py`, `s_class_expanded_check.py`,
-`s_class_matched_check.py` — so it can never move without updating all six.
-`ablation_common.py` is likewise bare-imported by `e1_ablation.py` and
-`e2_seed_variance.py` (and itself imports from `day7_auditability_probe.py`, chaining
-the same constraint). `run_gpu_checks_combined.py` goes one step further and does
-`import s_class_expanded_check` / `import day3_norm_check` as bare module imports
-(to load Gemma once instead of twice across both checks) — another reason those two
-can't move either.
+These use bare `from perception.X import Y` / `from reasoning.X import Y` imports, which
+resolve because Python puts a directly invoked script's own directory on `sys.path[0]`.
+**Run them from the repository root** (`python <name>.py`).
+
+`day7_auditability_probe.py` and `ablation_common.py` date from the dissertation. They
+stay at the root because current code and the archived scripts both import them.
+
+## `archive/dissertation/`
+
+Scripts that produced the submitted dissertation's results, moved here unchanged on
+2026-09-29: the day3–day7 checks, E0–E4b, S-class checks, the quantisation pilot, the
+aux-objective run, the ledger merges and the headline figures. Run them from the root
+with the root on the import path (`PYTHONPATH=. python archive/dissertation/<name>.py`).
+Sibling imports between archived scripts resolve through `sys.path[0]`. See
+`archive/dissertation/README.md` for the list and for what was deleted.
 
 ## `project_config.py` — shared constants and helpers
 Single home for the literals and helpers that used to be re-typed in every script:
@@ -54,15 +47,15 @@ before being merged, so the consolidation preserves behaviour exactly and remove
 drift risk. `day7_auditability_probe.select_events` is now a re-export, so the existing
 `from day7_auditability_probe import select_events` in six scripts still resolves.
 
-**Scope is deliberately limited to root scripts and `diagnostics/`.** The
+**Scope is deliberately limited to root and archived scripts.** The
 `perception/`/`reasoning/` packages do NOT import from it — a package depending on a
 repo-root module inverts the dependency direction and would break if those packages
 were imported from outside this checkout. `AAMI_CLASSES` is likewise NOT re-exported
 from `project_config`; it stays in `perception.model` and is imported from there, so
 this module removes a duplicate rather than becoming a seventh copy (and importing it
-here would drag `torch` into CPU-only scripts like `check_s_class_headroom.py`).
+here would drag `torch` into CPU-only scripts).
 
-Deliberate local overrides survive: `diagnostics/check_adapter_collapse.py` keeps its
+Deliberate local overrides survive: `archive/dissertation/check_adapter_collapse.py` keeps its
 own `PER_CLASS = 3`, because the migration only replaced constants whose value matched
 the canonical one exactly.
 
@@ -91,7 +84,7 @@ string paths resolved relative to cwd (repo root), not `__file__`-relative, so t
 move carries none of the sys.path[0] risk the scripts themselves do.
 
 ## `cache/`
-Expensive-to-recompute intermediate `.npy` arrays, read/written by
+Expensive-to-recompute intermediate `.npy` arrays, read/written by the archived
 `s_class_expanded_check.py`, `check_s_class_per_record.py`, and
 `find_additional_s_events.py`: `s_class_per_event_original20.npy`,
 `s_class_per_event_new43.npy`, `s_class_adapter_vectors_80_cache.npy`,
@@ -105,37 +98,8 @@ Captured stdout/stderr from manual runs: `e1_e2_run.log`, `e1_seeded_run.log`,
 these programmatically — pure human-readable run history, moved here from root
 with no code changes needed.
 
-## `diagnostics/`
-One-off manual verification scripts, never imported by anything else and not
-part of pytest's collection (`smoke_test_*.py` doesn't match pytest's default
-`test_*.py` pattern by design — these are meant to be read by a human, not run
-in CI): the four `smoke_test_*.py` files, `diagnose_arm_a_disagreements.py`,
-`check_adapter_collapse.py`.
-
-Each got a `sys.path.insert(0, ...)` shim added at the top (same pattern
-`conftest.py` already used for pytest) so their `perception.*`/`reasoning.*`
-imports still resolve from the new location. Verified by static import check
-(no GPU needed — only `__main__`-guarded code needs a GPU/model).
-**Run from the repo root**, e.g. `python diagnostics/check_adapter_collapse.py`.
-
-RESOLVED (was: "known pre-existing issue"): `diagnose_structured_output_overhead.py`
-imported `MODEL_TAG` from `reasoning.baseline_arm`, which doesn't define it. Confirmed
-dead code from the pre-HuggingFace Ollama era — the whole script targets the removed
-Ollama path, and its `GENERATION_CONFIG` is now HF-shaped so it would be silently wrong
-even with a valid tag. Moved to `archive/` with a header explaining both breakages.
-
 ## `docs/`
 `7day_prototype_design_doc.docx` — pure documentation, no code depends on it.
-
-## `archive/`
-`day7_auditability_probe_pre-v2.1_draft.py` — confirmed-stale earlier draft of
-`day7_auditability_probe.py` (diffed; superseded by the v2.1 scaling/StandardScaler/
-Wilcoxon fixes). Kept for reference rather than deleted outright.
-
-`diagnose_structured_output_overhead.py` — Ollama-era diagnostic, dead since the
-HuggingFace rewrite of `reasoning/baseline_arm.py`. Does not run (ImportError on
-`MODEL_TAG`); the latency question it measured is moot because the HF path uses
-retry-parse rather than grammar-constrained structured output. See its own header.
 
 ## A bug found and fixed while organizing this
 Several scripts opened files without an explicit `encoding="utf-8"`. On this

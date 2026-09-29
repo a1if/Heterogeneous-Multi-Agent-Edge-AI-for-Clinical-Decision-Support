@@ -71,20 +71,18 @@ perception/           CNN-LSTM Perception Agent (model, schema, checkpoint dir)
 reasoning/             Arm A / Arm B reasoning pipeline: baseline arm, adapter
                        arm, virtual-token adapter, prompt templates, training
 tests/                 pytest suite
-diagnostics/           One-off manual verification / smoke-test scripts
-archive/               Superseded scripts kept for reference, not run
+archive/dissertation/  Scripts behind the submitted dissertation's results (unchanged)
+reports/               Phase 1 technical report and figure scripts
 results/               Raw JSON outputs from the scripts below
 results_ledger.json    Single source of numeric truth, consumed by render_ledger.py
 ```
 
-Active pipeline scripts are deliberately kept flat at the repository root
-(`data_prep.py`, `train_perception_agent.py`, `day6_run_comparison.py`,
-`day7_auditability_probe.py`, `e0_statistics.py`, `e1_ablation.py`,
-`e2_seed_variance.py`, `render_ledger.py`, and related checks) — they rely on
-Python adding an invoked script's own directory to `sys.path[0]` to resolve
-`perception.*` / `reasoning.*` imports, so they must be run from the
-repository root. See `PROJECT_LAYOUT.md` for the full rationale and import
-dependency graph between scripts.
+Current (Phase 1, journal extension) scripts sit flat at the repository root
+(`p1_*.py`, `data_prep.py`, `train_perception_agent*.py`, `render_ledger.py`).
+Scripts that produced the submitted dissertation's results were moved to
+`archive/dissertation/` unchanged; run them from the repository root with the
+root on the import path, e.g. `PYTHONPATH=. python archive/dissertation/e1_ablation.py`.
+See `PROJECT_LAYOUT.md` and `archive/dissertation/README.md`.
 
 ## Requirements
 
@@ -103,8 +101,9 @@ dependency graph between scripts.
 2. Train the Perception Agent: `python train_perception_agent.py`.
 3. Train the adapter (Arm B): see `reasoning/adapter_training.py`.
 4. Run the comparison and statistics scripts from the repository root, e.g.
-   `python day6_run_comparison.py`, `python e0_statistics.py`,
-   `python e1_ablation.py`.
+   `PYTHONPATH=. python archive/dissertation/day6_run_comparison.py`,
+   `PYTHONPATH=. python archive/dissertation/e0_statistics.py`,
+   `PYTHONPATH=. python archive/dissertation/e1_ablation.py`.
 5. Regenerate the results ledger with `render_ledger.py`.
 
 Each script's own docstring documents its exact invocation and outputs.
@@ -116,23 +115,23 @@ Every figure and table in the dissertation is computed from a file in
 
 | In the dissertation | Produced by | Raw file in `results/` |
 |---|---|---|
-| Table 4.1, tokens / latency / accuracy | `day6_run_comparison.py` | `day6_results.json.bak_pre_rerun_20260816` |
+| Table 4.1, tokens / latency / accuracy | `archive/dissertation/day6_run_comparison.py` | `day6_results.json.bak_pre_rerun_20260816` |
 | Table 4.1, energy and VRAM | `measure_comm_cost.py` | `comm_cost_results.json` |
-| Table 4.1, confidence intervals | `e0_statistics.py` | `headline_reduction_cis.json` |
+| Table 4.1, confidence intervals | `archive/dissertation/e0_statistics.py` | `headline_reduction_cis.json` |
 | Table 4.2, paired efficiency detail | `measure_comm_cost.py` | `comm_cost_results.json` |
-| Figure, paired distributions | `make_headline_figures.py` | `day6_results.json.bak_pre_rerun_20260816` |
-| Figure, efficiency forest plot | `make_headline_figures.py` | `headline_reduction_cis.json` |
-| Table 4.3, class recoverability | `day7_auditability_probe.py`, `day7_probe_target_comparison.py` | `day7_auditability_results_v2.json`, `day7_probe_target_comparison.json` |
-| Figure, compression-ratio ablation | `e1_ablation.py` | `e1_ablation_results.json` |
-| Table, training-budget ladder | `e3_training_compute_ladder.py` | `e3_training_ladder_results.json` |
-| Training-set-size sweep | `e4_training_set_size.py`, `e4b_per_class_27.py` | `e4_training_set_size_results.json` |
-| Figure, embedding-norm distributions | `day3_norm_check.py`, `export_norm_check_raw.py` | `day3_norm_check_results.json`, `norm_check_raw_arrays.npz` |
-| Figure, S-class recall progression | `s_class_expanded_check.py`, `s_class_matched_check.py`, `s_class_headroom_bias_check.py`, `check_s_class_per_record.py` | `s_class_*.json` |
-| Figure, auxiliary reconstruction objective | `run_aux_experiment.py`, `train_perception_agent_aux.py`, `day7_auditability_probe_aux.py` | `aux_reconstruction_results.json`, `aux_sanity_seed101.json` |
+| Figure, paired distributions | `archive/dissertation/make_headline_figures.py` | `day6_results.json.bak_pre_rerun_20260816` |
+| Figure, efficiency forest plot | `archive/dissertation/make_headline_figures.py` | `headline_reduction_cis.json` |
+| Table 4.3, class recoverability | `day7_auditability_probe.py`, `archive/dissertation/day7_probe_target_comparison.py` | `day7_auditability_results_v2.json`, `day7_probe_target_comparison.json` |
+| Figure, compression-ratio ablation | `archive/dissertation/e1_ablation.py` | `e1_ablation_results.json` |
+| Table, training-budget ladder | `archive/dissertation/e3_training_compute_ladder.py` | `e3_training_ladder_results.json` |
+| Training-set-size sweep | `archive/dissertation/e4_training_set_size.py`, `archive/dissertation/e4b_per_class_27.py` | `e4_training_set_size_results.json` |
+| Figure, embedding-norm distributions | `archive/dissertation/day3_norm_check.py`, `archive/dissertation/export_norm_check_raw.py` | `day3_norm_check_results.json`, `norm_check_raw_arrays.npz` |
+| Figure, S-class recall progression | `archive/dissertation/s_class_expanded_check.py`, `archive/dissertation/s_class_matched_check.py`, `archive/dissertation/s_class_headroom_bias_check.py`, `archive/dissertation/check_s_class_per_record.py` | `s_class_*.json` |
+| Figure, auxiliary reconstruction objective | `archive/dissertation/run_aux_experiment.py`, `archive/dissertation/train_perception_agent_aux.py`, `archive/dissertation/day7_auditability_probe_aux.py` | `aux_reconstruction_results.json`, `aux_sanity_seed101.json` |
 | Figure, probe confusion matrix | `day7_auditability_probe.py` | `day7_auditability_results_v2.json` |
-| Figure, seed-to-seed variance | `e2_seed_variance.py` | `e2_seed_variance_results.json` |
+| Figure, seed-to-seed variance | `archive/dissertation/e2_seed_variance.py` | `e2_seed_variance_results.json` |
 | ECG model accuracy | `train_perception_agent.py`, `perception_eval.py` | `perception_eval_results.json` |
-| Quantisation coupling pilot | `quantization_coupling_pilot.py` | `quantization_coupling_pilot_results.json` |
+| Quantisation coupling pilot | `archive/dissertation/quantization_coupling_pilot.py` | `quantization_coupling_pilot_results.json` |
 
 `results_ledger.json` records the same provenance machine-readably: each
 reported number, the file it came from, and when it was produced.
