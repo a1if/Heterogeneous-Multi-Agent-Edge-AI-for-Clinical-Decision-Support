@@ -135,3 +135,17 @@ Decisions for the user after step 5 (not queued):
 9. [ ] r3 seeds 404/505 (~2 h each) for a 5-seed result
 10. [ ] External data (SVDB / INCART): training + external test (days)
 11. [ ] Second LLM replication (days)
+
+## Session paused 2026-09-29 ~15:50 (PC shut down on request) -- resume here
+State at pause:
+- r4 seed 101: DONE (early stop; best update 888, val bal-acc 0.719, parse 0.92). `reasoning/checkpoints/p1_item7_mea_r4_seed101.pt`
+- r4 seed 202: STOPPED mid-run at the latest resume save (update ~675; best so far update 444, val 0.679). Resumes from `p1_item7_mea_r4_seed202.resume.pt` (scheduler + optimizer + position restored)
+- r4 seed 303: not started. DS2 v2 eval + r4 analysis: not started
+
+Next steps, in order (from repo root, one GPU job at a time):
+1. [ ] Resume seed 202: `venv/Scripts/python.exe -u p1_item7_train.py --recipe r4 --seed 202 >> logs/p1_item7_r4_seed202.log 2>&1` (~1.5 h left)
+2. [ ] Seed 303: `venv/Scripts/python.exe -u p1_item7_train.py --recipe r4 --seed 303 > logs/p1_item7_r4_seed303.log 2>&1` (~2.5 h)
+3. [ ] DS2 v2 eval: `venv/Scripts/python.exe -u p1_item7_eval.py --split ds2v2 --suffix r4 --arms MEA:r4_seed101 MEA:r4_seed202 MEA:r4_seed303 A-compact > logs/p1_item7_eval_ds2v2_r4.log 2>&1` (A-compact rows reused)
+4. [ ] `venv/Scripts/python.exe p1_item7_r4_analysis.py` -> record Deviation 18 result in docs/analysis_plan.md (force-add) and here; compare vs r3 test (mean 0.79/0.79/0.77/0.80/0.77 at N=1/5/10/20/50), false alarms (r3 10.6% of routine), run>=3 urgent recall (r3 0.61)
+5. [ ] Rerun `pytest tests/test_day2_baseline_arm.py` with the GPU free (failed only from paging-file OOM during training)
+6. [ ] Start paper writing (user plan: this week)
