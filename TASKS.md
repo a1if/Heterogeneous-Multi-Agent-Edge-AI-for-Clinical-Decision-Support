@@ -139,7 +139,7 @@ Decisions for the user after step 5 (not queued):
 ## Session paused 2026-09-29 ~15:50 (PC shut down on request) -- resume here
 State at pause:
 - r4 seed 101: DONE (early stop; best update 888, val bal-acc 0.719, parse 0.92). `reasoning/checkpoints/p1_item7_mea_r4_seed101.pt`
-- r4 seed 202: STOPPED mid-run at the latest resume save (update ~675; best so far update 444, val 0.679). Resumes from `p1_item7_mea_r4_seed202.resume.pt` (scheduler + optimizer + position restored)
+- r4 seed 202: STOPPED mid-run at the resume save of update 675 (best so far update 666, val bal-acc 0.799, parse 0.91). Resumes from `p1_item7_mea_r4_seed202.resume.pt` (scheduler + optimizer + position restored)
 - r4 seed 303: not started. DS2 v2 eval + r4 analysis: not started
 
 Next steps, in order (from repo root, one GPU job at a time):
