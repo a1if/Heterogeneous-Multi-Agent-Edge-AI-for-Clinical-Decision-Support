@@ -34,7 +34,7 @@ BATCH = 8
 
 
 def collect():
-    from p1_item7_common import replay_split
+    from p1_item7_common import replay_split, window_vectors
     from p1_item7_eval import load_windows
     from p1_pilot_multi_event import scaffold_parts
     from reasoning.adapter_training import _append_target_for_teacher_forcing
@@ -92,7 +92,7 @@ def collect():
             else:
                 ck = torch.load(f"reasoning/checkpoints/p1_item7_mea_{arm.split(':')[1]}.pt", map_location="cpu",
                                 weights_only=False)["adapter_state_dict"]
-                adapter = MultiEventVirtualAdapter.for_model(model, max_events=ck["position"].shape[0]).to(device)
+                adapter = MultiEventVirtualAdapter.for_model(model, max_events=ck["position"].shape[0], input_dim=ck["projection.weight"].shape[1]).to(device)
                 adapter.load_state_dict(ck)
                 adapter.eval()
                 groups = [[w for w in todo if w["n"] == n] for n in sorted({w["n"] for w in todo})]
@@ -100,7 +100,7 @@ def collect():
                     with torch.no_grad():
                         es, ms, ps = [], [], []
                         for w in batch:
-                            ai = compose_multi_event_inputs(model, adapter, r["vectors"][w["start"]:w["start"] + w["n"]],
+                            ai = compose_multi_event_inputs(model, adapter, window_vectors(r, w["start"], w["n"], adapter.input_dim),
                                                             *parts(w["n"]))
                             e, m, p = _append_target_for_teacher_forcing(model, ai, prefix)
                             es.append(e), ms.append(m), ps.append(p)

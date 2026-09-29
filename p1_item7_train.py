@@ -56,7 +56,39 @@ RECIPES = {
     "r3": dict(lr=5e-4, accum=1, warmup_frac=0.05, min_lr_frac=0.1, val_per_cell=10, val_max_per_record=5,
                eval_every=93, patience=3, max_epochs=3, resume_every=25, val_batch=8, min_updates=750,
                ns=(1, 5, 10, 20, 50), max_events=50),
+    # Deviation 18: r3 + side inputs (heart rate, RR, run length -> 35-d) + hard-negative routine windows
+    "r4": dict(lr=5e-4, accum=1, warmup_frac=0.05, min_lr_frac=0.1, val_per_cell=10, val_max_per_record=5,
+               eval_every=111, patience=3, max_epochs=3, resume_every=25, val_batch=8, min_updates=894,
+               ns=(1, 5, 10, 20, 50), max_events=50, input_dim=35,
+               hard_neg_train=15, hard_neg_val=5, hard_neg_conf=0.8),
 }
+
+
+def hard_negative_windows(r, records, per_n, rng, ns, conf_thr=0.8, max_per_record=3, exclude=()):
+    """Routine windows (every beat's reference tier routine) whose lowest beat confidence
+    is below conf_thr: the windows behind the r3 false alarms (Deviation 18).
+    Non-overlapping candidates inside one record, shuffled, at most max_per_record per
+    record per N; windows already in `exclude` ((n, start) pairs) are skipped."""
+    rid = np.asarray(r["record_ids"])
+    conf = np.array([e["classification"]["confidence"] for e in r["events"]])
+    routine = np.array([t == "routine" for t in r["tiers"]])
+    starts = np.flatnonzero(np.r_[True, np.diff(rid) != 0])
+    ends = np.r_[starts[1:], len(rid)]
+    out = []
+    for n in ns:
+        cand = [s for s0, e0 in zip(starts, ends) if int(rid[s0]) in records
+                for s in range(s0, e0 - n + 1, n)
+                if routine[s:s + n].all() and conf[s:s + n].min() < conf_thr and (n, s) not in exclude]
+        chosen, per_rec = [], {}
+        for s in rng.permutation(cand) if cand else []:
+            k = int(rid[s])
+            if per_rec.get(k, 0) < max_per_record:
+                chosen.append({"n": n, "tier": "routine", "start": int(s), "hard_negative": True})
+                per_rec[k] = per_rec.get(k, 0) + 1
+            if len(chosen) == per_n:
+                break
+        out += chosen
+    return out
 
 
 def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3, ns=NS):
@@ -177,7 +209,7 @@ def main():
     ap.add_argument("--recipe", choices=sorted(RECIPES), default="r2")
     args = ap.parse_args()
 
-    from p1_item7_common import RR_ENCODER, replay_split
+    from p1_item7_common import RR_ENCODER, replay_split, window_vectors
     from p1_pilot_multi_event import scaffold_parts
     from p1_step1_seeded_headline import provenance, sha256
     from reasoning.adapter_training import (_append_target_for_teacher_forcing, _labels_for_target,
@@ -193,6 +225,13 @@ def main():
     rc = RECIPES[args.recipe]
     r = replay_split("ds1")
     train, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"], rc.get("ns", NS))
+    if rc.get("hard_neg_train"):
+        allrec = {int(x) for x in np.unique(r["record_ids"])}
+        seen = {(w["n"], w["start"]) for w in train + val}
+        train += hard_negative_windows(r, allrec - VAL_RECORDS, rc["hard_neg_train"], np.random.default_rng(2),
+                                       rc["ns"], rc["hard_neg_conf"], exclude=seen)
+        val += hard_negative_windows(r, VAL_RECORDS, rc["hard_neg_val"], np.random.default_rng(3),
+                                     rc["ns"], rc["hard_neg_conf"], exclude=seen)
     prefix = "" if args.recipe == "r1" else f"{args.recipe}_"  # r1 keeps its original file names
     tag = f"{prefix}smoke" if args.smoke else f"{prefix}seed{args.seed}"
     paths = {"resume": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.resume.pt"),
@@ -208,7 +247,8 @@ def main():
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     torch.manual_seed(args.seed)
     device = model.get_input_embeddings().weight.device
-    adapter = MultiEventVirtualAdapter.for_model(model, max_events=rc.get("max_events", 20)).to(device)
+    adapter = MultiEventVirtualAdapter.for_model(model, max_events=rc.get("max_events", 20),
+                                                 input_dim=rc.get("input_dim", 32)).to(device)
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=rc["lr"], weight_decay=0.0)
     total_steps = rc["max_epochs"] * (len(train) // rc["accum"])
     scheduler = torch.optim.lr_scheduler.LambdaLR(
@@ -222,7 +262,7 @@ def main():
             pre, suf = scaffold_parts(n)
             rendered, s0, s1 = _render_prompt_with_placeholder(processor, pre, suf)
             scaffold[n] = _tokenize_and_remove_placeholder(processor, rendered, s0, s1)
-        return compose_multi_event_inputs(model, adapter, r["vectors"][w["start"]:w["start"] + n], *scaffold[n])
+        return compose_multi_event_inputs(model, adapter, window_vectors(r, w["start"], n, adapter.input_dim), *scaffold[n])
 
     step = {"i": 0}
     def loss_fn(w):

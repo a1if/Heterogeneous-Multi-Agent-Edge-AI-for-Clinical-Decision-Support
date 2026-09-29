@@ -61,3 +61,27 @@ def replay_split(split, checkpoint=RR_ENCODER):
         pickle.dump(result, f)
     tmp.replace(path)
     return result
+
+
+# Deviation 18 (recipe r4): per-event side inputs appended to the 32-d vector.
+SIDE_FEATURES = ("hr_z", "rr_z", "run_z")
+
+
+def side_features(events):
+    """(n, 3) float32: heart rate, RR interval and run length from the perception
+    agent's events (the same fields the A-compact text shows), scaled to O(1)."""
+    out = np.empty((len(events), 3), dtype=np.float32)
+    for i, e in enumerate(events):
+        sf, cf = e["signal_features"], e["clinical_flags"]
+        out[i, 0] = np.clip((sf["heart_rate_bpm"] - 80.0) / 30.0, -3, 3)
+        out[i, 1] = np.clip((sf["rr_interval_ms"] - 750.0) / 250.0, -3, 3)
+        out[i, 2] = np.log1p(min(cf["consecutive_abnormal_beats"], 20)) / np.log(4.0)  # run 3 -> 1.0
+    return out
+
+
+def window_vectors(r, start, n, input_dim=32):
+    """Adapter input for one window: the 32-d vectors, plus side inputs when input_dim == 35."""
+    v = np.asarray(r["vectors"][start:start + n], dtype=np.float32)
+    if input_dim == 32:
+        return v
+    return np.concatenate([v, side_features(r["events"][start:start + n])], axis=1)

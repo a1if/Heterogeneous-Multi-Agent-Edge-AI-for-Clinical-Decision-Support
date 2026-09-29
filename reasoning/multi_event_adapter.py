@@ -36,7 +36,8 @@ class MultiEventVirtualAdapter(nn.Module):
         self.log_scale = nn.Parameter(torch.tensor(math.log(init_scale)))
 
     @classmethod
-    def for_model(cls, model, *, num_tokens: int = 4, max_events: int = MAX_EVENTS, probe_tokens: int = 4096):
+    def for_model(cls, model, *, num_tokens: int = 4, max_events: int = MAX_EVENTS, probe_tokens: int = 4096,
+                  input_dim: int = PERCEPTION_FEATURE_DIM):
         """Size from the model's embedding layer; initial scale = median norm of what
         the embedding layer outputs for real token ids (this includes any embedding
         scaling the model applies, unlike the raw weight rows)."""
@@ -46,7 +47,7 @@ class MultiEventVirtualAdapter(nn.Module):
         ids = torch.randint(0, emb.weight.shape[0], (1, probe_tokens), generator=g).to(emb.weight.device)
         with torch.no_grad():
             scale = float(emb(ids).float().norm(dim=-1).median())
-        return cls(dim, num_tokens=num_tokens, max_events=max_events, init_scale=scale)
+        return cls(dim, num_tokens=num_tokens, input_dim=input_dim, max_events=max_events, init_scale=scale)
 
     @property
     def scale(self) -> torch.Tensor:

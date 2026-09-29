@@ -75,7 +75,7 @@ def n50_windows(r):
 
 
 def run(split, arms, suffix=""):
-    from p1_item7_common import replay_split
+    from p1_item7_common import replay_split, window_vectors
     from p1_pilot_multi_event import scaffold_parts
     from reasoning.baseline_arm import _extract_last_json_object
     from reasoning.constrained_json import SchemaJsonProcessor, TokenTable
@@ -148,7 +148,7 @@ def run(split, arms, suffix=""):
             tag = arm.split(":", 1)[1]
             ck = torch.load(f"reasoning/checkpoints/p1_item7_mea_{tag}.pt", map_location="cpu", weights_only=False)
             slots = ck["adapter_state_dict"]["position"].shape[0]  # 20 (r2) or 50 (r3)
-            adapter = MultiEventVirtualAdapter.for_model(model, max_events=slots).to(device)
+            adapter = MultiEventVirtualAdapter.for_model(model, max_events=slots, input_dim=ck["adapter_state_dict"]["projection.weight"].shape[1]).to(device)
             adapter.load_state_dict(ck["adapter_state_dict"])
             adapter.eval()
             state.setdefault("checkpoints", {})[arm] = {"update": ck.get("update"), "val": ck.get("val")}
@@ -156,7 +156,7 @@ def run(split, arms, suffix=""):
             for batch in [g[i:i + MEA_BATCH] for g in groups for i in range(0, len(g), MEA_BATCH)]:
                 proc = SchemaJsonProcessor(table, eos, FIELD_CAP)
                 with torch.no_grad():
-                    ais = [compose_multi_event_inputs(model, adapter, r["vectors"][w["start"]:w["start"] + w["n"]],
+                    ais = [compose_multi_event_inputs(model, adapter, window_vectors(r, w["start"], w["n"], adapter.input_dim),
                                                       *parts(w["n"])) for w in batch]
                     out = model.generate(inputs_embeds=torch.cat([a.inputs_embeds for a in ais]),
                                          attention_mask=torch.cat([a.attention_mask for a in ais]),
