@@ -191,13 +191,57 @@ def status(recipe, compare):
             "stages": stages, "gpu": gpu(), "eta": eta, "eval": test}
 
 
+def watched_signature(recipe):
+    """mtimes of every file the status is computed from; a change means new data to push."""
+    paths = [ROOT / f"results/p1_item7_train_{recipe}_seed{s}.json" for s in SEEDS] + [
+        ROOT / f"results/p1_item7_eval_ds2v2_{recipe}.json", ROOT / f"results/p1_item7_{recipe}_analysis.json"]
+    sig = []
+    for p in paths:
+        try:
+            sig.append(p.stat().st_mtime)
+        except OSError:
+            sig.append(None)
+    return tuple(sig)
+
+
 class Handler(BaseHTTPRequestHandler):
     recipe, compare = "r4", "r3"
 
     def log_message(self, *a):
         pass
 
+    def stream(self):
+        """Server-sent events: a full 'status' event whenever a watched file changes (checked every
+        second), a small 'gpu' event every 2 s, and a comment heartbeat so proxies keep the line open."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Accel-Buffering", "no")
+        self.end_headers()
+        last_sig, last_gpu, last_beat = None, 0.0, time.time()
+        try:
+            while True:
+                now = time.time()
+                sig = watched_signature(self.recipe)
+                if sig != last_sig:
+                    self.wfile.write(b"event: status\ndata: " + json.dumps(status(self.recipe, self.compare)).encode() + b"\n\n")
+                    last_sig, last_gpu, last_beat = sig, now, now
+                elif now - last_gpu >= 2:
+                    g = gpu()
+                    self.wfile.write(b"event: gpu\ndata: " + json.dumps({"gpu": g, "now": now}).encode() + b"\n\n")
+                    last_gpu = last_beat = now
+                elif now - last_beat >= 15:
+                    self.wfile.write(b": keep-alive\n\n")
+                    last_beat = now
+                self.wfile.flush()
+                time.sleep(1)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError, OSError):
+            return  # viewer closed the page
+
     def do_GET(self):
+        if self.path.startswith("/api/stream"):
+            self.stream()
+            return
         if self.path.startswith("/api/status"):
             body = json.dumps(status(self.recipe, self.compare)).encode()
             ctype = "application/json"
@@ -247,7 +291,7 @@ table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;font
 label.tg{font-size:12px;color:var(--text2);display:inline-flex;gap:6px;align-items:center;cursor:pointer}
 .scroll{overflow-x:auto}
 </style></head><body><main>
-<header><h1>Item 7 training: live progress</h1><span class="sub" id="sub"></span><span class="live"><span class="dot"></span><span id="clock">connecting…</span></span></header>
+<header><h1>Item 7 training: live progress</h1><span class="sub" id="sub"></span><span class="live"><span class="dot"></span><span id="clock">connecting…</span> · <span id="mode">connecting</span></span></header>
 <section class="card" style="margin-bottom:12px"><div style="display:flex;flex-wrap:wrap;gap:6px 18px;align-items:baseline">
  <h2 style="margin:0">Live</h2><span id="phase" class="x" style="color:var(--text2)"></span><span id="saved" style="margin-left:auto;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums"></span></div>
  <div style="display:flex;align-items:baseline;gap:10px;margin-top:6px"><span id="liveu" style="font-size:34px;font-weight:650;font-variant-numeric:tabular-nums">–</span><span id="liveu2" style="color:var(--text2)"></span></div>
@@ -318,8 +362,8 @@ function render(){if(!D)return;
   {k:"Best this seed",v:r&&r.best_val?fmt(r.best_val.balanced_accuracy,2):"–",n:r?`update ${r.best_update} · ${r.evals_since_best}/3 checks since best`:""},
   {k:`Mean best (${bests.length} seed${bests.length==1?"":"s"})`,v:bests.length?fmt(bests.reduce((x,y)=>x+y,0)/bests.length,2):"–",n:"validation balanced accuracy"},
   {k:"Time left, this seed",v:e?hm(e.to_max):"–",n:e?`to the ${D.total_updates}-update cap; early stop can end it sooner`:"measuring…"},
-  {k:"GPU",v:g?`${Math.round(g.util)}%`:"–",n:g?`${(g.mem/1024).toFixed(1)} / ${(g.mem_total/1024).toFixed(0)} GB · ${g.temp}°C · ${Math.round(g.power)} W`:"nvidia-smi unavailable",p:g?g.mem/g.mem_total:null}];
- document.getElementById("tiles").innerHTML=tiles.map(t=>`<div class="card tile"><div class="k">${t.k}</div><div class="v">${t.v}</div><div class="n">${t.n}</div>${t.p!=null?`<div class="bar"><i style="width:${(t.p*100).toFixed(1)}%"></i></div>`:""}</div>`).join("");
+  {k:"GPU",id:"gputile",v:g?`${Math.round(g.util)}%`:"–",n:g?`${(g.mem/1024).toFixed(1)} / ${(g.mem_total/1024).toFixed(0)} GB · ${g.temp}°C · ${Math.round(g.power)} W`:"nvidia-smi unavailable",p:g?g.mem/g.mem_total:null}];
+ document.getElementById("tiles").innerHTML=tiles.map(t=>`<div class="card tile"><div class="k">${t.k}</div><div class="v"${t.id?` id="${t.id}"`:""}>${t.v}</div><div class="n">${t.n}</div>${t.p!=null?`<div class="bar"><i style="width:${(t.p*100).toFixed(1)}%"></i></div>`:""}</div>`).join("");
  const mk=(key,src,ref)=>SEEDS.map(s=>({seed:s,v:VAR[s],ref,name:`${ref?D.compare:D.recipe} ${s}`,pts:(src[s]?src[s].evals:[]).map(p=>[p.update,p[key]])}));
  const best=Object.fromEntries(SEEDS.map(s=>[s,D.runs[s]?D.runs[s].best_update:null]));
  const cmp=showCmp&&D.compare;
@@ -359,7 +403,15 @@ function live(){if(!D)return;renderEval();const e=D.eta,now=Date.now()/1000+skew
  const g=D.gpu;if(g&&g.hist.length>1){const W=1100,H=46,h=g.hist,t1=h[h.length-1][0],X=t=>W-(t1-t)/360*W,Y=u=>H-2-u/100*(H-4);
   const d=h.filter(p=>t1-p[0]<=360).map((p,i)=>`${i?"L":"M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
   document.getElementById("gspark").innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:46px"><line x1="0" x2="${W}" y1="${Y(100)}" y2="${Y(100)}" stroke="${css("--grid")}"/><line x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}" stroke="${css("--border")}"/><path d="${d}" fill="none" stroke="${css("--s1")}" stroke-width="2" vector-effect="non-scaling-stroke"/></svg>`}
- if(!e){document.getElementById("liveu").textContent="–";document.getElementById("phase").textContent=(D.stages.find(s=>s.state==="running")||{name:"no training run active"}).name;return}
+ if(!e){const v=D.eval;document.getElementById("evalmarks").innerHTML="";
+  if(v){const cur=v.arms.find(a=>a.done<a.total);
+   document.getElementById("liveu").textContent=`${v.done}`;
+   document.getElementById("liveu2").textContent=`/ ${v.total} test generations${cur?` · now scoring ${cur.arm.replace("MEA:","")} (${cur.done}/${cur.total})`:""}`;
+   document.getElementById("livebar").style.width=(v.done/v.total*100).toFixed(2)+"%";
+   document.getElementById("phase").textContent=v.complete?"test evaluation complete":`DS2 v2 test evaluation${v.eta?` · ≈ ${hm(v.eta)} left`:""}`;
+   document.getElementById("saved").textContent=`results saved ${Math.round(now-v.saved_at)} s ago (every 8 windows)`}
+  else{document.getElementById("liveu").textContent="–";document.getElementById("phase").textContent=(D.stages.find(s=>s.state==="running")||{name:"no run active"}).name}
+  return}
  const age=now-e.saved_at,nextEval=Math.ceil((e.saved_update+1)/e.eval_every)*e.eval_every;
  const tReach=(nextEval-e.saved_update)*e.sec_per_update,inVal=age>tReach;
  const est=Math.min(D.total_updates,nextEval,Math.floor(e.saved_update+age/e.sec_per_update));
@@ -370,7 +422,21 @@ function live(){if(!D)return;renderEval();const e=D.eta,now=Date.now()/1000+skew
  document.getElementById("phase").textContent=inVal?`validation check at update ${nextEval} running · ${hm(age-tReach)} elapsed of ≈ ${hm(e.val_sec)}`:`training · next validation check at update ${nextEval} in ≈ ${hm(tReach-age)}`;
  document.getElementById("saved").textContent=`state saved ${Math.round(age)} s ago · ${e.sec_per_update.toFixed(1)} s/update ${e.measured?"measured":"(prior)"} · check ≈ ${hm(e.val_sec)} ${e.val_measured?"measured":"(prior)"}`;
 }
-poll();setInterval(poll,2000);setInterval(live,1000);matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
+// Streaming: the server pushes 'status' when a result file changes and 'gpu' every 2 s.
+// If the stream drops, EventSource reconnects by itself; while it is down, fall back to polling.
+let pollTimer=null;
+function startPolling(){if(!pollTimer){poll();pollTimer=setInterval(poll,2000)}}
+function stopPolling(){if(pollTimer){clearInterval(pollTimer);pollTimer=null}}
+function setMode(t){const el=document.getElementById("mode");if(el)el.textContent=t}
+if("EventSource" in window){
+ const es=new EventSource("/api/stream");
+ es.onopen=()=>{stopPolling();setMode("streaming")};
+ es.addEventListener("status",ev=>{const t=Date.now()/1000;D=JSON.parse(ev.data);skew=D.now-t;render();live()});
+ es.addEventListener("gpu",ev=>{if(!D)return;const g=JSON.parse(ev.data);D.gpu=g.gpu;live();
+  const gt=document.getElementById("gputile");if(gt&&g.gpu)gt.textContent=Math.round(g.gpu.util)+"%"});
+ es.onerror=()=>{setMode("reconnecting… (polling meanwhile)");startPolling()};
+}else startPolling();
+setInterval(live,1000);matchMedia("(prefers-color-scheme: dark)").addEventListener("change",render);
 </script></body></html>"""
 
 
