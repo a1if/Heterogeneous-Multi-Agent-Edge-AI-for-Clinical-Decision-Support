@@ -142,6 +142,9 @@ State at pause:
 - r4 seed 202: STOPPED mid-run at the resume save of update 700 (best so far update 666, val bal-acc 0.799, parse 0.91). Resumes from `p1_item7_mea_r4_seed202.resume.pt` (scheduler + optimizer + position restored)
 - r4 seed 303: not started. DS2 v2 eval + r4 analysis: not started
 
+Update 2026-09-30: seed 202 resumed 09:52, early stop at 999 (best 666, val 0.799). Seed 303 ran to the 1341-update cap, still improving (best 1332, val 0.819). Final r4 val bests 0.719 / 0.799 / 0.819 (mean 0.779). DS2 v2 eval started 13:20.
+- Decision (user, 13:25, before any seed-303 test result): evaluate the pre-registered checkpoints as they are (seed 303 = update 1332). Any later extension of seed 303 past the cap is post hoc and must be reported as exploratory, not as the Deviation 18 result
+
 Next steps, in order (from repo root, one GPU job at a time):
 1. [ ] Resume seed 202: `venv/Scripts/python.exe -u p1_item7_train.py --recipe r4 --seed 202 >> logs/p1_item7_r4_seed202.log 2>&1` (~1.5 h left)
 2. [ ] Seed 303: `venv/Scripts/python.exe -u p1_item7_train.py --recipe r4 --seed 303 > logs/p1_item7_r4_seed303.log 2>&1` (~2.5 h)
