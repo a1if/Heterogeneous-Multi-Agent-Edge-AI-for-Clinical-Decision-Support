@@ -388,6 +388,7 @@ def main():
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
             sk.connect(("192.0.2.1", 80))  # no packet is sent; picks the LAN interface address
             print(f"on the local network: http://{sk.getsockname()[0]}:{a.port}", flush=True)
+    ThreadingHTTPServer.allow_reuse_address = False  # on Windows reuse lets a second server silently share the port
     ThreadingHTTPServer((a.host, a.port), Handler).serve_forever()
 
 
