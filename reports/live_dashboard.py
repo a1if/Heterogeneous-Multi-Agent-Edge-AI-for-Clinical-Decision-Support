@@ -6,6 +6,7 @@ the DS2 evaluation log and nvidia-smi; never writes to results/ or checkpoints/.
 Run (from repo root):
     python reports/live_dashboard.py            # http://127.0.0.1:8765
     python reports/live_dashboard.py --recipe r4 --compare r3 --port 8765
+    python reports/live_dashboard.py --host 0.0.0.0  # also reachable from the local network (read-only)
 """
 import argparse
 import json
@@ -378,10 +379,16 @@ def main():
     ap.add_argument("--recipe", default="r4")
     ap.add_argument("--compare", default="r3")
     ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--host", default="127.0.0.1", help="0.0.0.0 = also serve other devices on the local network")
     a = ap.parse_args()
     Handler.recipe, Handler.compare = a.recipe, a.compare
     print(f"dashboard: http://127.0.0.1:{a.port}", flush=True)
-    ThreadingHTTPServer(("127.0.0.1", a.port), Handler).serve_forever()
+    if a.host == "0.0.0.0":
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+            sk.connect(("192.0.2.1", 80))  # no packet is sent; picks the LAN interface address
+            print(f"on the local network: http://{sk.getsockname()[0]}:{a.port}", flush=True)
+    ThreadingHTTPServer((a.host, a.port), Handler).serve_forever()
 
 
 if __name__ == "__main__":
