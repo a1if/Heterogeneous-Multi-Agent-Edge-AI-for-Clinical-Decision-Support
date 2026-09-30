@@ -1,0 +1,100 @@
+{
+  "analysis_plan": "docs/analysis_plan.md (Deviation 9, Deviation 11)",
+  "recipe": "r4",
+  "recipe_params": {
+    "lr": 0.0005,
+    "accum": 1,
+    "warmup_frac": 0.05,
+    "min_lr_frac": 0.1,
+    "val_per_cell": 10,
+    "val_max_per_record": 5,
+    "eval_every": 111,
+    "patience": 3,
+    "max_epochs": 3,
+    "resume_every": 25,
+    "val_batch": 8,
+    "min_updates": 894,
+    "ns": [
+      1,
+      5,
+      10,
+      20,
+      50
+    ],
+    "max_events": 50,
+    "input_dim": 35,
+    "hard_neg_train": 15,
+    "hard_neg_val": 5,
+    "hard_neg_conf": 0.8
+  },
+  "provenance": {
+    "git_commit": "b66e9823a1c3d5a27115bf4aa4b330aecfbb0263",
+    "git_dirty": false,
+    "python": "3.13.3",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "transformers": "5.14.1",
+    "bitsandbytes": "0.50.0",
+    "gpu": "NVIDIA GeForce RTX 5070"
+  },
+  "encoder": {
+    "path": "perception/checkpoints/cnn_lstm_rr_seed0.pt",
+    "sha256": "e0e953787691c522b87c0eb03829f76ab8919f04274835f77bd772cef3d8861d"
+  },
+  "seed": 101,
+  "n_train": 16,
+  "n_val": 11,
+  "init_scale": 61.5400390625,
+  "largest_n": 50,
+  "peak_mem_mb_n20_train_step": 9559.33154296875,
+  "peak_mem_mb_loop_incl_validation": 10315.33984375,
+  "memory_ok": true,
+  "batch_check": {
+    "n": 11,
+    "same_answer": 10,
+    "same_text": 9
+  },
+  "loss_check": {
+    "full_logits": 3.83677339553833,
+    "logits_to_keep": 3.83677339553833
+  },
+  "scale_after": 61.58612823486328,
+  "seconds": 248.38877725601196,
+  "state": {
+    "history": [
+      {
+        "update": 1,
+        "loss": 3.914259195327759,
+        "lr": 0.0005
+      },
+      {
+        "update": 2,
+        "loss": 4.256075859069824,
+        "lr": 0.0005,
+        "val": {
+          "balanced_accuracy": 0.0,
+          "parse_rate": 0.0,
+          "by_n": {
+            "1": 0.0,
+            "50": 0.0
+          }
+        }
+      }
+    ],
+    "best_metric": 0.0,
+    "best_update": 2,
+    "evals_since_best": 0,
+    "epoch": 0,
+    "pos": 2,
+    "updates": 2,
+    "done": true,
+    "best_val": {
+      "balanced_accuracy": 0.0,
+      "parse_rate": 0.0,
+      "by_n": {
+        "1": 0.0,
+        "50": 0.0
+      }
+    }
+  }
+}
