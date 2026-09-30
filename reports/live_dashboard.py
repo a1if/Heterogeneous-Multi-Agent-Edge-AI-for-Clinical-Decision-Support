@@ -9,7 +9,7 @@ Run (from repo root):
 """
 import argparse
 import json
-import re
+
 import subprocess
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -61,16 +61,85 @@ def gpu():
     return dict(_gpu["v"], hist=_gpu["hist"]) if _gpu["v"] else None
 
 
-def eval_progress(recipe):
-    log = ROOT / f"logs/p1_item7_eval_ds2v2_{recipe}.log"
-    if not log.exists():
+TIERS = ("routine", "priority", "urgent")
+_evcache = {}
+_evrate = []  # (save time, MEA generations done)
+
+
+def bal(pairs):
+    """Balanced accuracy over the tiers present (same definition as p1_item7_tier1.bal)."""
+    per = [sum(a == t for r, a in pairs if r == t) / sum(r == t for r, _ in pairs)
+           for t in TIERS if any(r == t for r, _ in pairs)]
+    return sum(per) / len(per) if per else None
+
+
+def rows_of(path):
+    """(rows without generated text, complete?) of an eval results file, cached by mtime.
+    The evaluation rewrites the file atomically after every batch of 8 windows."""
+    try:
+        m = path.stat().st_mtime
+    except OSError:
+        return None, False
+    c = _evcache.get(path)
+    if not c or c[0] != m:
+        d = load(path)
+        if d is None:
+            return (c[1], c[2]) if c else (None, False)
+        c = _evcache[path] = (m, [{k: v for k, v in x.items() if k != "text"} for x in d["rows"]], "summary" in d)
+    return c[1], c[2]
+
+
+def eval_status(recipe, compare):
+    """Live DS2 v2 test progress. Accuracies use the windows finished so far and are paired: the comparison
+    recipe and the text arm are scored on exactly the same windows as the new recipe."""
+    path = ROOT / f"results/p1_item7_eval_ds2v2_{recipe}.json"
+    rows, complete = rows_of(path)
+    if rows is None:
         return None
-    arms = {}
-    for m in re.finditer(r"\[([^\]\s]+) (\d+)/(\d+)\]", log.read_text(encoding="utf-8", errors="replace")):
-        arms[m.group(1)] = (int(m.group(2)), int(m.group(3)))
-    done = re.findall(r"\[([^\]\s]+)\] done", log.read_text(encoding="utf-8", errors="replace"))
-    return {"arms": {a: {"done": d, "total": t} for a, (d, t) in arms.items()}, "finished_arms": done,
-            "complete": (ROOT / f"results/p1_item7_eval_ds2v2_{recipe}.json").exists() and "QUEUE" not in ""}
+    base = rows_of(ROOT / "results/p1_item7_eval_ds2v2.json")[0] or []
+    key = lambda x: (x["set"], x["n"], x["start"])
+    ref = {}
+    for x in base:
+        ref.setdefault(key(x), {})[x["arm"]] = x["tier"]
+    windows = {key(x): x["reference"] for x in base if x["arm"] == "A-compact"}
+    expected = [f"MEA:{recipe}_seed{s}" for s in SEEDS]
+    cmp_arms = [f"MEA:{compare}_seed{s}" for s in SEEDS]
+    mine = {a: {key(x): x["tier"] for x in rows if x["arm"] == a} for a in expected}
+    done_all = sum(len(v) for v in mine.values())
+    if not _evrate or _evrate[-1][1] != done_all:
+        _evrate.append((path.stat().st_mtime, done_all))
+    del _evrate[:-60]
+    ns = sorted({k[1] for k in windows})
+    arms = [{"arm": a, "done": len(mine[a]), "total": len(windows),
+             "by_n": {str(n): [sum(k[1] == n for k in mine[a]), sum(k[1] == n for k in windows)] for n in ns}}
+            for a in expected]
+    table = []
+    for n in ns:
+        # one common window set per N: the stratified windows finished by every seed that has started this N
+        started = [a for a in expected if any(k[1] == n for k in mine[a])]
+        ks = set.intersection(*[{k for k in mine[a] if k[1] == n and k[0] == "stratified"} for a in started]) if started else set()
+        row = {"n": n, "total": sum(k[1] == n and k[0] == "stratified" for k in windows), "windows": len(ks),
+               "seeds": [a[-3:] for a in started], "r4": None, "cmp": None, "text": None}
+        if ks:
+            ks = sorted(ks)
+            row["r4"] = sum(bal([(windows[k], mine[a][k]) for k in ks]) for a in started) / len(started)
+            row["cmp"] = sum(bal([(windows[k], ref[k][c]) for k in ks]) for c in cmp_arms) / len(cmp_arms)
+            row["text"] = bal([(windows[k], ref[k]["A-compact"]) for k in ks])
+        table.append(row)
+    started = [a for a in expected if mine[a]]
+    ks = sorted(set.intersection(*[{k for k in mine[a] if windows[k] == "routine"} for a in started])) if started else []
+    fa = {"r4": [], "cmp": [], "text": []}
+    if ks:  # same routine windows for every column
+        fa["r4"] = [sum(mine[a][k] != "routine" for k in ks) / len(ks) for a in started]
+        fa["cmp"] = [sum(ref[k][c] != "routine" for k in ks) / len(ks) for c in cmp_arms]
+        fa["text"] = [sum(ref[k]["A-compact"] != "routine" for k in ks) / len(ks)]
+    rate = None
+    if len(_evrate) >= 2 and _evrate[-1][1] > _evrate[0][1] and _evrate[-1][0] > _evrate[0][0]:
+        rate = (_evrate[-1][1] - _evrate[0][1]) / (_evrate[-1][0] - _evrate[0][0])
+    left = len(expected) * len(windows) - done_all
+    return {"complete": complete, "done": done_all, "total": len(expected) * len(windows), "arms": arms,
+            "table": table, "false_alarm": {f: sum(v) / len(v) if v else None for f, v in fa.items()},
+            "eta": left / rate if rate else None, "saved_at": path.stat().st_mtime}
 
 
 def status(recipe, compare):
@@ -91,15 +160,12 @@ def status(recipe, compare):
             state = "paused"
         stages.append({"name": f"{recipe} seed {seed}", "state": state,
                        "progress": (r["updates"] / total) if r else 0})
-    ev = eval_progress(recipe)
-    ev_done = (ROOT / f"results/p1_item7_r4_analysis.json").exists() if recipe == "r4" else False
-    ev_state = "waiting"
-    if ev:
-        ev_state = "running"
-        if ev["finished_arms"] and len(ev["finished_arms"]) >= 4:
-            ev_state = "done"
-    stages.append({"name": "DS2 v2 test evaluation", "state": ev_state, "detail": ev})
-    stages.append({"name": "r4 analysis", "state": "done" if ev_done else "waiting"})
+    test = eval_status(recipe, compare)
+    stages.append({"name": "DS2 v2 test evaluation",
+                   "state": "waiting" if test is None else ("done" if test["complete"] else "running"),
+                   "progress": test["done"] / test["total"] if test else None})
+    analysed = (ROOT / f"results/p1_item7_{recipe}_analysis.json").exists()
+    stages.append({"name": f"{recipe} analysis", "state": "done" if analysed else "waiting"})
     eta = None
     if active is not None:
         h, ev = _rate.get(active, []), EVAL_EVERY.get(recipe, 111)
@@ -121,7 +187,7 @@ def status(recipe, compare):
     ref = {str(s): run_summary(compare, s) for s in SEEDS} if compare else {}
     return {"time": time.strftime("%H:%M:%S"), "now": now, "recipe": recipe, "compare": compare, "total_updates": total,
             "min_updates": int(total * 2 / 3), "active_seed": active, "runs": runs, "reference": ref,
-            "stages": stages, "gpu": gpu(), "eta": eta}
+            "stages": stages, "gpu": gpu(), "eta": eta, "eval": test}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -199,6 +265,8 @@ label.tg{font-size:12px;color:var(--text2);display:inline-flex;gap:6px;align-ite
  <div class="card"><h2>Queue</h2><div class="cap">Runs one GPU job at a time, in this order.</div><div class="stages" id="stages"></div>
   <div style="margin-top:14px"><label class="tg"><input type="checkbox" id="cmp" checked> Show comparison recipe</label></div></div>
 </section>
+<section class="card" style="margin-bottom:12px"><h2>Test evaluation (DS2 v2, 1,195 windows per seed)</h2>
+ <div class="cap" id="evcap"></div><div id="evbody"></div></section>
 <section class="card"><h2>Best checkpoint per seed</h2><div class="cap">Balanced accuracy on validation, overall and by window length N.</div><div class="scroll"><table id="tbl"></table></div></section>
 </main><div class="tip" id="tip"></div>
 <script>
@@ -260,16 +328,32 @@ function render(){if(!D)return;
  chart("c2",[...(cmp?mk("parse",D.reference,true):[]),...mk("parse",D.runs,false)],{xmax,yfmt:v=>Math.round(v*100)+"%"});
  const L=SEEDS.map(s=>({seed:s,v:VAR[s],name:`${D.recipe} ${s}`,pts:D.runs[s]?D.runs[s].loss:[]}));
  const lmax=Math.max(1,...L.flatMap(s=>s.pts.map(p=>p[1])));chart("c3",L,{xmax:D.total_updates,ymax:Math.min(lmax,6),markers:false,yfmt:v=>v.toFixed(1)});
- document.getElementById("stages").innerHTML=D.stages.map((s,i)=>{let x=s.state;if(s.progress!=null&&s.state!=="waiting")x+=` · ${Math.round(s.progress*100)}% of max`;
-  if(s.detail&&s.detail.arms){x=Object.entries(s.detail.arms).map(([k,v])=>`${k} ${v.done}/${v.total}`).join(" · ")||x}
+ document.getElementById("stages").innerHTML=D.stages.map((s,i)=>{let x=s.state;if(s.progress!=null&&s.state!=="waiting")x+=` · ${Math.round(s.progress*100)}%${i<3?" of max":""}`;
   return `<div class="st"><span class="ic ${s.state}">${s.state==="done"?"✓":i+1}</span><span>${s.name}</span><span class="x">${x}</span></div>`}).join("");
- const Ns=["1","5","10","20","50"],row=(lab,rr)=>{const b=rr&&rr.best_val;return `<tr><td>${lab}</td><td>${rr?rr.best_update:"–"}</td><td><b>${b?fmt(b.balanced_accuracy,3):"–"}</b></td><td>${b?fmt(b.parse_rate*100,0)+"%":"–"}</td>${Ns.map(n=>`<td>${b&&b.by_n[n]!=null?fmt(b.by_n[n],2):"–"}</td>`).join("")}<td>${rr?(rr.done?"done":"running"):"waiting"}</td></tr>`};
+ const Ns=["1","5","10","20","50"],row=(lab,rr,fin)=>{const b=rr&&rr.best_val;return `<tr><td>${lab}</td><td>${rr?rr.best_update:"–"}</td><td><b>${b?fmt(b.balanced_accuracy,3):"–"}</b></td><td>${b?fmt(b.parse_rate*100,0)+"%":"–"}</td>${Ns.map(n=>`<td>${b&&b.by_n[n]!=null?fmt(b.by_n[n],2):"–"}</td>`).join("")}<td>${fin?"final":rr?(rr.done?"done":(String(D.active_seed)===lab.slice(-3)?"running":"stopped")):"waiting"}</td></tr>`};
  document.getElementById("tbl").innerHTML=`<tr><th>Run</th><th>Best update</th><th>Bal. acc.</th><th>Parse</th>${Ns.map(n=>`<th>N=${n}</th>`).join("")}<th>Status</th></tr>`+
-  SEEDS.map(s=>row(`${D.recipe} seed ${s}`,D.runs[s])).join("")+(D.compare?SEEDS.map(s=>row(`${D.compare} seed ${s}`,D.reference[s])).join(""):"");
+  SEEDS.map(s=>row(`${D.recipe} seed ${s}`,D.runs[s])).join("")+(D.compare?SEEDS.map(s=>row(`${D.compare} seed ${s}`,D.reference[s],true)).join(""):"");
 }
 let skew=0;
 async function poll(){try{const t=Date.now()/1000;D=await (await fetch("/api/status",{cache:"no-store"})).json();skew=D.now-t;render();live()}catch(e){document.getElementById("clock").textContent="server not reachable"}}
-function live(){if(!D)return;const e=D.eta,now=Date.now()/1000+skew;
+function pct(x){return x==null?"–":(x*100).toFixed(1)+"%"}
+function renderEval(){const v=D.eval,b=document.getElementById("evbody"),c=document.getElementById("evcap");
+ if(!v){b.innerHTML="";c.textContent="Starts automatically after seed 303 finishes. Text-arm answers are reused from the r3 run (same windows, same prompts, greedy decoding).";return}
+ const now=Date.now()/1000+skew;
+ c.innerHTML=`${v.complete?"Complete":"Running"} · ${v.done} / ${v.total} generations${v.eta&&!v.complete?` · ≈ ${hm(v.eta)} left (linear estimate; N=50 windows are slower)`:""} · saved ${Math.round(now-v.saved_at)} s ago. Accuracies are <b>paired</b>: for each N, ${D.recipe}, ${D.compare} (3-seed mean) and text are scored on the same windows, those finished by every ${D.recipe} seed that has reached that N.`;
+ let h=`<div class="bar" style="height:10px"><i style="width:${(v.done/v.total*100).toFixed(2)}%"></i></div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:12px 0">`;
+ for(const a of v.arms){const sd=a.arm.slice(-3);
+  h+=`<div><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text2)"><span><i class="sw" style="background:var(${VAR[sd]})"></i> ${a.arm.replace("MEA:","")}</span><span style="font-variant-numeric:tabular-nums">${a.done} / ${a.total}</span></div>
+  <div class="bar"><i style="width:${(a.done/a.total*100).toFixed(1)}%;background:var(${VAR[sd]})"></i></div>
+  <div style="font-size:11px;color:var(--muted);margin-top:3px;font-variant-numeric:tabular-nums">${Object.entries(a.by_n).map(([n,[d,t]])=>`N=${n} ${d}/${t}`).join(" · ")}</div></div>`}
+ h+=`</div><div class="scroll"><table><tr><th>N</th><th>Balanced windows done</th><th>${D.recipe} mean</th><th>${D.compare} mean</th><th>Text (default)</th><th>${D.recipe} − ${D.compare}</th></tr>`;
+ for(const r of v.table){const d=(r.r4!=null&&r.cmp!=null)?r.r4-r.cmp:null;
+  h+=`<tr><td>${r.n}</td><td>${r.windows} / ${r.total}${r.seeds.length&&r.seeds.length<3?` <span style="color:var(--muted)">(seed ${r.seeds.join(", ")})</span>`:""}</td><td><b>${fmt(r.r4)}</b></td><td>${fmt(r.cmp)}</td><td>${fmt(r.text)}</td><td>${d==null?"–":(d>=0?"+":"")+d.toFixed(3)}</td></tr>`}
+ const f=v.false_alarm,fd=(f.r4!=null&&f.cmp!=null)?(f.r4-f.cmp)*100:null;
+ h+=`<tr><td>False alarms</td><td>routine windows so far</td><td><b>${pct(f.r4)}</b></td><td>${pct(f.cmp)}</td><td>${pct(f.text)}</td><td>${fd==null?"–":(fd>=0?"+":"")+fd.toFixed(1)+" pts"}</td></tr></table></div>
+  <div class="cap" style="margin-top:6px">Running numbers, not the pre-registered result: record-level CIs and the calibrated-text comparison come from the analysis step.</div>`;
+ b.innerHTML=h}
+function live(){if(!D)return;renderEval();const e=D.eta,now=Date.now()/1000+skew;
  document.getElementById("clock").textContent=new Date((now)*1000).toLocaleTimeString([], {hour12:false});
  const g=D.gpu;if(g&&g.hist.length>1){const W=1100,H=46,h=g.hist,t1=h[h.length-1][0],X=t=>W-(t1-t)/360*W,Y=u=>H-2-u/100*(H-4);
   const d=h.filter(p=>t1-p[0]<=360).map((p,i)=>`${i?"L":"M"}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join("");
