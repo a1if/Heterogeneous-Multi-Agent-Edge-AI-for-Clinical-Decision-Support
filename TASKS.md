@@ -150,7 +150,7 @@ Next steps, in order (from repo root, one GPU job at a time):
 2. [x] Seed 303: `venv/Scripts/python.exe -u p1_item7_train.py --recipe r4 --seed 303 > logs/p1_item7_r4_seed303.log 2>&1` (~2.5 h)
 3. [x] DS2 v2 eval: `venv/Scripts/python.exe -u p1_item7_eval.py --split ds2v2 --suffix r4 --arms MEA:r4_seed101 MEA:r4_seed202 MEA:r4_seed303 A-compact > logs/p1_item7_eval_ds2v2_r4.log 2>&1` (A-compact rows reused)
 4. [x] `venv/Scripts/python.exe p1_item7_r4_analysis.py` -> record Deviation 18 result in docs/analysis_plan.md (force-add) and here; compare vs r3 test (mean 0.79/0.79/0.77/0.80/0.77 at N=1/5/10/20/50), false alarms (r3 10.6% of routine), run>=3 urgent recall (r3 0.61)
-5. [ ] Rerun `pytest tests/test_day2_baseline_arm.py` with the GPU free (failed only from paging-file OOM during training)
+5. [x] (8 passed 2026-09-30 with the GPU free) Rerun `pytest tests/test_day2_baseline_arm.py` with the GPU free (failed only from paging-file OOM during training)
 6. [ ] Start paper writing (user plan: this week)
 
 ## Open after Deviation 18 (2026-09-30)
