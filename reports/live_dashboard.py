@@ -150,7 +150,7 @@ def status(recipe, compare):
     for seed in SEEDS:
         r = run_summary(recipe, seed)
         runs[str(seed)] = r
-        state = "done" if r and r["done"] else ("running" if r else "waiting")
+        state = "done" if r and (r["done"] or r["updates"] >= total) else ("running" if r else "waiting")
         if state == "running" and active is None:
             active = seed
             hist = _rate.setdefault(seed, [])
@@ -331,7 +331,7 @@ function render(){if(!D)return;
  const lmax=Math.max(1,...L.flatMap(s=>s.pts.map(p=>p[1])));chart("c3",L,{xmax:D.total_updates,ymax:Math.min(lmax,6),markers:false,yfmt:v=>v.toFixed(1)});
  document.getElementById("stages").innerHTML=D.stages.map((s,i)=>{let x=s.state;if(s.progress!=null&&s.state!=="waiting")x+=` · ${Math.round(s.progress*100)}%${i<3?" of max":""}`;
   return `<div class="st"><span class="ic ${s.state}">${s.state==="done"?"✓":i+1}</span><span>${s.name}</span><span class="x">${x}</span></div>`}).join("");
- const Ns=["1","5","10","20","50"],row=(lab,rr,fin)=>{const b=rr&&rr.best_val;return `<tr><td>${lab}</td><td>${rr?rr.best_update:"–"}</td><td><b>${b?fmt(b.balanced_accuracy,3):"–"}</b></td><td>${b?fmt(b.parse_rate*100,0)+"%":"–"}</td>${Ns.map(n=>`<td>${b&&b.by_n[n]!=null?fmt(b.by_n[n],2):"–"}</td>`).join("")}<td>${fin?"final":rr?(rr.done?"done":(String(D.active_seed)===lab.slice(-3)?"running":"stopped")):"waiting"}</td></tr>`};
+ const Ns=["1","5","10","20","50"],row=(lab,rr,fin)=>{const b=rr&&rr.best_val;return `<tr><td>${lab}</td><td>${rr?rr.best_update:"–"}</td><td><b>${b?fmt(b.balanced_accuracy,3):"–"}</b></td><td>${b?fmt(b.parse_rate*100,0)+"%":"–"}</td>${Ns.map(n=>`<td>${b&&b.by_n[n]!=null?fmt(b.by_n[n],2):"–"}</td>`).join("")}<td>${fin?"final":rr?((rr.done||rr.updates>=D.total_updates)?"done":(String(D.active_seed)===lab.slice(-3)?"running":"stopped")):"waiting"}</td></tr>`};
  document.getElementById("tbl").innerHTML=`<tr><th>Run</th><th>Best update</th><th>Bal. acc.</th><th>Parse</th>${Ns.map(n=>`<th>N=${n}</th>`).join("")}<th>Status</th></tr>`+
   SEEDS.map(s=>row(`${D.recipe} seed ${s}`,D.runs[s])).join("")+(D.compare?SEEDS.map(s=>row(`${D.compare} seed ${s}`,D.reference[s],true)).join(""):"");
 }
