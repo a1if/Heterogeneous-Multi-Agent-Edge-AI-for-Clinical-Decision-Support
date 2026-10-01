@@ -72,17 +72,23 @@ def fig_latency():
     save(fig, "fig2_latency.png")
 
 
+R4 = "results/p1_item7_r4_analysis.json"
+R4_ARMS = ("MEA:r4_seed101", "MEA:r4_seed202", "MEA:r4_seed303")
+
+
 def fig_accuracy():
-    s5, cal = load("results/p1_item7_step5.json"), load("results/p1_item7_calib.json")["primary_rule"]["by_n"]
-    mea = ["MEA:r3_seed101", "MEA:r3_seed202", "MEA:r3_seed303"]
-    text = [s5["by_n"][str(n)]["balanced_accuracy"]["A-compact"] for n in NS]
-    mean = [s5["by_n"][str(n)]["balanced_accuracy"]["MEA_mean"] for n in NS]
-    lo = [min(s5["by_n"][str(n)]["balanced_accuracy"][m] for m in mea) for n in NS]
-    hi = [max(s5["by_n"][str(n)]["balanced_accuracy"][m] for m in mea) for n in NS]
-    ctext = [cal[str(n)]["A-compact"] for n in NS]
-    fig, ax = plt.subplots(figsize=(6.4, 3.4))
+    a = load(R4)
+    d, c, r3 = a["primary_default"], a["primary_calibrated_text"]["by_n"], a["r3_default"]
+    text = [d[str(n)]["text"] for n in NS]
+    ctext = [c[str(n)]["text"] for n in NS]
+    mean = [d[str(n)]["mea_mean"] for n in NS]
+    lo = [min(d[str(n)]["per_seed"].values()) for n in NS]
+    hi = [max(d[str(n)]["per_seed"].values()) for n in NS]
+    old = [r3[str(n)]["mea_mean"] for n in NS]
+    fig, ax = plt.subplots(figsize=(6.4, 3.5))
     ax.fill_between(NS, lo, hi, color=BLUE, alpha=0.14, linewidth=0)
-    ax.plot(NS, mean, color=BLUE, lw=2, marker="o", ms=6, label="Latent adapter, 3-seed mean (band = seed range)")
+    ax.plot(NS, mean, color=BLUE, lw=2, marker="o", ms=6, label="Latent adapter, recipe r4 (final), 3-seed mean; band = seed range")
+    ax.plot(NS, old, color=INK2, lw=1.3, ls=":", marker="o", ms=4, mfc="white", label="Latent adapter, recipe r3 (previous iteration)")
     ax.plot(NS, text, color=ORANGE, lw=2, marker="o", ms=6, label="Text (A-compact), default decoding")
     ax.plot(NS, ctext, color=AQUA, lw=2, ls="--", marker="s", ms=6, label="Text, calibrated threshold (Deviation 17)")
     for n, v in zip(NS, text):
@@ -91,29 +97,33 @@ def fig_accuracy():
         ax.text(n, v + 0.03, f"{v:.2f}", ha="center", fontsize=7.5, color=INK2)
     ax.set_xscale("log"); ax.set_xticks(NS); ax.set_xticklabels(NS); ax.set_ylim(0.35, 1.02)
     ax.set_xlabel("Events per prompt (N)"); ax.set_ylabel("Balanced accuracy (DS2 test)")
-    ax.legend(loc="lower left", fontsize=7.5)
+    ax.legend(loc="upper center", fontsize=7.5, ncol=2, bbox_to_anchor=(0.5, -0.2))
     fig.tight_layout()
     save(fig, "fig3_accuracy_vs_n.png")
 
 
 def fig_forest():
-    s5, cal = load("results/p1_item7_step5.json"), load("results/p1_item7_calib.json")["primary_rule"]["by_n"]
+    a = load(R4)
+    r3cal = load("results/p1_item7_calib.json")["primary_rule"]["by_n"]
     ns = [5, 10, 20, 50]
-    fig, ax = plt.subplots(figsize=(6.4, 3.0))
+    fig, ax = plt.subplots(figsize=(6.6, 3.5))
     for k, n in enumerate(ns):
-        for off, (src, col, lab) in zip((-0.14, 0.14), ((s5["by_n"][str(n)]["primary"], ORANGE, "vs default text"),
-                                                         (cal[str(n)]["primary"], AQUA, "vs calibrated text"))):
+        series = ((a["primary_default"][str(n)]["test"], ORANGE, "r4 vs default text", True),
+                  (a["primary_calibrated_text"]["by_n"][str(n)]["test"], AQUA, "r4 vs calibrated text", True),
+                  (r3cal[str(n)]["primary"], INK2, "r3 vs calibrated text (previous iteration)", False))
+        for off, (src, col, lab, filled) in zip((-0.24, 0.0, 0.24), series):
             y = k + off
             d, (l, h) = src["difference"], src["cluster_ci95"]
-            ax.plot([l, h], [y, y], color=col, lw=2.2, solid_capstyle="round")
-            ax.plot(d, y, "o", color=col, ms=6, markeredgecolor="white", markeredgewidth=1.2, label=lab if k == 0 else None)
-            ax.text(h + 0.01, y, f"{d:+.2f} [{l:+.2f}, {h:+.2f}]", va="center", fontsize=7.5, color=INK2)
+            ax.plot([l, h], [y, y], color=col, lw=2.2 if filled else 1.4, solid_capstyle="round")
+            ax.plot(d, y, "o", color=col if filled else "white", ms=6 if filled else 5, markeredgecolor=col if not filled else "white",
+                    markeredgewidth=1.2, label=lab if k == 0 else None)
+            ax.text(h + 0.01, y, f"{d:+.2f} [{l:+.2f}, {h:+.2f}]", va="center", fontsize=7, color=INK2)
     ax.axvline(0, color=INK2, lw=1)
     ax.axvline(-0.05, color="#d03b3b", lw=1, ls=":")
-    ax.text(-0.055, -0.62, "NI margin −0.05", color="#d03b3b", fontsize=7.5, ha="right", va="center")
-    ax.set_yticks(range(len(ns))); ax.set_yticklabels([f"N = {n}" for n in ns]); ax.set_ylim(len(ns) - 0.5, -0.9)
-    ax.set_xlim(-0.2, 0.66); ax.set_xlabel("Adapter minus text, balanced accuracy (record-level 95% CI)")
-    ax.legend(loc="upper right", fontsize=8, ncol=2)
+    ax.text(-0.055, -0.75, "NI margin −0.05", color="#d03b3b", fontsize=7.5, ha="right", va="center")
+    ax.set_yticks(range(len(ns))); ax.set_yticklabels([f"N = {n}" for n in ns]); ax.set_ylim(len(ns) - 0.5, -1.0)
+    ax.set_xlim(-0.2, 0.7); ax.set_xlabel("Adapter minus text, balanced accuracy (record-level 95% CI)")
+    ax.legend(loc="lower center", fontsize=7.5, ncol=3, bbox_to_anchor=(0.5, -0.38))
     fig.tight_layout()
     save(fig, "fig4_forest.png")
 
@@ -122,7 +132,7 @@ def fig_why_text_fails():
     from p1_item7_common import replay_split
     from reasoning.training_targets import most_urgent_index
     ev = replay_split("ds2")["events"]
-    rows = load("results/p1_item7_eval_ds2v2.json")["rows"]
+    rows = [x for x in load("results/p1_item7_eval_ds2v2_r4.json")["rows"] if x["arm"] in ("A-compact",) + R4_ARMS]
     pos, why = defaultdict(lambda: defaultdict(list)), defaultdict(lambda: defaultdict(list))
     for x in rows:
         if x["set"] != "stratified" or x["n"] < 10 or x["reference"] == "routine":
@@ -152,16 +162,14 @@ def fig_why_text_fails():
 
 
 def fig_confusion():
-    s5 = load("results/p1_item7_step5.json")
+    rows = [x for x in load("results/p1_item7_eval_ds2v2_r4.json")["rows"] if x["set"] == "stratified" and x["n"] == 50]
     T = ["routine", "priority", "urgent"]
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
-    for ax, arm, title in ((axes[0], "A-compact", "Text (A-compact)"), (axes[1], None, "Latent adapter (3 seeds pooled)")):
-        c = s5["by_n"]["50"]["confusion"]
-        if arm:
-            m = np.array([[c[arm][r].get(p, 0) for p in T] for r in T], dtype=float)
-        else:
-            m = sum(np.array([[c[a][r].get(p, 0) for p in T] for r in T], dtype=float)
-                    for a in ("MEA:r3_seed101", "MEA:r3_seed202", "MEA:r3_seed303"))
+    for ax, arms, title in ((axes[0], ("A-compact",), "Text (A-compact)"), (axes[1], R4_ARMS, "Latent adapter r4 (3 seeds pooled)")):
+        m = np.zeros((3, 3))
+        for x in rows:
+            if x["arm"] in arms:
+                m[T.index(x["reference"]), T.index(x["tier"])] += 1
         frac = m / m.sum(1, keepdims=True)
         ax.imshow(frac, cmap="Blues", vmin=0, vmax=1)
         for i in range(3):
@@ -178,16 +186,69 @@ def fig_confusion():
 def fig_training():
     fig, ax = plt.subplots(figsize=(6.4, 3.0))
     for seed, col, ls in ((101, BLUE, "-"), (202, ORANGE, "--"), (303, AQUA, ":")):
-        s = load(f"results/p1_item7_train_r3_seed{seed}.json")
+        s = load(f"results/p1_item7_train_r4_seed{seed}.json")
         h = [x for x in s["history"] if "val" in x]
         ax.plot([x["update"] for x in h], [x["val"]["balanced_accuracy"] for x in h], color=col, lw=2, ls=ls,
-                marker="o", ms=4, label=f"seed {seed} (best step {s['best_update']})")
-    ax.axvline(750, color=INK2, lw=0.8, ls=":")
-    ax.text(758, 0.95, "early stopping allowed from here", fontsize=7.5, color=INK2, va="top")
+                marker="o", ms=4, label=f"seed {seed} (best step {s['best_update']}, {s['best_metric']:.2f})")
+    ax.axvline(894, color=INK2, lw=0.8, ls=":")
+    ax.text(902, 0.97, "early stopping allowed from here", fontsize=7.5, color=INK2, va="top", ha="left")
     ax.set_xlabel("Training step (batch 1)"); ax.set_ylabel("Validation balanced accuracy"); ax.set_ylim(0, 1)
     ax.legend(loc="lower right", fontsize=8)
     fig.tight_layout()
-    save(fig, "fig7_training_r3.png")
+    save(fig, "fig7_training_r4.png")
+
+
+def fig_false_alarms():
+    a = load(R4)["false_alarm"]
+    groups = [("Text (A-compact)", ["A-compact"], ORANGE), ("Adapter r3", [f"MEA:r3_seed{s}" for s in (101, 202, 303)], INK2),
+              ("Adapter r4 (final)", list(R4_ARMS), BLUE)]
+    fig, ax = plt.subplots(figsize=(6.4, 2.8))
+    x = np.arange(2)
+    for k, (lab, arms, col) in enumerate(groups):
+        vals = [[a[m][key] * 100 for m in arms] for key in ("all_routine", "natural_routine")]
+        mean = [np.mean(v) for v in vals]
+        xs = x - 0.27 + k * 0.27
+        ax.bar(xs, mean, width=0.25, color=col, label=lab, edgecolor="white", linewidth=2)
+        for xi, v, m in zip(xs, vals, mean):
+            if len(v) > 1:
+                ax.plot([xi, xi], [min(v), max(v)], color=INK, lw=1)
+            ax.text(xi, max(v) + 0.4, f"{m:.1f}%", ha="center", fontsize=7.5, color=INK2)
+    ax.set_xticks(x); ax.set_xticklabels(["All routine test windows (479)", "Natural-prevalence routine windows (202)"])
+    ax.set_ylabel("Routine windows escalated (%)"); ax.grid(axis="x", visible=False); ax.set_ylim(0, 16)
+    ax.legend(fontsize=8, loc="upper right")
+    fig.tight_layout()
+    save(fig, "fig9_false_alarms.png")
+
+
+def fig_side_info():
+    """Left: R^2 for heart rate and RR (Deviation 18). Right: run >= 3 balanced accuracy (Deviation 18b)."""
+    s, rl = load(R4)["slots"], load("results/p1_item7_runlen.json")
+    toks = lambda d, t, get: [get(d[f"{t}_seed{sd}_slot{sl}"]) for sd in (101, 202, 303) for sl in (0, 49)]
+    panels = [
+        ("R² on DS2 (≤ 0 shown as 0)", [("heart_rate", "Heart rate"), ("rr", "RR interval")],
+         lambda f: ([s["input_35d"][f]["mlp"]["r2"]], toks(s, "r3", lambda d: d[f]["mlp"]["r2"]), toks(s, "r4", lambda d: d[f]["mlp"]["r2"]))),
+        ("Balanced accuracy on DS2", [("run3", "Run of ≥ 3 abnormal beats")],
+         lambda f: ([rl["input_35d"][f]["mlp"]["balanced_accuracy"]], toks(rl, "r3", lambda d: d[f]["mlp"]["balanced_accuracy"]),
+                    toks(rl, "r4", lambda d: d[f]["mlp"]["balanced_accuracy"])))]
+    fig, axes = plt.subplots(1, 2, figsize=(8.2, 2.9), gridspec_kw={"width_ratios": [2, 1.2]})
+    labels = [("Input (32-d vector + side inputs)", INK2), ("Adapter r3 tokens", "#9ec5f4"), ("Adapter r4 tokens", BLUE)]
+    for ax, (ylab, fields, get) in zip(axes, panels):
+        x = np.arange(len(fields))
+        for k, (lab, col) in enumerate(labels):
+            xs = x - 0.27 + k * 0.27
+            vals = [get(f)[k] for f, _ in fields]
+            mean = [max(0.0, np.mean(v)) for v in vals]
+            ax.bar(xs, mean, width=0.25, color=col, label=lab, edgecolor="white", linewidth=2)
+            for xi, v, m in zip(xs, vals, mean):
+                if len(v) > 1:
+                    ax.plot([xi, xi], [max(0, min(v)), max(v)], color=INK, lw=1)
+                ax.text(xi, max(max(v), m) + 0.03, f"{np.mean(v):.2f}" if np.mean(v) > 0 else "≤ 0", ha="center", fontsize=7.5, color=INK2)
+        ax.set_xticks(x); ax.set_xticklabels([l for _, l in fields]); ax.set_ylim(0, 1.12)
+        ax.set_ylabel(ylab); ax.grid(axis="x", visible=False)
+    axes[1].axhline(0.5, color=INK2, lw=0.8, ls=":"); axes[1].set_xlim(-0.5, 0.5); axes[1].text(1.01, 0.5 / 1.12, "chance", transform=axes[1].transAxes, fontsize=7, color=INK2, va="center", ha="left")
+    axes[0].legend(fontsize=7.5, loc="upper center", ncol=3, bbox_to_anchor=(0.8, -0.12))
+    fig.tight_layout()
+    save(fig, "fig10_side_info.png")
 
 
 def fig_audit():
@@ -211,3 +272,4 @@ def fig_audit():
 
 if __name__ == "__main__":
     fig_pipeline(); fig_latency(); fig_accuracy(); fig_forest(); fig_why_text_fails(); fig_confusion(); fig_training(); fig_audit()
+    fig_false_alarms(); fig_side_info()

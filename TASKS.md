@@ -156,5 +156,5 @@ Next steps, in order (from repo root, one GPU job at a time):
 ## Open after Deviation 18 (2026-09-30)
 - [ ] Ablation to separate hard negatives from side inputs (r4 changed both at once)
 - [x] Run-length decodability (Deviation 18b, pre-registered 2026-10-01): run>=3 balanced accuracy r4 0.96 (0.93-0.98) vs input 0.985 vs r3 0.56 -> r4 tokens carry run length; r3's did not. Used only partly for urgency (run-based urgent recall 0.64)
-- [ ] Update the Phase 1 technical report / paper headline: r4 superior to calibrated text at N=10-20, false alarms ~3%
+- [x] Phase 1 technical report updated 2026-10-01 with r4 (13 pages; figures 3-10 regenerated from committed results; user edits kept: no "Code and records" line, section 11 "Proposed next steps" without GPU-hour estimates). Paper headline still to write
 - [ ] Optional, exploratory only: extend seed 303 past the cap (it was still improving)
