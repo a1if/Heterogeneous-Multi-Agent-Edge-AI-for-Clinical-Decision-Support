@@ -184,3 +184,4 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - [ ] Thu 15-Sat 17: revise, references, supplement (analysis plan, deviations table)
 - [ ] Sun 18: final number-by-number check against results files; Mon 19: submission-ready
 - [ ] Future work (not in this paper): Qwen3.5-4B receiver (docs/qwen_feasibility.md); data scale-up r5; multi-question reuse study
+- Second-sender queue started 2026-10-01 evening: `bash scripts/run_second_sender.sh` (idempotent; re-run after any interruption: finished steps are skipped, adapter seeds resume from reasoning/checkpoints/p1_item7_mea_r4_res_seedS.resume.pt). Logs: logs/p1_res_*.log, logs/p1_item7_r4_res_seed*.log
