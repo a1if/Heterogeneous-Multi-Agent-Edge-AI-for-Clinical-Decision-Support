@@ -50,7 +50,8 @@ def load_windows(split, r):
         return n50_windows(r)
     if split == "ds2v2":  # Deviation 16: the frozen enlarged set (p1_item7_testset_v2.py)
         keep = ("set", "n", "start", "reference", "top_class_predicted", "top_class_true", "record")
-        v2 = json.loads(Path("results/p1_item7_testset_v2.json").read_text(encoding="utf-8"))
+        from p1_item7_common import ENCODER_TAG
+        v2 = json.loads(Path(f"results/p1_item7_testset_v2{ENCODER_TAG}.json").read_text(encoding="utf-8"))
         return [{k: w[k] for k in keep} for w in v2["windows"]]
     base = json.loads(Path("results/p1_item7_baseline.json").read_text(encoding="utf-8"))
     return [{"set": w["set"], "n": w["n"], "start": w["start"], "reference": w["reference"],
@@ -92,7 +93,8 @@ def run(split, arms, suffix=""):
     state = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {
         "analysis_plan": "docs/analysis_plan.md (Deviations 9-13)", "design": __doc__, "rows": []}
     base = results_path(split)
-    if suffix and not state["rows"] and base.exists():
+    from p1_item7_common import ENCODER_TAG
+    if suffix and not state["rows"] and base.exists() and not ENCODER_TAG:  # never reuse text rows across senders
         # Separate results file (e.g. recipe r3 at N = 5-20): reuse the A-compact generations for the
         # same windows (identical prompts, constrained greedy decoding), flagged as reused.
         state["rows"] = [{**x, "reused_from": str(base)} for x in json.loads(base.read_text(encoding="utf-8"))["rows"]

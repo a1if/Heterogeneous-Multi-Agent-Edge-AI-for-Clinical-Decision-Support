@@ -27,12 +27,14 @@ from p1_io import save_json_atomic
 
 TIERS = ("routine", "priority", "urgent")
 EVAL = Path("results/p1_item7_eval_ds2v2_r4.json")
-TOKENS = Path("results/p1_item7_filtered_tokens.json")
-LOGITS = Path("results/p1_item7_filtered_logits.json")
-TIMING = Path("results/p1_item7_filtered_timing.json")
+import os
+_TAG = os.environ.get("P1_ENCODER_TAG", "")  # Deviation 22: per-sender artifacts
+TOKENS = Path(f"results/p1_item7_filtered_tokens{_TAG}.json")
+LOGITS = Path(f"results/p1_item7_filtered_logits{_TAG}.json")
+TIMING = Path(f"results/p1_item7_filtered_timing{_TAG}.json")
 OUT = Path("results/p1_item7_filtered.json")
 R4 = ("MEA:r4_seed101", "MEA:r4_seed202", "MEA:r4_seed303")
-MEA_TIMING_CKPT = "reasoning/checkpoints/p1_item7_mea_r4_seed101.pt"
+MEA_TIMING_CKPT = f"reasoning/checkpoints/p1_item7_mea_r4{os.environ.get('P1_ENCODER_TAG', '')}_seed101.pt"
 
 
 def filtered_note(n):
@@ -67,7 +69,7 @@ def text_ids(processor, content):
 
 
 def windows():
-    v2 = json.loads(Path("results/p1_item7_testset_v2.json").read_text(encoding="utf-8"))["windows"]
+    v2 = json.loads(Path(f"results/p1_item7_testset_v2{_TAG}.json").read_text(encoding="utf-8"))["windows"]
     return [{k: w[k] for k in ("set", "n", "start", "reference", "record")} for w in v2]
 
 
@@ -99,7 +101,7 @@ def tokens():
 
 
 # ---------- calibration logits (GPU) ----------
-def collect():
+def collect(text_arm="A-filtered"):
     import torch
     from p1_item7_common import replay_split
     from p1_item7_train import RECIPES, build_windows
@@ -110,7 +112,9 @@ def collect():
     _, v3 = build_windows(r1, rc["val_per_cell"], rc["val_max_per_record"], rc["ns"])
     sets = {"val": (r1, [{"set": "val", "n": w["n"], "start": w["start"], "reference": w["tier"]} for w in v3]),
             "ds2v2": (r2, windows())}
-    state = json.loads(LOGITS.read_text(encoding="utf-8")) if LOGITS.exists() else {"design": __doc__, "rows": []}
+    logits_path = LOGITS if text_arm == "A-filtered" else Path(f"results/p1_item7_compact_logits{_TAG}.json")
+    build = filtered_content if text_arm == "A-filtered" else compact_content
+    state = json.loads(logits_path.read_text(encoding="utf-8")) if logits_path.exists() else {"design": __doc__, "arm": text_arm, "rows": []}
     done = {(x["split"], x["set"], x["n"], x["start"]) for x in state["rows"]}
     model, processor = load_model()
     device = model.get_input_embeddings().weight.device
@@ -120,15 +124,15 @@ def collect():
     t0 = time.time()
     for split, (r, ws) in sets.items():
         for k, w in enumerate(x for x in ws if (split, x["set"], x["n"], x["start"]) not in done):
-            ids = text_ids(processor, filtered_content(r["events"], w["start"], w["n"]))["input_ids"].to(device)
+            ids = text_ids(processor, build(r["events"], w["start"], w["n"]))["input_ids"].to(device)
             with torch.no_grad():
                 lg = model(input_ids=torch.cat([ids, prefix], 1), use_cache=False, logits_to_keep=1).logits
             state["rows"].append({"split": split, **{k2: w[k2] for k2 in ("set", "n", "start", "reference")},
                                   "logits": lg[0, -1, tier_ids].float().tolist()})
             if (k + 1) % 50 == 0:
-                save_json_atomic(LOGITS, state)
+                save_json_atomic(logits_path, state)
                 print(f"[{split} {k + 1}] {time.time() - t0:.0f}s", flush=True)
-        save_json_atomic(LOGITS, state)
+        save_json_atomic(logits_path, state)
     print("collect done", len(state["rows"]), flush=True)
 
 
@@ -323,4 +327,6 @@ def show(out):
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=("tokens", "collect", "timing", "analyse"))
-    {"tokens": tokens, "collect": collect, "timing": timing, "analyse": analyse}[ap.parse_args().mode]()
+    ap.add_argument("--text-arm", choices=("A-filtered", "A-compact"), default="A-filtered", help="collect only")
+    a = ap.parse_args()
+    collect(a.text_arm) if a.mode == "collect" else {"tokens": tokens, "timing": timing, "analyse": analyse}[a.mode]()

@@ -232,7 +232,8 @@ def main():
                                        rc["ns"], rc["hard_neg_conf"], exclude=seen)
         val += hard_negative_windows(r, VAL_RECORDS, rc["hard_neg_val"], np.random.default_rng(3),
                                      rc["ns"], rc["hard_neg_conf"], exclude=seen)
-    prefix = "" if args.recipe == "r1" else f"{args.recipe}_"  # r1 keeps its original file names
+    from p1_item7_common import ENCODER_TAG
+    prefix = "" if args.recipe == "r1" else f"{args.recipe}{ENCODER_TAG}_"  # r1 keeps its original file names; tag = Deviation 22 sender
     tag = f"{prefix}smoke" if args.smoke else f"{prefix}seed{args.seed}"
     paths = {"resume": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.resume.pt"),
              "best": Path(f"reasoning/checkpoints/p1_item7_mea_{tag}.pt"),

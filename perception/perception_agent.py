@@ -88,7 +88,12 @@ class PerceptionAgent:
         checkpoint = torch.load(checkpoint_path, map_location=self.device) if checkpoint_path else None
         self.uses_rr = isinstance(checkpoint, dict) and "rr_standardizer" in checkpoint
         if self.uses_rr:
-            self.model = CNNLSTMRR().to(self.device)
+            arch = checkpoint.get("arch", "cnn_lstm_rr")  # Deviation 22: second sender architecture
+            if arch == "resnet1d_rr":
+                from perception.model_resnet_rr import ResNet1DRR
+                self.model = ResNet1DRR().to(self.device)
+            else:
+                self.model = CNNLSTMRR().to(self.device)
             self.model.load_state_dict(checkpoint["state_dict"])
             self._rr_stats = checkpoint["rr_standardizer"]
         else:

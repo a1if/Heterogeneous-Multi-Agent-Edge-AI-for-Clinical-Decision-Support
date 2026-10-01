@@ -15,7 +15,12 @@ import numpy as np
 from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.training_targets import urgency_tier_from_event
 
-RR_ENCODER = "perception/checkpoints/cnn_lstm_rr_seed0.pt"
+import os
+
+# Deviation 22: P1_ENCODER switches the sender (e.g. perception/checkpoints/resnet1d_rr_seed0.pt) and
+# P1_ENCODER_TAG suffixes every artifact name derived from it. Unset = the main sender, names unchanged.
+RR_ENCODER = os.environ.get("P1_ENCODER", "perception/checkpoints/cnn_lstm_rr_seed0.pt")
+ENCODER_TAG = os.environ.get("P1_ENCODER_TAG", "")
 SPLITS = {"ds1": "data/processed/ds1_train.npz", "ds2": "data/processed/ds2_test.npz",
           "incart": "data/processed/incart_test.npz"}  # Deviation 21: confirmatory test only (incart_prep.py)
 CACHE_DIR = Path("cache/item7")

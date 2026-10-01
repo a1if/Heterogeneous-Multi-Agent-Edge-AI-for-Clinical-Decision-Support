@@ -26,7 +26,7 @@ from p1_io import save_json_atomic
 PER_TIER = {1: 60, 5: 60, 10: 60, 20: 60, 50: 40}
 N_NATURAL = 100
 NS_NATURAL = (5, 10, 20, 50)
-OUT = Path("results/p1_item7_testset_v2.json")
+OUT = Path(f"results/p1_item7_testset_v2{__import__('os').environ.get('P1_ENCODER_TAG', '')}.json")  # Deviation 22: per-sender set
 LABELS = "NSVFQ"
 
 

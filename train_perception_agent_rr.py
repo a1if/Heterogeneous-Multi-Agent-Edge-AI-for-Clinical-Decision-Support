@@ -78,12 +78,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--smoke", action="store_true", help="3 batches on CPU, no checkpoint or results")
+    parser.add_argument("--arch", choices=("cnn_lstm_rr", "resnet1d_rr"), default="cnn_lstm_rr",
+                        help="resnet1d_rr = Deviation 22 second sender")
     args = parser.parse_args()
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     device = "cpu" if args.smoke else ("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint_path = f"perception/checkpoints/cnn_lstm_rr_seed{args.seed}.pt"
+    checkpoint_path = f"perception/checkpoints/{args.arch.replace('_rr', '')}_rr_seed{args.seed}.pt"
 
     X, y, rr, record_ids = load_with_rr("ds1_train")
     val_mask = np.isin(record_ids, list(VAL_RECORDS))
@@ -93,7 +95,11 @@ def main():
                           sampler=make_weighted_sampler(y[~val_mask]))
     val_loader = loader(X[val_mask], rr[val_mask], y[val_mask])
 
-    model = CNNLSTMRR().to(device)
+    if args.arch == "resnet1d_rr":
+        from perception.model_resnet_rr import ResNet1DRR
+        model = ResNet1DRR().to(device)
+    else:
+        model = CNNLSTMRR().to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
     criterion = nn.CrossEntropyLoss()
     best_val, stale, history, t0 = float("inf"), 0, [], time.time()
@@ -122,7 +128,7 @@ def main():
               f"se={history[-1]['val_se']}")
         if val_loss < best_val:
             best_val, stale = val_loss, 0
-            torch.save({"state_dict": model.state_dict(), "rr_standardizer": stats,
+            torch.save({"state_dict": model.state_dict(), "rr_standardizer": stats, "arch": args.arch,
                         "rr_feature_names": list(FEATURE_NAMES), "seed": args.seed}, checkpoint_path)
         else:
             stale += 1
@@ -146,6 +152,8 @@ def main():
         "ds2": {"rr_encoder": metrics(y2, rr_pred), "reference_cnn_lstm": metrics(y2, ref_pred)},
     }
     results_path = RESULTS_PATH if args.seed == 0 else RESULTS_PATH.replace(".json", f"_seed{args.seed}.json")
+    if args.arch != "cnn_lstm_rr":
+        results_path = RESULTS_PATH.replace(".json", f"_{args.arch}_seed{args.seed}.json")
     with open(results_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
     for name, m in results["ds2"].items():
