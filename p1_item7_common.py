@@ -16,7 +16,8 @@ from perception.perception_agent import PerceptionAgent, replay_selected
 from reasoning.training_targets import urgency_tier_from_event
 
 RR_ENCODER = "perception/checkpoints/cnn_lstm_rr_seed0.pt"
-SPLITS = {"ds1": "data/processed/ds1_train.npz", "ds2": "data/processed/ds2_test.npz"}
+SPLITS = {"ds1": "data/processed/ds1_train.npz", "ds2": "data/processed/ds2_test.npz",
+          "incart": "data/processed/incart_test.npz"}  # Deviation 21: confirmatory test only (incart_prep.py)
 CACHE_DIR = Path("cache/item7")
 RR_GAP_CAP_MS = 11999.0  # HealthEventJSON rejects heart rates < 5 bpm (RR > 12 s gaps)
 

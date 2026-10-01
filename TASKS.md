@@ -165,6 +165,7 @@ Next steps, in order (from repo root, one GPU job at a time):
 - [ ] Deviation 20 (A-filtered) analysis finishes -> freeze A-filtered calibration bias
 - [ ] Freeze manifest (hashes, versions, biases) + git tag r4-confirmatory
 - [x] INCART downloaded 2026-10-01 from PhysioNet's AWS mirror (s3://physionet-open/incartdb/1.0.0/, 231 files, 795 MB, all SHA-256 checksums pass); files-patients-diagnoses.txt gives the record->patient map for the cluster bootstrap
+- [x] Conversion code written + unit-tested (incart_prep.py, tests/test_incart_prep.py; split "incart" in p1_item7_common), not yet run
 - [ ] Conversion + replay + window build (only conversion checks inspected)
 - [ ] Single run: r4 x3, A-compact, A-filtered, calibration logits, timing (~9-10 h GPU)
 - [ ] Analysis H1-H4 in fixed sequence; report all outcomes
