@@ -159,3 +159,12 @@ Next steps, in order (from repo root, one GPU job at a time):
 - [x] Phase 1 technical report updated 2026-10-01 with r4 (13 pages; figures 3-10 regenerated from committed results; user edits kept: no "Code and records" line, section 11 "Proposed next steps" without GPU-hour estimates). Paper headline still to write
 - [ ] Optional, exploratory only: extend seed 303 past the cap (it was still improving)
 - [x] Report: RR-encoder gains quoted as 10-seed mean ± SD (new Table 3); F-class limitation added (2026-10-01)
+
+## Confirmatory evaluation (Deviation 21, docs/confirmatory_plan.md)
+- [x] One-page plan written and committed before any INCART data (2026-10-01)
+- [ ] Deviation 20 (A-filtered) analysis finishes -> freeze A-filtered calibration bias
+- [ ] Freeze manifest (hashes, versions, biases) + git tag r4-confirmatory
+- [ ] INCART ZIP (563.5 MB) placed in data/incartdb/ by the user (PhysioNet download too slow from here)
+- [ ] Conversion + replay + window build (only conversion checks inspected)
+- [ ] Single run: r4 x3, A-compact, A-filtered, calibration logits, timing (~9-10 h GPU)
+- [ ] Analysis H1-H4 in fixed sequence; report all outcomes
