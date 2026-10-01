@@ -11,7 +11,7 @@ Run (from repo root):
     python train_perception_agent_rr.py --smoke      # a few batches, no checkpoint written
 Produces:
     perception/checkpoints/cnn_lstm_rr_seed{seed}.pt
-    results/p1_rr_encoder_results.json
+    results/p1_rr_encoder_results.json (seed 0) or results/p1_rr_encoder_results_seed{seed}.json
 """
 import argparse
 import json
@@ -145,7 +145,8 @@ def main():
         "train_seconds": round(time.time() - t0, 1), "history": history,
         "ds2": {"rr_encoder": metrics(y2, rr_pred), "reference_cnn_lstm": metrics(y2, ref_pred)},
     }
-    with open(RESULTS_PATH, "w", encoding="utf-8") as f:
+    results_path = RESULTS_PATH if args.seed == 0 else RESULTS_PATH.replace(".json", f"_seed{args.seed}.json")
+    with open(results_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
     for name, m in results["ds2"].items():
         print(f"{name:20s} acc={m['accuracy']:.4f} " +
