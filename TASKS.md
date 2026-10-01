@@ -173,7 +173,7 @@ Next steps, in order (from repo root, one GPU job at a time):
 
 ## Plan to 19 October 2026 (agreed 2026-10-01): target TMLR / Engineering Applications of AI, RQ1-RQ3 only
 Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up); Qwen moved to future work.
-- [ ] Thu 1 Oct night: second non-transformer sender (1D-CNN encoder, RR branch, 32-d context) + r4-recipe adapter, 3 seeds (pre-registered first)
+- [x] Thu 1 Oct night: second sender ResNet1D-RR (DS1 val acc 0.955, gate passed) + r4-recipe adapter, 3 seeds, done 00:54 Fri 2 Oct: best val bal-acc 0.71 (101, step 1332) / 0.74 (202, step 1332) / 0.74 (303, step 1221); DS2 test set 1,182 windows (urgent cells at N<=20 short: 46-47). One restart after a Windows file lock (fix: atomic-save retry)
 - [ ] Fri 2: serving realism (batch 1/4/8, prefix caching, throughput, memory, energy); night: second-sender DS2 eval
 - [ ] Sat 3 night: compression sweep k = 1, 2, 8 tokens/event (one seed each) + DS2 eval
 - [ ] Sun 4: analysis; protocol-selection guide
