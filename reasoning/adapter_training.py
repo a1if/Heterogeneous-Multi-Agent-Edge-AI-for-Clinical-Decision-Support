@@ -62,7 +62,15 @@ def _atomic_torch_save(obj, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_name(path.name + ".tmp")
     torch.save(obj, tmp)
-    os.replace(tmp, path)
+    for attempt in range(20):  # Windows may briefly lock the target (antivirus scan): retry, then raise
+        try:
+            os.replace(tmp, path)
+            break
+        except PermissionError:
+            if attempt == 19:
+                raise
+            import time
+            time.sleep(0.5)
 
 
 def _save_resume(path, config, adapter, optimizer, losses, *, epoch, step, epoch_losses) -> None:
