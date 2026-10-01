@@ -164,7 +164,7 @@ Next steps, in order (from repo root, one GPU job at a time):
 - [x] One-page plan written and committed before any INCART data (2026-10-01)
 - [ ] Deviation 20 (A-filtered) analysis finishes -> freeze A-filtered calibration bias
 - [ ] Freeze manifest (hashes, versions, biases) + git tag r4-confirmatory
-- [ ] INCART ZIP (563.5 MB) placed in data/incartdb/ by the user (PhysioNet download too slow from here)
+- [x] INCART downloaded 2026-10-01 from PhysioNet's AWS mirror (s3://physionet-open/incartdb/1.0.0/, 231 files, 795 MB, all SHA-256 checksums pass); files-patients-diagnoses.txt gives the record->patient map for the cluster bootstrap
 - [ ] Conversion + replay + window build (only conversion checks inspected)
 - [ ] Single run: r4 x3, A-compact, A-filtered, calibration logits, timing (~9-10 h GPU)
 - [ ] Analysis H1-H4 in fixed sequence; report all outcomes
