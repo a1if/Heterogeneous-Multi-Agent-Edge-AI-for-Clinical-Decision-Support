@@ -109,7 +109,7 @@ Gate: claim efficiency only where B-4 beats A-compact by >= 10% with the 95% CI 
 - [ ] Dissertation §5.3 also says "three full-batch gradient steps" (same erratum as §3.5.1: 192 per-example updates)
 - [x] Pre-check: RR features separate S from N in held-out data (DS2: 85% of S vs 4% of N have pre-RR ratio < 0.85)
 - [ ] F-class RR distribution shifts between splits (DS1 post-ratio median 0.76, DS2 1.00); the RR encoder's F Se is 0.0%. Check whether this shift explains it
-- [ ] RR encoder is a single seed (0); train more seeds before reporting it as a sweep point
+- [x] RR encoder is a single seed (0); train more seeds before reporting it as a sweep point -> Deviation 19 (2026-10-01): 10 seeds; gains over reference robust on accuracy (0.926 ± 0.019 vs 0.854), recoverability (0.812 ± 0.050 vs 0.696), N/S/V; F not robust; seed 0 representative (ranks 3/4/7), best of 10 on V sensitivity; S Se range 0.15-0.73
 - [x] `tests/test_day2_baseline_arm.py::test_baseline_arm_produces_structured_output` crashes with a Windows access violation while loading Gemma (pre-existing, unrelated to Phase 1 changes) -- 2026-09-28: does NOT reproduce (passes alone, 78 s, and the whole file 7/8 passes); the only failure was test_baseline_is_frozen: the freeze hash was stale after the documented Deviation 5 change (max_new_tokens 1024 -> 256). Re-frozen with the old hash kept under `history` in `reasoning/BASELINE_FROZEN.json`. Full suite run to confirm the crash is gone: `logs/full_test_suite.log` -- CONFIRMED: full suite 62 passed, 1 skipped, 0 failed, no access violation (22:13-22:19)
 - [x] DS1 `rr_interval_ms` has outliers up to 100,022 ms; RR features clip to [200, 3000] ms (`perception/rr_features.py`, tested)
 - [ ] Services audit request: no `services/` directory and no issue link in this repo; waiting on the user
@@ -158,3 +158,4 @@ Next steps, in order (from repo root, one GPU job at a time):
 - [x] Run-length decodability (Deviation 18b, pre-registered 2026-10-01): run>=3 balanced accuracy r4 0.96 (0.93-0.98) vs input 0.985 vs r3 0.56 -> r4 tokens carry run length; r3's did not. Used only partly for urgency (run-based urgent recall 0.64)
 - [x] Phase 1 technical report updated 2026-10-01 with r4 (13 pages; figures 3-10 regenerated from committed results; user edits kept: no "Code and records" line, section 11 "Proposed next steps" without GPU-hour estimates). Paper headline still to write
 - [ ] Optional, exploratory only: extend seed 303 past the cap (it was still improving)
+- [ ] Report: quote RR-encoder gains as 10-seed mean ± SD (S Se 48% ± 21, recoverability 81% ± 5) instead of seed 0's single values (38%, 84.6%)
