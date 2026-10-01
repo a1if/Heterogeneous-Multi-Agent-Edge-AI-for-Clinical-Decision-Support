@@ -350,7 +350,7 @@ def main():
                  "memory_ok": max(peak_n20, peak_loop) < 11500, "batch_check": batch_check,
                  "loss_check": loss_check, "scale_after": float(adapter.scale), "seconds": time.time() - t0, "state": state}
         save_json_atomic(Path("results/p1_item7_smoke.json" if args.recipe == "r1"
-                              else f"results/p1_item7_smoke_{args.recipe}.json"), smoke)
+                              else f"results/p1_item7_smoke_{args.recipe}{ENCODER_TAG}.json"), smoke)
         print(json.dumps({k: v for k, v in smoke.items() if k != "state"}, indent=2))
         print("virtual-token norm range at N=20 (text tokens included):", float(norms.min()), float(norms.max()))
         return
