@@ -48,15 +48,15 @@ def windows_by_n(rows):
     return out
 
 
-def cluster_ci(wins, mea, record_of, n_boot=20000, seed=0):
+def cluster_ci(wins, mea, record_of, n_boot=20000, seed=0, base="A-compact"):
     rng = np.random.default_rng(seed)
-    starts = [s for s, w in wins.items() if all(a in w["arms"] for a in mea + ["A-compact"])]
+    starts = [s for s, w in wins.items() if all(a in w["arms"] for a in mea + [base])]
     recs = sorted({record_of[s] for s in starts})
     by_rec = {r: [s for s in starts if record_of[s] == r] for r in recs}
 
     def diff(sel):
         ba = lambda arm: bal([(wins[s]["reference"], wins[s]["arms"][arm]) for s in sel])
-        return np.mean([ba(m) for m in mea]) - ba("A-compact")
+        return np.mean([ba(m) for m in mea]) - ba(base)
 
     point = float(diff(starts))
     boots = []

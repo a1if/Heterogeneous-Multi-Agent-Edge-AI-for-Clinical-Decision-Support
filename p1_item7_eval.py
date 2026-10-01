@@ -2,6 +2,7 @@
 
 Arms (identical scaffold, task and decoding):
   A-compact          text JSON payload of the N events (p1_pilot_multi_event scaffold)
+  A-filtered         Deviation 20: only non-normal beats listed (with position), normal beats counted
   MEA:<tag>          multi-event adapter checkpoint reasoning/checkpoints/p1_item7_mea_<tag>.pt
 Window sets:
   --split val        the 120 recipe-r2 validation windows (DS1 held-out records): Gate A re-check
@@ -125,12 +126,16 @@ def run(split, arms, suffix=""):
     t0 = time.time()
     for arm in arms:
         todo = [w for w in windows if (arm, w["set"], w["n"], w["start"]) not in done]
-        if arm == "A-compact":
+        if arm in ("A-compact", "A-filtered"):
             for k, w in enumerate(todo):
-                pre, suf = scaffold_parts(w["n"])
-                payload = json.dumps([_payload(r["events"][i], "compact") for i in range(w["start"], w["start"] + w["n"])],
-                                     indent=2)
-                ids = processor.apply_chat_template([{"role": "user", "content": pre + payload + suf}],
+                if arm == "A-filtered":  # Deviation 20: non-normal beats listed, normal beats counted
+                    from p1_item7_filtered import filtered_content
+                    content = filtered_content(r["events"], w["start"], w["n"])
+                else:
+                    pre, suf = scaffold_parts(w["n"])
+                    content = pre + json.dumps([_payload(r["events"][i], "compact")
+                                                for i in range(w["start"], w["start"] + w["n"])], indent=2) + suf
+                ids = processor.apply_chat_template([{"role": "user", "content": content}],
                                                     add_generation_prompt=True, tokenize=True, return_dict=True,
                                                     return_tensors="pt")
                 proc = SchemaJsonProcessor(table, eos, FIELD_CAP)
