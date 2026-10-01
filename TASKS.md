@@ -170,3 +170,17 @@ Next steps, in order (from repo root, one GPU job at a time):
 - [ ] Conversion + replay + window build (only conversion checks inspected)
 - [ ] Single run: r4 x3, A-compact, A-filtered, calibration logits, timing (~9-10 h GPU)
 - [ ] Analysis H1-H4 in fixed sequence; report all outcomes
+
+## Plan to 19 October 2026 (agreed 2026-10-01): target TMLR / Engineering Applications of AI, RQ1-RQ3 only
+Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up); Qwen moved to future work.
+- [ ] Thu 1 Oct night: second non-transformer sender (1D-CNN encoder, RR branch, 32-d context) + r4-recipe adapter, 3 seeds (pre-registered first)
+- [ ] Fri 2: serving realism (batch 1/4/8, prefix caching, throughput, memory, energy); night: second-sender DS2 eval
+- [ ] Sat 3 night: compression sweep k = 1, 2, 8 tokens/event (one seed each) + DS2 eval
+- [ ] Sun 4: analysis; protocol-selection guide
+- [ ] Mon 5: FREEZE + tag release; night: INCART conversion, replay, confirmatory run (Gemma, r4)
+- [ ] Tue 6: INCART analysis (H1-H4); Tue-Wed nights: buffer for technical reruns
+- [ ] Writing: outline + related work Fri 2-Sat 3; methods Sun 4-Tue 6; results/discussion Wed 7-Sat 10; artifact package Thu 8-Sat 10
+- [ ] Sun 11: full draft -> supervisor Mon 12 (feedback by Wed 14)
+- [ ] Thu 15-Sat 17: revise, references, supplement (analysis plan, deviations table)
+- [ ] Sun 18: final number-by-number check against results files; Mon 19: submission-ready
+- [ ] Future work (not in this paper): Qwen3.5-4B receiver (docs/qwen_feasibility.md); data scale-up r5; multi-question reuse study
