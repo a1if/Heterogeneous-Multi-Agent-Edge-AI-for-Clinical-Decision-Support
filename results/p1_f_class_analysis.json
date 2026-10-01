@@ -1,0 +1,129 @@
+{
+  "design": "Exploratory (cited in the Phase 1 report's limitations): why the RR encoder does not detect F beats. CPU/GPU, about 1 min.\n\nPer split: F-beat count and the records they come from; median RR features of F vs N vs V;\ncorrelation of the mean F beat with the mean N and V beats; what seeds 0, 6 and 7 predict\nfor DS2's F beats.\n\nRun (from repo root):\n    python p1_f_class_analysis.py\n",
+  "splits": {
+    "ds1_train": {
+      "f_beats": 387,
+      "beats": 43198,
+      "by_record": {
+        "208": 372,
+        "124": 5,
+        "114": 4,
+        "108": 2,
+        "201": 2,
+        "203": 1,
+        "215": 1
+      }
+    },
+    "ds1_val": {
+      "f_beats": 27,
+      "beats": 7789,
+      "by_record": {
+        "223": 14,
+        "205": 11,
+        "109": 2
+      }
+    },
+    "ds2_test": {
+      "f_beats": 388,
+      "beats": 49680,
+      "by_record": {
+        "213": 362,
+        "233": 11,
+        "210": 10,
+        "200": 2,
+        "202": 1,
+        "214": 1,
+        "219": 1
+      }
+    }
+  },
+  "rr_feature_medians": {
+    "ds1_train": {
+      "N": {
+        "pre_s": 0.7940000295639038,
+        "post_s": 0.7639999985694885,
+        "local_s": 0.7720000147819519,
+        "pre_ratio": 1.0019999742507935,
+        "post_ratio": 0.9959999918937683
+      },
+      "V": {
+        "pre_s": 0.5189999938011169,
+        "post_s": 0.8889999985694885,
+        "local_s": 0.722000002861023,
+        "pre_ratio": 0.7009999752044678,
+        "post_ratio": 1.2769999504089355
+      },
+      "F": {
+        "pre_s": 0.5830000042915344,
+        "post_s": 0.460999995470047,
+        "local_s": 0.6240000128746033,
+        "pre_ratio": 0.9459999799728394,
+        "post_ratio": 0.753000020980835
+      }
+    },
+    "ds2_test": {
+      "N": {
+        "pre_s": 0.7889999747276306,
+        "post_s": 0.753000020980835,
+        "local_s": 0.7710000276565552,
+        "pre_ratio": 1.0019999742507935,
+        "post_ratio": 0.9929999709129333
+      },
+      "V": {
+        "pre_s": 0.5,
+        "post_s": 0.8220000267028809,
+        "local_s": 0.6890000104904175,
+        "pre_ratio": 0.7059999704360962,
+        "post_ratio": 1.2519999742507935
+      },
+      "F": {
+        "pre_s": 0.5529999732971191,
+        "post_s": 0.5529999732971191,
+        "local_s": 0.5529999732971191,
+        "pre_ratio": 1.0,
+        "post_ratio": 0.9990000128746033
+      }
+    }
+  },
+  "mean_beat_correlation": {
+    "ds1_train": {
+      "F_vs_N": 0.6674076386476138,
+      "F_vs_V": 0.7336550053085584
+    },
+    "ds2_test": {
+      "F_vs_N": 0.8450710591841127,
+      "F_vs_V": 0.12055431902413591
+    },
+    "F_ds1_vs_ds2": 0.7059716101203295,
+    "N_ds1_vs_ds2": 0.9746874655088573
+  },
+  "seed_predictions": {
+    "0": {
+      "f_predicted_as": {
+        "N": 335,
+        "V": 53
+      },
+      "predicted_f_total": 1907,
+      "predicted_f_correct": 0
+    },
+    "6": {
+      "f_predicted_as": {
+        "N": 309,
+        "F": 43,
+        "V": 34,
+        "S": 2
+      },
+      "predicted_f_total": 377,
+      "predicted_f_correct": 43
+    },
+    "7": {
+      "f_predicted_as": {
+        "F": 70,
+        "N": 242,
+        "V": 76
+      },
+      "predicted_f_total": 2639,
+      "predicted_f_correct": 70
+    }
+  }
+}

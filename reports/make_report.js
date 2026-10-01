@@ -98,7 +98,7 @@ children.push(p("Research questions: RQ1, does the adapter reduce token count, l
 // 3 Method
 children.push(h1("3. How Phase 1 was run"));
 [
-  "**Pre-registration.** Every change of design was written into the analysis plan as a numbered deviation before any data it affected (18 deviations, each with its reason). Confirmatory and exploratory analyses are labelled as such.",
+  "**Pre-registration.** Every change of design was written into the analysis plan as a numbered deviation before any data it affected (19 deviations, each with its reason). Confirmatory and exploratory analyses are labelled as such.",
   "**Fair baselines.** Besides the dissertation's full JSON (A-full), a compact JSON (A-compact: label, confidence, run length, SQI) and a label-only arm were added; A-compact is the strongest text baseline and is used throughout.",
   "**Seeds and statistics.** At least 3 training seeds per recipe; paired bootstrap confidence intervals; for the final test, a record-level (patient-cluster) bootstrap, because windows from one patient are correlated.",
   "**Held-out patients.** Adapters train on DS1 (19 records) with 3 held-out DS1 records for validation; all headline results are on DS2 (22 records never used for training or tuning).",
@@ -114,7 +114,7 @@ children.push(table([
   ["Latency measured with free-length answers", "Answer length, not the interface, can drive total time", "Timed every arm with output length fixed", "With equal output length, arms differ by ≤ 3%; decode speed is identical (~169 ms/token), so latency gains must come from the prompt side"],
   ["One training run reported as the headline", "Adapter training is sensitive to the random seed", "Multiple seeds per configuration, reported as mean and range", "Single-event accuracy varies across seeds (78.8–95.0%)"],
   ["Methods text describes 3 full-batch updates", "Reproducibility", "Checked against the code", "The code performs 192 per-example updates (64 × 3 epochs); the description is updated accordingly"],
-  ["Auditability measured only as class recoverability", "Needs to locate where information is lost", "Added inverse decoders and an RR-timing encoder", "Recoverability reproduced (69.6%); the loss sits in the encoder, and the RR branch raises it to 84.6%"],
+  ["Auditability measured only as class recoverability", "Needs to locate where information is lost", "Added inverse decoders and an RR-timing encoder", "Recoverability reproduced (69.6%); the loss sits in the encoder, and the RR branch raises it to 81% (mean of 10 seeds)"],
 ], [1900, 2000, 2200, 2926]));
 children.push(caption("Table 2. Weaknesses identified in the single-event evaluation and the Phase 1 response to each."));
 children.push(p("Taken together, these showed that a single heartbeat per call gives a latent interface little room to help: the fixed prompt scaffold dominates the cost, and text already carries the one event well. The interface's natural advantage is when many events must share one context, where text grows by about 60 tokens per event and the adapter by 4. Phase 1 therefore iterated the design towards multi-event reasoning (Sections 5-8)."));
@@ -123,7 +123,16 @@ children.push(p("Taken together, these showed that a single heartbeat per call g
 children.push(h1("5. What changed in the system"));
 children.push(...figure("fig1_pipeline.png", "Figure 1. Pipeline before (single event) and after Phase 1 (multi-event). The highlighted block is the component trained in this work."));
 children.push(h2("5.1 Perception: RR-timing branch"));
-children.push(p("A 5-feature RR-interval branch (pre-RR, post-RR, local mean RR and two ratios) was added to the CNN-LSTM's context stage. S-beat sensitivity rose from 8% to 38%, and class recoverability from the 32-d vector from 69.6% ± 9.9 to 84.6% ± 5.5. Cost: one beat of latency (the post-RR interval) and a single training seed so far."));
+children.push(p("A 5-feature RR-interval branch (pre-RR, post-RR, local mean RR and two ratios) was added to the CNN-LSTM's context stage. Over 10 training seeds (Deviation 19), it improves on the reference encoder on every seed for overall accuracy, normal, S and V beats, and class recoverability from the 32-d vector; it does not reliably detect F beats (6 of 10 seeds above the reference's 0.3%). Cost: one beat of latency (the post-RR interval)."));
+children.push(table([
+  ["Measure (DS2)", "Reference CNN-LSTM", "RR encoder, 10 seeds: mean ± SD [range]", "Seed 0 (used downstream)"],
+  ["Accuracy", "0.854", "0.926 ± 0.019 [0.889, 0.949]", "0.911"],
+  ["S sensitivity", "8%", "48% ± 21% [15%, 73%]", "38%"],
+  ["V sensitivity", "77%", "93% ± 3% [86%, 97%]", "97%"],
+  ["F sensitivity", "0.3%", "5% ± 7% [0%, 18%]", "0%"],
+  ["Class recoverability (probe)", "69.6%", "81.2% ± 5.0% [74.6%, 88.3%]", "84.6%"],
+], [2500, 1700, 2900, 1926]));
+children.push(caption("Table 3. RR encoder across 10 seeds (Deviation 19). Seed 0, on which all adapters were trained, was the only seed when it was chosen and ranks 3rd, 4th and 7th of 10 on accuracy, S sensitivity and recoverability (representative by the pre-registered rule); it has the highest V sensitivity of the 10."));
 children.push(h2("5.2 Multi-event adapter"));
 [
   "N context vectors → N × 4 virtual tokens: a per-event linear projection, learned event-position embeddings (up to 50 slots), and per-token L2 normalisation with a learnable scale (this removed the norm drift that broke generation at large N).",
@@ -153,7 +162,7 @@ children.push(table([
   ["20", "−50%", "−14%", "−177 MB"],
   ["50", "−78% (845 → 183 ms)", "−36% (1,812 → 1,161 ms)", "−460 MB; energy 391 → 230 J"],
 ], [1900, 2300, 2500, 2326]));
-children.push(caption("Table 3. Cost of the latent interface relative to compact text (E3, E3b, Deviation 14). End-to-end response time is dominated by generating the answer (~160 ms/token for every arm), so full-response latency depends on answer length, not on the interface. Recipe r4 keeps 4 tokens per event (the side inputs enter the same projection), so these costs apply to it unchanged."));
+children.push(caption("Table 4. Cost of the latent interface relative to compact text (E3, E3b, Deviation 14). End-to-end response time is dominated by generating the answer (~160 ms/token for every arm), so full-response latency depends on answer length, not on the interface. Recipe r4 keeps 4 tokens per event (the side inputs enter the same projection), so these costs apply to it unchanged."));
 
 // 7 Accuracy
 children.push(h1("7. Accuracy results"));
@@ -168,7 +177,7 @@ children.push(table([
   ["20", "157", "0.48", "0.73", "0.80", "0.83"],
   ["50", "117", "0.54", "0.76", "0.77", "0.84"],
 ], [700, 1100, 1700, 1800, 1700, 2026]));
-children.push(caption("Table 4. Balanced accuracy on the class-balanced DS2 test windows (adapters: mean of 3 seeds). Text answers are identical across the r3 and r4 comparisons (same windows, prompts and decoder)."));
+children.push(caption("Table 5. Balanced accuracy on the class-balanced DS2 test windows (adapters: mean of 3 seeds). Text answers are identical across the r3 and r4 comparisons (same windows, prompts and decoder)."));
 children.push(h2("7.2 Primary comparison against default and calibrated text"));
 children.push(p("The calibrated text arm adds a bias on the routine score at the tier step, chosen on the DS1 validation set only (Deviation 17); it lifts text from 0.48–0.56 to 0.73–0.76 at N ≥ 10 and is the fair comparison. Against it, r3 was non-inferior but never superior. r4 is superior at N = 10 and 20, with patient-level confidence intervals that exclude zero, and non-inferior at N = 5 and 50."));
 children.push(table([
@@ -178,8 +187,8 @@ children.push(table([
   ["20", "+0.35 [+0.23, +0.46]", "+0.10 [+0.01, +0.18]", "superior", "+0.06 [−0.03, +0.16]"],
   ["50", "+0.29 [+0.16, +0.42]", "+0.08 [−0.02, +0.17]", "non-inferior", "+0.01 [−0.11, +0.13]"],
 ], [700, 2050, 2250, 1850, 2176]));
-children.push(caption("Table 5. Adapter minus text, balanced accuracy, with patient-level (record-cluster) bootstrap 95% confidence intervals; non-inferiority margin −0.05."));
-children.push(...figure("fig4_forest.png", "Figure 5. The comparisons of Table 5. Dotted red line: non-inferiority margin. Hollow markers show the previous recipe (r3) against calibrated text."));
+children.push(caption("Table 6. Adapter minus text, balanced accuracy, with patient-level (record-cluster) bootstrap 95% confidence intervals; non-inferiority margin −0.05."));
+children.push(...figure("fig4_forest.png", "Figure 5. The comparisons of Table 6. Dotted red line: non-inferiority margin. Hollow markers show the previous recipe (r3) against calibrated text."));
 children.push(h2("7.3 Why text fails with many events"));
 children.push(...figure("fig5_why_text_fails.png", "Figure 6. Left: text misses urgent windows caused by a single high-confidence V/F beat (a numeric threshold, 0.85, buried in a long list) far more than runs of abnormal beats. Right: text is worst when the key beat is in the middle of the list, the 'lost in the middle' effect; the adapter (r4, 3 seeds) shows no position effect."));
 children.push(p("Both mechanisms are documented in the literature: position effects in long contexts (Liu et al., TACL 2024; Hsieh et al., Findings of ACL 2024) and label bias corrected by calibration (Zhao et al., ICML 2021). A fairness point: the text arm is zero-shot, whereas the adapter was trained on this task; a trained text baseline is planned."));
@@ -195,7 +204,7 @@ children.push(table([
   ["20", "0.60", "0.88–0.93", "0%", "8.3–10.4%", "4.2–6.2%"],
   ["50", "0.56", "0.92–0.95", "0%", "2.5–10.0%", "0–2.5%"],
 ], [700, 1500, 1900, 1600, 1600, 1726]));
-children.push(caption("Table 6. Natural-prevalence windows (100 per N; 40–62 routine windows per N), where the tiers occur at their real frequency."));
+children.push(caption("Table 7. Natural-prevalence windows (100 per N; 40–62 routine windows per N), where the tiers occur at their real frequency."));
 children.push(h2("7.5 Against true annotations"));
 children.push(p("Scoring escalation against the MIT-BIH annotations (does the window contain a truly abnormal beat?) shows that the encoder's own rule has sensitivity 0.92–0.94 but specificity only 0.46–0.52. The clinical accuracy ceiling is therefore set by perception, not by the interface; the adapter (analysed for r3) tracks the reference (sensitivity 0.89–0.98) while default text misses more truly abnormal windows (0.67–0.71 at N ≥ 10)."));
 
@@ -217,20 +226,21 @@ children.push(table([
   ["Question", "Dissertation", "Now"],
   ["RQ1 cost", "Token and latency savings vs full JSON", "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text"],
   ["RQ2 accuracy", "95% on the evaluation set; seed variance flagged as open", "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events"],
-  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 85%; per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); uncertainty check available"],
+  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 81% ± 5 (10 seeds); per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); uncertainty check available"],
 ], [1700, 2700, 4626]));
-children.push(caption("Table 7. Research questions: dissertation answer and how Phase 1 refined or extended it."));
+children.push(caption("Table 8. Research questions: dissertation answer and how Phase 1 refined or extended it."));
 
 // 10 Limitations
 children.push(h1("10. Limitations and threats to validity"));
 [
-  "Many design changes (Deviations 9–18) were made after early results. Each was logged before the data it affected, but the DS2 test set has now informed several iterations; a fresh confirmatory set would remove any doubt.",
+  "Many design changes (Deviations 9–19) were made after early results. Each was logged before the data it affected, but the DS2 test set has now informed several iterations; a fresh confirmatory set would remove any doubt.",
   "Recipe r4 changed two things at once (hard negatives and side inputs), so their separate contributions are not identified; an ablation is planned. One r4 seed was still improving at the epoch cap and was evaluated as pre-registered.",
   "One database (MIT-BIH, 22 test patients), one language model (Gemma 4 E4B, 4-bit), one consumer GPU. Generalisation is not yet shown.",
   "The task is communication fidelity: the language model reproduces a fixed rule over perception outputs, which a three-line rule also solves. The contribution is about the interface, not clinical reasoning.",
   "The text baseline is zero-shot; the adapter is trained. A trained text baseline and a filtered text prompt (abnormal events first, normal beats summarised) are needed; the latter could narrow the efficiency advantage.",
   "False alarms are reduced but not removed (about 3% of routine windows; text 0%), and single-event accuracy remains below text. Windowing delays alerts by up to the window length and gives one decision per window.",
-  "The RR encoder is a single seed with 0% F-class sensitivity; perception specificity (0.46–0.52) limits clinical accuracy.",
+  "**Fusion (F) beats are essentially not detected** (sensitivity 5% ± 7% over 10 encoder seeds). This is a property of the data split rather than of the model: 96% of the training F beats come from one patient (record 208) and 93% of the test F beats from another (record 213), and the two patients' fusion beats differ. In training they are premature and resemble ventricular beats (correlation of the mean beat with V 0.73); in the test patient they occur in a regular rhythm and resemble normal beats (correlation with N 0.85, with V 0.12), so the model labels most of them normal and the RR branch has no timing cue to use. F is widely reported as the weakest class under this inter-patient split. For triage, urgent decisions on F beats therefore rest on V detection or run length. Remedies (more patients with F beats, e.g. the INCART database; augmentation; merging F with V for triage) are possible but not needed for the interface claims.",
+  "Encoder seed variation: S sensitivity ranges from 15% to 73% across seeds, and seed 0 (used for every adapter) has the highest V sensitivity of the 10 (97% vs a mean of 93%), which may slightly favour the downstream results. Perception specificity (0.46–0.52) limits clinical accuracy.",
   "No human evaluation; that needs ethics approval.",
 ].forEach(t => children.push(bullet(t)));
 
@@ -261,8 +271,9 @@ children.push(table([
   ["16 / 16a", "Enlarged test set (1,195 windows); step 1 retired", "Precision; claim moved to multi-event"],
   ["17", "Threshold calibration of both arms", "False alarms; fair comparison"],
   ["18 / 18b", "Recipe r4: hard negatives + heart rate, RR and run-length side inputs; run-length decodability measured as run ≥ 3 balanced accuracy", "False alarms and facts missing from the vector; the planned R² was ill-posed on this split"],
+  ["19", "RR encoder retrained with 10 seeds", "Its gains were single-run numbers"],
 ], [1000, 4600, 3426]));
-children.push(caption("Table 8. Deviations 1–18 (full text in the analysis plan)."));
+children.push(caption("Table 9. Deviations 1–19 (full text in the analysis plan)."));
 
 // ---------- document ----------
 const doc = new Document({

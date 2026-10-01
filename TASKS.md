@@ -158,4 +158,4 @@ Next steps, in order (from repo root, one GPU job at a time):
 - [x] Run-length decodability (Deviation 18b, pre-registered 2026-10-01): run>=3 balanced accuracy r4 0.96 (0.93-0.98) vs input 0.985 vs r3 0.56 -> r4 tokens carry run length; r3's did not. Used only partly for urgency (run-based urgent recall 0.64)
 - [x] Phase 1 technical report updated 2026-10-01 with r4 (13 pages; figures 3-10 regenerated from committed results; user edits kept: no "Code and records" line, section 11 "Proposed next steps" without GPU-hour estimates). Paper headline still to write
 - [ ] Optional, exploratory only: extend seed 303 past the cap (it was still improving)
-- [ ] Report: quote RR-encoder gains as 10-seed mean ± SD (S Se 48% ± 21, recoverability 81% ± 5) instead of seed 0's single values (38%, 84.6%)
+- [x] Report: RR-encoder gains quoted as 10-seed mean ± SD (new Table 3); F-class limitation added (2026-10-01)
