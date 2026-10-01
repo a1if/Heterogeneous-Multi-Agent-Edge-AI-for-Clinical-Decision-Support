@@ -162,7 +162,8 @@ Next steps, in order (from repo root, one GPU job at a time):
 
 ## Confirmatory evaluation (Deviation 21, docs/confirmatory_plan.md)
 - [x] One-page plan written and committed before any INCART data (2026-10-01)
-- [ ] Deviation 20 (A-filtered) analysis finishes -> freeze A-filtered calibration bias
+- [x] Deviation 20 (A-filtered) done 2026-10-01: filtered text 0.94-0.99 vs r4 0.81-0.84 (r4 significantly worse at every N), 0% false alarms, latency equal (±1.5%), 5-19% more tokens. Calibration bias 8.0. Pre-registered rule literally says 'holds' but did not anticipate r4 inferior: reported as a negative result
+- [ ] DECISION (user): revise claims / confirmatory plan in light of Deviation 20 before the freeze
 - [ ] Freeze manifest (hashes, versions, biases) + git tag r4-confirmatory
 - [x] INCART downloaded 2026-10-01 from PhysioNet's AWS mirror (s3://physionet-open/incartdb/1.0.0/, 231 files, 795 MB, all SHA-256 checksums pass); files-patients-diagnoses.txt gives the record->patient map for the cluster bootstrap
 - [x] Conversion code written + unit-tested (incart_prep.py, tests/test_incart_prep.py; split "incart" in p1_item7_common), not yet run
