@@ -155,7 +155,8 @@ def run(split, arms, suffix=""):
             tag = arm.split(":", 1)[1]
             ck = torch.load(f"reasoning/checkpoints/p1_item7_mea_{tag}.pt", map_location="cpu", weights_only=False)
             slots = ck["adapter_state_dict"]["position"].shape[0]  # 20 (r2) or 50 (r3)
-            adapter = MultiEventVirtualAdapter.for_model(model, max_events=slots, input_dim=ck["adapter_state_dict"]["projection.weight"].shape[1]).to(device)
+            adapter = MultiEventVirtualAdapter.for_model(model, max_events=slots, num_tokens=ck["adapter_state_dict"]["position"].shape[1],
+                                                         input_dim=ck["adapter_state_dict"]["projection.weight"].shape[1]).to(device)
             adapter.load_state_dict(ck["adapter_state_dict"])
             adapter.eval()
             state.setdefault("checkpoints", {})[arm] = {"update": ck.get("update"), "val": ck.get("val")}

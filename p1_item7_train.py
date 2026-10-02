@@ -62,6 +62,9 @@ RECIPES = {
                ns=(1, 5, 10, 20, 50), max_events=50, input_dim=35,
                hard_neg_train=15, hard_neg_val=5, hard_neg_conf=0.8),
 }
+# Deviation 24: compression sweep, recipe r4 with k virtual tokens per event (k = 4 is r4 itself)
+for _k in (1, 2, 8):
+    RECIPES[f"r4k{_k}"] = dict(RECIPES["r4"], tokens=_k)
 
 
 def hard_negative_windows(r, records, per_n, rng, ns, conf_thr=0.8, max_per_record=3, exclude=()):
@@ -248,7 +251,7 @@ def main():
     model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
     torch.manual_seed(args.seed)
     device = model.get_input_embeddings().weight.device
-    adapter = MultiEventVirtualAdapter.for_model(model, max_events=rc.get("max_events", 20),
+    adapter = MultiEventVirtualAdapter.for_model(model, max_events=rc.get("max_events", 20), num_tokens=rc.get("tokens", 4),
                                                  input_dim=rc.get("input_dim", 32)).to(device)
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=rc["lr"], weight_decay=0.0)
     total_steps = rc["max_epochs"] * (len(train) // rc["accum"])
