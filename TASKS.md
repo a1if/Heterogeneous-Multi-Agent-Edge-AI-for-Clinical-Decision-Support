@@ -197,6 +197,20 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - [x] Fri 2 22:24: **serving benchmark done** (Deviation 23 result in analysis_plan; two technical corrections to 23a recorded). Adapter fits every batch cell; compact text cannot batch at N=50 or B=8; filtered fits half the B=8 chunks; adapter highest throughput / lowest J per decision with batching
 - [ ] Fri 2 21:32: serving benchmark **restarted under the memory rule** (Deviation 23a: PyTorch capped at 90% of VRAM; batches that do not fit are recorded as exceeds_memory, not timed; first uncapped partial run kept as results/p1_serving_uncapped_partial.json). Queue `scripts/run_serving_then_stoptier.sh` (log logs/serving_queue.log): serving (~1 h) then the Deviation 25 stop-at-tier check (~30 min). The old run_friday / run_stoptier_check waiters were stopped
 
+- [ ] Fri 2 23:11: **compression sweep started** (Deviation 24, a day early; `scripts/run_compression_sweep.sh`, log logs/sweep_queue.log). Smoke k=8 memory OK (10.7 GB peak). Training k=1, 2, 8 (seed 101), then DS2 eval; ~8 h. Then `python p1_sweep_analysis.py`
+
+## Session paused 2026-10-03 00:40 (user request) -- resume here
+State:
+- Compression sweep (Deviation 24, main sender CNN-LSTM-RR, seed 101): k=1 DONE (val bal-acc 0.844 at update 1,332, ran to the 1,341 cap); k=2 STOPPED at update ~200 (resume.pt saved 00:36); k=8 and the DS2 eval not started. Smoke k=8 memory OK.
+- Done this session: Deviation 22 (second sender) result; Deviation 23/23a (serving) result; Deviation 25 passed (2,390/2,390) and applied to scripts/run_incart.sh; report updated (7.6 filtered, 6.1 serving, 9 second sender).
+- Dashboard stopped (restart: `python reports/live_dashboard.py --recipe r4k2 --compare r4 --host 0.0.0.0 --require-key`, key in logs/dashboard_key.txt). 10-minute update schedule cancelled.
+
+Resume (detached; k=1 is skipped, k=2 resumes from its checkpoint; ~6 h), in PowerShell:
+
+    Start-Process "C:\Program Files\Git\usr\bin\bash.exe" -ArgumentList '-c','"cd /c/Users/alift/project && unset P1_ENCODER P1_ENCODER_TAG; /usr/bin/bash scripts/run_compression_sweep.sh >> logs/sweep_queue.log 2>&1"' -WindowStyle Hidden
+
+Then: `python p1_sweep_analysis.py`, record the Deviation 24 result. Monday: p1_freeze.py, tag r4-confirmatory, run_incart_prep.sh, run_incart.sh (text arms now stop at the tier, ~2 h). Writing: related work and introduction.
+
 ## Journal targeting (added 2026-10-02)
 - [x] Journal shortlist + JBHI submission rules + structure of comparable papers: docs/journal_writing_guide.md
 - [ ] Decide target conflict: TASKS plan says TMLR / Engineering Applications of AI; publication_plan section 3 says JBHI first
