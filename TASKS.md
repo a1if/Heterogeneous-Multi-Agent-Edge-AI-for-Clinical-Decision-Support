@@ -190,6 +190,9 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 
 - [ ] Fri 2 ~17:00: **Deviation 25 stop-at-tier check** queued detached (`scripts/run_stoptier_check.sh`, log logs/stoptier_check.log). Waits for "FRIDAY QUEUE DONE" (after serving), then `p1_item7_eval.py --split ds2v2 --suffix stoptier --stop-at-tier --arms A-compact A-filtered` (~30 min), then `p1_stop_at_tier_check.py` -> results/p1_stop_at_tier_check.json. If 2,390/2,390 tiers match: in scripts/run_incart.sh split the generation step into MEA x3 (full) + text arms with `--stop-at-tier`, before the freeze. Else no change
 
+- [x] Fri 2 21:20: **Deviation 22 done** (second sender, `results/p1_second_sender_analysis.json`, result in docs/analysis_plan.md). Adapter vs calibrated compact text: superior at N = 10 only, non-inferior at 20/50; filtered text better at N = 5-20, inconclusive at N = 50 (exploratory note + `p1_filtered_n50_diag.py`). RQ3 strong (HR/RR R^2 ~0.9)
+- [x] Dashboard restarted for the second sender (`--recipe r4_res --compare none --host 0.0.0.0 --require-key`, key in logs/dashboard_key.txt). Public tunnel NOT opened (permission denied; user can run the ssh command themselves)
+
 ## Journal targeting (added 2026-10-02)
 - [x] Journal shortlist + JBHI submission rules + structure of comparable papers: docs/journal_writing_guide.md
 - [ ] Decide target conflict: TASKS plan says TMLR / Engineering Applications of AI; publication_plan section 3 says JBHI first
