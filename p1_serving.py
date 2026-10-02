@@ -16,6 +16,14 @@ consecutive chunks of B windows of the same N (a short last chunk is dropped); 3
 
 CUDA-synchronised wall clock; the cache copy for each cached call is made before its timer starts.
 
+Memory rule (amendment to Deviation 23, 2026-10-02, after the first partial run): PyTorch is capped at 90% of
+the card's dedicated memory (torch.cuda.set_per_process_memory_fraction). Without the cap, Windows silently
+spills over-large batches into system RAM and the timing measures paging, not the model (first run: compact
+text at N = 50, batch 4, took 19-32 s per prefill instead of under 1 s). With the cap, a batch that does not fit
+raises an out-of-memory error instead; that chunk is recorded as exceeds_memory (with its prompt tokens and the
+stage that failed) and not timed. Cells are summarised over the chunks that fit, with the count that did not.
+The uncapped partial run is kept as results/p1_serving_uncapped_partial.json and not analysed.
+
 Run (from repo root):
     python p1_serving.py            # resumable; results/p1_serving.json
     python p1_serving.py --summary
@@ -34,6 +42,7 @@ OUT = Path("results/p1_serving.json")
 NS = (10, 20, 50)
 BATCHES = (1, 4, 8)
 REPEATS = 3
+MEM_FRACTION = 0.90  # memory rule: cap PyTorch at 90% of dedicated GPU memory (no silent spill to system RAM)
 ARMS = ("A-compact", "A-filtered", "MEA")
 MEA_CKPT = "reasoning/checkpoints/p1_item7_mea_r4_seed101.pt"
 EVENT_MARK = "--- Event data ---\n"
@@ -52,9 +61,12 @@ def run():
     from reasoning.multi_event_adapter import MultiEventVirtualAdapter, compose_multi_event_inputs
     from reasoning.virtual_adapter import _render_prompt_with_placeholder, _tokenize_and_remove_placeholder
 
+    torch.cuda.set_per_process_memory_fraction(MEM_FRACTION, 0)
+    cap_mb = MEM_FRACTION * torch.cuda.get_device_properties(0).total_memory / 2 ** 20
     r = replay_split("ds2")
     ws = [w for w in select(load_windows("ds2", r) + load_windows("ds2_n50", r)) if w["n"] in NS]
     state = json.loads(OUT.read_text(encoding="utf-8")) if OUT.exists() else {"design": __doc__, "rows": []}
+    state["memory_cap_mb"] = cap_mb
     done = {(x["arm"], x["n"], x["batch"], x["repeat"], x["chunk"]) for x in state["rows"]}
     model, processor = load_model()
     tok = processor.tokenizer
@@ -142,11 +154,16 @@ def run():
         proc = SchemaJsonProcessor(table, eos, 40)
 
         def go():
-            with torch.no_grad():
-                return model.generate(**kw, do_sample=False, max_new_tokens=TIER_TOKEN_INDEX, logits_processor=[proc],
-                                      pad_token_id=pad_id)
+            try:
+                with torch.no_grad():
+                    return model.generate(**kw, do_sample=False, max_new_tokens=TIER_TOKEN_INDEX,
+                                          logits_processor=[proc], pad_token_id=pad_id)
+            except torch.cuda.OutOfMemoryError:
+                return "OOM"  # returned, not raised, so the power-sampling thread is stopped
         sync()
-        (_, joules, watts, secs, n_samples) = sample_power_during(go)
+        (res, joules, watts, secs, n_samples) = sample_power_during(go)
+        if isinstance(res, str):
+            raise torch.cuda.OutOfMemoryError("decision")
         return secs * 1000, joules, n_samples
 
     for arm in ARMS:  # warm-up
@@ -163,16 +180,26 @@ def run():
                         if (arm, n, b, rep, ci) in done:
                             continue
                         items = [window_inputs(arm, w) for w in chunk]
-                        p_ms, p_mb = prefill(items)
-                        c_ms, c_mb = prefill_cached(items)
-                        d_ms, d_j, d_samples = decision(items)
                         lengths = [len(x["ids"]) if "ids" in x else int(x["embeds"].shape[1]) for x in items]
-                        state["rows"].append({"arm": arm, "n": n, "batch": b, "repeat": rep, "chunk": ci,
-                                              "prompt_tokens": lengths, "prefix_tokens": items[0]["k"],
-                                              "prefill_ms": p_ms, "prefill_peak_mb": p_mb,
-                                              "prefill_cached_ms": c_ms, "prefill_cached_peak_mb": c_mb,
-                                              "decision_ms": d_ms, "decision_joules": d_j, "power_samples": d_samples,
-                                              "decisions_per_s": b / (d_ms / 1000), "joules_per_decision": d_j / b})
+                        row = {"arm": arm, "n": n, "batch": b, "repeat": rep, "chunk": ci,
+                               "prompt_tokens": lengths, "prefix_tokens": items[0]["k"]}
+                        stage = "prefill"
+                        try:
+                            p_ms, p_mb = prefill(items)
+                            stage = "prefill_cached"
+                            c_ms, c_mb = prefill_cached(items)
+                            stage = "decision"
+                            d_ms, d_j, d_samples = decision(items)
+                            row.update({"prefill_ms": p_ms, "prefill_peak_mb": p_mb,
+                                        "prefill_cached_ms": c_ms, "prefill_cached_peak_mb": c_mb,
+                                        "decision_ms": d_ms, "decision_joules": d_j, "power_samples": d_samples,
+                                        "decisions_per_s": b / (d_ms / 1000), "joules_per_decision": d_j / b})
+                        except torch.cuda.OutOfMemoryError:
+                            row.update({"exceeds_memory": True, "failed_stage": stage})
+                            print(f"exceeds memory: {arm} N={n} B={b} chunk {ci} at {stage} "
+                                  f"(tokens {sum(lengths)})", flush=True)
+                        del items
+                        state["rows"].append(row)
                         save_json_atomic(OUT, state)
                         torch.cuda.empty_cache()
         print(f"repeat {rep} done, {time.time() - t_start:.0f}s", flush=True)
@@ -187,17 +214,24 @@ def summarize(rows):
         for b in BATCHES:
             cell = {}
             for arm in ARMS:
-                xs = [x for x in rows if x["arm"] == arm and x["n"] == n and x["batch"] == b]
+                xa = [x for x in rows if x["arm"] == arm and x["n"] == n and x["batch"] == b]
+                if not xa:
+                    continue
+                xs = [x for x in xa if not x.get("exceeds_memory")]
+                oom = len(xa) - len(xs)
                 if not xs:
+                    cell[arm] = {"exceeds_memory": oom, "n_measurements": 0,
+                                 "prompt_tokens_median": float(np.median([t for x in xa for t in x["prompt_tokens"]]))}
                     continue
                 med = lambda k: float(np.median([x[k] for x in xs]))
                 cell[arm] = {k: med(k) for k in ("prefill_ms", "prefill_cached_ms", "decision_ms", "decisions_per_s",
                                                  "joules_per_decision", "prefill_peak_mb", "prefill_cached_peak_mb")}
                 cell[arm]["prompt_tokens_median"] = float(np.median([t for x in xs for t in x["prompt_tokens"]]))
                 cell[arm]["n_measurements"] = len(xs)
-            if "MEA" in cell:
+                cell[arm]["exceeds_memory"] = oom
+            if "MEA" in cell and cell["MEA"].get("n_measurements"):
                 for base in ("A-compact", "A-filtered"):
-                    if base in cell:
+                    if base in cell and cell[base].get("n_measurements"):
                         cell[f"MEA_vs_{base}"] = {k: cell["MEA"][k] / cell[base][k] - 1
                                                   for k in ("prefill_ms", "prefill_cached_ms", "decision_ms",
                                                             "joules_per_decision", "prefill_peak_mb")}
