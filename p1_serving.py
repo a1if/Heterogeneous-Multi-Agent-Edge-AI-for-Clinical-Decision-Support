@@ -14,13 +14,14 @@ consecutive chunks of B windows of the same N (a short last chunk is dropped); 3
   decision       constrained greedy generation up to the tier token (token 7) for the batch, uncached, text
                  batches left-padded: decisions per second and energy per decision (NVML power, trapezoid).
 
-CUDA-synchronised wall clock; the cache copy for each cached call is made before its timer starts.
+CUDA-synchronised wall clock; the prefix KV cache for each cached call is built before its timer starts.
 
 Memory rule (amendment to Deviation 23, 2026-10-02, after the first partial run): PyTorch is capped at 90% of
 the card's dedicated memory (torch.cuda.set_per_process_memory_fraction). Without the cap, Windows silently
 spills over-large batches into system RAM and the timing measures paging, not the model (first run: compact
 text at N = 50, batch 4, took 19-32 s per prefill instead of under 1 s). With the cap, a batch that does not fit
-raises an out-of-memory error instead; that chunk is recorded as exceeds_memory (with its prompt tokens and the
+raises an out-of-memory error instead. Cached allocator blocks are released (untimed) before every stage, so
+each stage starts from the same state and fragmentation does not trip the cap. A chunk that still does not fit is recorded as exceeds_memory (with its prompt tokens and the
 stage that failed) and not timed. Cells are summarised over the chunks that fit, with the count that did not.
 The uncapped partial run is kept as results/p1_serving_uncapped_partial.json and not analysed.
 
@@ -29,7 +30,6 @@ Run (from repo root):
     python p1_serving.py --summary
 """
 import argparse
-import copy
 import json
 import time
 from pathlib import Path
@@ -104,6 +104,12 @@ def run():
     def sync():
         torch.cuda.synchronize()
 
+    def free():
+        import gc
+        gc.collect()
+        torch.cuda.synchronize()
+        torch.cuda.empty_cache()
+
     def batch_tensors(items, side):
         """Stack a batch. Text: pad to the longest (side = 'left' or 'right'). MEA windows of one N are equal length."""
         if "embeds" in items[0]:
@@ -144,8 +150,9 @@ def run():
                    "attention_mask": full["attention_mask"][:, :k]}
             rest = {"inputs_embeds": full["inputs_embeds"][:, k:], "per_layer_inputs": full["per_layer_inputs"][:, k:]}
         with torch.no_grad():
-            cache = model(**pre, use_cache=True).past_key_values
-            c = copy.deepcopy(cache)
+            # untimed: the shared prefix's KV cache (logits for the last position only; the cache is used once,
+            # so it is not copied)
+            c = model(**pre, use_cache=True, logits_to_keep=1).past_key_values
             return timed(lambda: model(**rest, attention_mask=full["attention_mask"], past_key_values=c,
                                        use_cache=True, logits_to_keep=1))[1:]
 
@@ -184,11 +191,15 @@ def run():
                         row = {"arm": arm, "n": n, "batch": b, "repeat": rep, "chunk": ci,
                                "prompt_tokens": lengths, "prefix_tokens": items[0]["k"]}
                         stage = "prefill"
-                        try:
+                        try:  # cached blocks are released before every stage (untimed), so each stage starts
+                            # from the same allocator state and the cap is not hit through fragmentation
+                            free()
                             p_ms, p_mb = prefill(items)
                             stage = "prefill_cached"
+                            free()
                             c_ms, c_mb = prefill_cached(items)
                             stage = "decision"
+                            free()
                             d_ms, d_j, d_samples = decision(items)
                             row.update({"prefill_ms": p_ms, "prefill_peak_mb": p_mb,
                                         "prefill_cached_ms": c_ms, "prefill_cached_peak_mb": c_mb,

@@ -193,6 +193,7 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - [x] Fri 2 21:20: **Deviation 22 done** (second sender, `results/p1_second_sender_analysis.json`, result in docs/analysis_plan.md). Adapter vs calibrated compact text: superior at N = 10 only, non-inferior at 20/50; filtered text better at N = 5-20, inconclusive at N = 50 (exploratory note + `p1_filtered_n50_diag.py`). RQ3 strong (HR/RR R^2 ~0.9)
 - [x] Dashboard restarted for the second sender (`--recipe r4_res --compare none --host 0.0.0.0 --require-key`, key in logs/dashboard_key.txt). Public tunnel NOT opened (permission denied; user can run the ssh command themselves)
 
+- [x] Fri 2 22:24: **serving benchmark done** (Deviation 23 result in analysis_plan; two technical corrections to 23a recorded). Adapter fits every batch cell; compact text cannot batch at N=50 or B=8; filtered fits half the B=8 chunks; adapter highest throughput / lowest J per decision with batching
 - [ ] Fri 2 21:32: serving benchmark **restarted under the memory rule** (Deviation 23a: PyTorch capped at 90% of VRAM; batches that do not fit are recorded as exceeds_memory, not timed; first uncapped partial run kept as results/p1_serving_uncapped_partial.json). Queue `scripts/run_serving_then_stoptier.sh` (log logs/serving_queue.log): serving (~1 h) then the Deviation 25 stop-at-tier check (~30 min). The old run_friday / run_stoptier_check waiters were stopped
 
 ## Journal targeting (added 2026-10-02)
