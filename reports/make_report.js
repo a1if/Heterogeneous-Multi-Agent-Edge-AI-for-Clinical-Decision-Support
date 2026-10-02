@@ -63,7 +63,7 @@ children.push(
     children: [new TextRun({ text: "Latent Perception-to-Reasoning Interfaces for ECG Triage", bold: true, size: 40 })] }),
   new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: "Phase 1 technical report: from single-event adapter to multi-event reasoning", size: 28, color: "52514E" })] }),
   p("**Author:** Alif Tasbir"),
-  p("**Date:** 1 October 2026 (updated with the final adapter recipe, r4)"),
+  p("**Date:** 2 October 2026 (updated with the filtered-text baseline and a second sender architecture)"),
   p("**Status:** post-viva extension of the MSc dissertation, working towards journal submission"),
   new Paragraph({ spacing: { before: 400 }, children: [] }),
   new TableOfContents("Contents", { hyperlink: true, headingStyleRange: "1-2" }),
@@ -79,7 +79,9 @@ children.push(p("The dissertation built and evaluated a small learned adapter th
   "**Accuracy at scale (pre-registered, 1,195 test windows, 22 held-out patients, 3 seeds, patient-level confidence intervals).** The final adapter (recipe r4) reaches 0.81 / 0.83 / 0.83 / 0.84 balanced accuracy at 5 / 10 / 20 / 50 events. It is more accurate than default text at every N (+0.08 to +0.35) and, the stricter comparison, **more accurate than text with a calibrated threshold at 10 and 20 events (+0.10 each, confidence intervals exclude zero)**, and non-inferior at 5 and 50.",
   "**How the adapter reached this.** The previous recipe (r3) matched calibrated text but did not beat it, and raised false alarms on about 11% of routine windows. Two targeted changes in r4 (training on hard routine examples, and passing heart rate, RR interval and run length alongside each event) cut false alarms to 3.6% and raised accuracy at every N. The headline is now **equal or better accuracy than calibrated text at 19–78% lower prompt-processing cost**.",
   "**Auditability holds per event.** Each event's label, tier and urgency flag can be decoded from its slot of virtual tokens as well as from the encoder vector itself, at any of 50 positions. With r4, heart rate and RR interval (R² about 0.7) and the presence of a run of abnormal beats (0.96 balanced accuracy) are now also recoverable from the tokens; the previous design could not carry them.",
-  "**Remaining weaknesses:** the adapter still raises false alarms on about 3% of routine windows where text raises none; the two r4 changes were made together, so their separate effects are not yet known; text remains better for a single event.",
+  "**A stronger text baseline changes the accuracy picture.** A filtered text prompt that lists only the abnormal beats (normal beats given as a count) is 11–17 points more accurate than the adapter at 5–50 events, raises no false alarms and is equally fast. It costs 5–19% more prompt tokens, and its length grows by about 68 tokens per abnormal beat. Against the best text prompt, the adapter's case therefore rests on a cost that does not depend on the number of abnormal beats and on carrying information about every beat, not on accuracy.",
+  "**The method replicates on a second, purely convolutional sender** (ResNet1D-RR, no recurrence). Text again collapses as events are added while the adapter stays at 0.77–0.82; the adapter is more accurate than calibrated text at 10 events and non-inferior at 20 and 50; heart rate and RR interval are recoverable from every token slot (R² about 0.9). Filtered text is again more accurate at 5–20 events; at 50 events it drops to 0.81 and the difference is inconclusive.",
+  "**Remaining weaknesses:** the adapter still raises false alarms on 1–4% of routine windows where text raises none; filtered text is more accurate when the question is known in advance; the two r4 changes were made together, so their separate effects are not yet known; text remains better for a single event.",
 ].forEach(t => children.push(bullet(t)));
 
 // 2 Background
@@ -208,6 +210,24 @@ children.push(caption("Table 7. Natural-prevalence windows (100 per N; 40–62 r
 children.push(h2("7.5 Against true annotations"));
 children.push(p("Scoring escalation against the MIT-BIH annotations (does the window contain a truly abnormal beat?) shows that the encoder's own rule has sensitivity 0.92–0.94 but specificity only 0.46–0.52. The clinical accuracy ceiling is therefore set by perception, not by the interface; the adapter (analysed for r3) tracks the reference (sensitivity 0.89–0.98) while default text misses more truly abnormal windows (0.67–0.71 at N ≥ 10)."));
 
+children.push(h2("7.6 Filtered text baseline (Deviation 20)"));
+children.push(p("The strongest objection to the efficiency claim is that a text prompt need not list every beat. The filtered prompt lists only the non-normal beats (with their position in the window) and gives the normal beats as a count; everything else (scaffold, instructions, constrained decoder) is unchanged. Filtering loses no task information: the filtered window's tier equals the reference on all 1,195 test windows."));
+children.push(table([
+  ["N", "Adapter r4 (3 seeds)", "Filtered text", "Adapter − filtered [95% CI]", "Prompt tokens: adapter / filtered (median)"],
+  ["1", "0.804", "0.966", "–", "516 / 679"],
+  ["5", "0.814", "0.988", "−0.17 [−0.22, −0.13]", "532 / 679"],
+  ["10", "0.830", "0.982", "−0.15 [−0.19, −0.11]", "553 / 682"],
+  ["20", "0.830", "0.945", "−0.12 [−0.16, −0.07]", "593 / 683"],
+  ["50", "0.836", "0.942", "−0.11 [−0.17, −0.05]", "713 / 750"],
+], [600, 1900, 1500, 2400, 2626]));
+children.push(caption("Table 8. Adapter against the filtered text prompt (default decoding; calibration changes the filtered arm by about 0.01 or less). Record-cluster bootstrap 95% CIs."));
+[
+  "**Filtered text is more accurate at every N** (confidence intervals exclude zero) and raises no false alarms (adapter 2.7–4.8%). Time to first token and time to the decision differ by at most 1.5% (about 180 ms for both).",
+  "**Its cost depends on the content.** Each listed abnormal beat adds about 68 tokens, so at 50 events the filtered prompt is longer than the adapter's in half of the windows (those with more than about 1.5 abnormal beats). The adapter's prompt length depends only on N.",
+  "**What filtering gives up.** It relies on perception's labels to decide what to drop, and the receiver (and an auditor) gets no information about the normal beats. The adapter passes per-event information for every beat (Section 8).",
+  "The pre-registered decision rule for this comparison anticipated a filtered prompt that is cheaper but less accurate; applied literally it returns 'advantage holds' because the filtered prompt is longer. We do not read it that way: against filtered text, the latent interface offers no accuracy or latency advantage on this task.",
+].forEach(t => children.push(bullet(t)));
+
 // 8 Auditability
 children.push(h1("8. Auditability"));
 [
@@ -220,40 +240,61 @@ children.push(h1("8. Auditability"));
 children.push(...figure("fig8_auditability.png", "Figure 9. Balanced accuracy of decoding each event's fields from its virtual-token slot (recipe r3, mean of 3 seeds) versus from the encoder's 32-d vector."));
 children.push(...figure("fig10_side_info.png", "Figure 10. Facts carried per event after the r4 change, decoded from slots 0 and 49 of each seed (bars: mean; lines: range). Left: heart rate and RR interval (R²). Right: presence of a run of ≥ 3 abnormal beats (balanced accuracy; Deviation 18b, a pre-registered replacement for an R² metric that proved ill-posed on this split)."));
 
-// 9 RQs
-children.push(h1("9. Status of the research questions"));
+// 9 Second sender
+children.push(h1("9. Replication on a second sender (Deviation 22)"));
+children.push(p("All results so far use one sender architecture (a CNN-LSTM). To test whether a different kind of non-transformer model can use the same latent channel, a purely convolutional sender was trained (ResNet1D-RR: residual 1-D convolutions, no recurrence, the same RR branch and the same 32-d context vector). Everything downstream followed the frozen r4 protocol unchanged: its own DS2 test windows (1,182; the tiers depend on the sender's predictions), three adapter seeds, both text arms and calibration on its own validation windows. It reached 0.955 on DS1 validation (gate 0.85)."));
+children.push(table([
+  ["N", "Adapter (3 seeds)", "Text", "Text, calibrated", "Filtered text", "Adapter − calibrated text", "Adapter − filtered"],
+  ["1", "0.789", "0.964", "0.964", "0.955", "–", "–"],
+  ["5", "0.770", "0.715", "0.787", "0.959", "−0.02 [−0.11, +0.08]", "−0.19 [−0.25, −0.13]"],
+  ["10", "0.823", "0.585", "0.732", "0.929", "+0.09 [+0.02, +0.16]", "−0.11 [−0.18, −0.04]"],
+  ["20", "0.780", "0.586", "0.733", "0.907", "+0.05 [−0.03, +0.13]", "−0.13 [−0.20, −0.06]"],
+  ["50", "0.794", "0.550", "0.733", "0.800", "+0.06 [−0.02, +0.14]", "−0.01 [−0.09, +0.08]"],
+], [500, 1150, 900, 1150, 1100, 2113, 2113]));
+children.push(caption("Table 9. Second sender: balanced accuracy on its DS2 test windows, with record-cluster bootstrap 95% CIs (non-inferiority margin −0.05). Calibrated filtered text is shown in the last column."));
+children.push(...figure("fig11_two_senders.png", "Figure 11. Both senders side by side. The pattern replicates: text with every event listed falls as N grows, the adapter stays roughly flat, and filtered text is the most accurate arm, except at N = 50 on the second sender."));
+[
+  "**Accuracy (RQ2).** The adapter is more accurate than calibrated text at 10 events and non-inferior at 20 and 50, but not at 5; on the main sender it was superior at both 10 and 20. False alarms: 1.3–2.1% of routine windows (text 0%). Every arm produced a valid answer on every window.",
+  "**Cost (RQ1).** Time to first token 16–79% lower than text with every event listed at N = 5–50 (713 vs 3,456 prompt tokens at N = 50); 6–10% lower than filtered text at most N, with no difference at N = 20.",
+  "**Recoverability (RQ3).** From every token slot: beat label 0.91–0.97, tier 0.98–0.99 and run ≥ 3 0.93–0.98 balanced accuracy; heart rate R² 0.89–0.94 and RR interval R² 0.89–0.92, higher than on the main sender (0.59–0.78). The sender's own vector is somewhat less class-recoverable (0.76 ± 0.07 vs 0.81 ± 0.05).",
+  "**Why filtered text drops at 50 events here** (exploratory, after the fact). Not prompt length (median 684 tokens vs 750 on the main sender). Almost all errors are urgent windows answered 'priority', and this sender's urgent windows carry sparser, more borderline evidence: often a single urgent beat among about 13 listed abnormal beats, a deciding V/F confidence just above the 0.85 threshold, or urgency only through a run of three. Filtered text's accuracy therefore depends on how the sender's evidence is distributed; the adapter's does not change much (40 windows per sender, so this is indicative only).",
+].forEach(t => children.push(bullet(t)));
+
+// 10 RQs
+children.push(h1("10. Status of the research questions"));
 children.push(table([
   ["Question", "Dissertation", "Now"],
-  ["RQ1 cost", "Token and latency savings vs full JSON", "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text"],
-  ["RQ2 accuracy", "95% on the evaluation set; seed variance flagged as open", "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events"],
-  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 81% ± 5 (10 seeds); per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); uncertainty check available"],
+  ["RQ1 cost", "Token and latency savings vs full JSON", "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text; replicated on a second sender. Against filtered text, latency is similar and the adapter's advantage is a prompt length that does not grow with the number of abnormal beats"],
+  ["RQ2 accuracy", "95% on the evaluation set; seed variance flagged as open", "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events. Filtered text is more accurate at every N; second sender superior to calibrated text at N = 10 and non-inferior at 20 and 50"],
+  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 81% ± 5 (10 seeds); per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); replicated on a second sender (heart rate and RR R² about 0.9); uncertainty check available"],
 ], [1700, 2700, 4626]));
-children.push(caption("Table 8. Research questions: dissertation answer and how Phase 1 refined or extended it."));
+children.push(caption("Table 10. Research questions: dissertation answer and how Phase 1 refined or extended it."));
 
 // 10 Limitations
-children.push(h1("10. Limitations and threats to validity"));
+children.push(h1("11. Limitations and threats to validity"));
 [
-  "Many design changes (Deviations 9–19) were made after early results. Each was logged before the data it affected, but the DS2 test set has now informed several iterations; a fresh confirmatory set would remove any doubt.",
+  "Many design changes (Deviations 9–19) were made after early results. Each was logged before the data it affected, but the DS2 test set has now informed several iterations. A confirmatory test of the frozen system on an unseen database (INCART) is pre-registered (Deviation 21).",
   "Recipe r4 changed two things at once (hard negatives and side inputs), so their separate contributions are not identified; an ablation is planned. One r4 seed was still improving at the epoch cap and was evaluated as pre-registered.",
-  "One database (MIT-BIH, 22 test patients), one language model (Gemma 4 E4B, 4-bit), one consumer GPU. Generalisation is not yet shown.",
+  "One database so far (MIT-BIH, 22 test patients), one receiving language model (Gemma 4 E4B, 4-bit), one consumer GPU. Two sender architectures have now been tested; a second receiving model is future work.",
   "The task is communication fidelity: the language model reproduces a fixed rule over perception outputs, which a three-line rule also solves. The contribution is about the interface, not clinical reasoning.",
-  "The text baseline is zero-shot; the adapter is trained. A trained text baseline and a filtered text prompt (abnormal events first, normal beats summarised) are needed; the latter could narrow the efficiency advantage.",
-  "False alarms are reduced but not removed (about 3% of routine windows; text 0%), and single-event accuracy remains below text. Windowing delays alerts by up to the window length and gives one decision per window.",
+  "The text baselines are zero-shot; the adapter is trained. This matches the setting studied (a frozen receiver shared by several agents, not fine-tuned for one sender), but a receiver fine-tuned on text could do better. The filtered text prompt, the strongest text baseline tested, is more accurate than the adapter on this task (Section 7.6).",
+  "False alarms are reduced but not removed (1–4% of routine windows across both senders; text 0%), and single-event accuracy remains below text. Windowing delays alerts by up to the window length and gives one decision per window.",
   "**Fusion (F) beats are essentially not detected** (sensitivity 5% ± 7% over 10 encoder seeds). This is a property of the data split rather than of the model: 96% of the training F beats come from one patient (record 208) and 93% of the test F beats from another (record 213), and the two patients' fusion beats differ. In training they are premature and resemble ventricular beats (correlation of the mean beat with V 0.73); in the test patient they occur in a regular rhythm and resemble normal beats (correlation with N 0.85, with V 0.12), so the model labels most of them normal and the RR branch has no timing cue to use. F is widely reported as the weakest class under this inter-patient split. For triage, urgent decisions on F beats therefore rest on V detection or run length. Remedies (more patients with F beats, e.g. the INCART database; augmentation; merging F with V for triage) are possible but not needed for the interface claims.",
   "Encoder seed variation: S sensitivity ranges from 15% to 73% across seeds, and seed 0 (used for every adapter) has the highest V sensitivity of the 10 (97% vs a mean of 93%), which may slightly favour the downstream results. Perception specificity (0.46–0.52) limits clinical accuracy.",
   "No human evaluation; that needs ethics approval.",
 ].forEach(t => children.push(bullet(t)));
 
 // 11 Next steps
-children.push(h1("11. Proposed next steps"));
+children.push(h1("12. Proposed next steps"));
 [
-  "**Filtered-text baseline** (abnormal events first, normal beats summarised): tests the strongest objection to the efficiency claim.",
+  "**Confirmatory test on INCART** (32 patients, never used for any decision): the system is frozen and versioned first, then run once with fixed hypotheses (Deviation 21).",
+  "**Serving conditions:** batching, reuse of the shared prompt prefix, throughput and energy per decision (Deviation 23, running).",
+  "**Compression curve:** 1, 2, 4 and 8 tokens per event, measuring accuracy and recoverability against cost (Deviation 24).",
   "**Ablation of recipe r4:** train with hard negatives only, to separate their effect from the side inputs'.",
-  "**Trained text baseline** (LoRA on the same training windows) for a trained-vs-trained comparison.",
-  "**External validation** on another database (MIT-BIH Supraventricular Arrhythmia, INCART) and **a second language model**.",
+  "**A second receiving language model** is left as future work.",
   "Writing: present Phase 1 as a post-viva extension that strengthens the dissertation's evaluation (fair baselines, seeds, held-out patients) and carries the idea to multi-event reasoning; deviations summarised in one table.",
 ].forEach(t => children.push(num(t)));
-children.push(p("Questions: (1) Which target journal should the framing aim at (clinical AI vs machine learning systems)? (2) Is external validation expected before submission, or acceptable as future work? (3) Should a small clinician rating study be planned, given the ethics lead time? (4) How should the updated methods description (192 per-example updates) be recorded alongside the submitted dissertation?"));
+children.push(p("Questions: (1) The framing is efficient communication between agents, with ECG triage as the case study; is TMLR or Engineering Applications of Artificial Intelligence the better fit? (2) Is one receiving language model acceptable for submission, with a second as future work? (3) Should a small clinician rating study be planned, given the ethics lead time? (4) How should the updated methods description (192 per-example updates) be recorded alongside the submitted dissertation?"));
 
 children.push(h1("Appendix A. Pre-registered deviations"));
 children.push(table([
@@ -272,8 +313,14 @@ children.push(table([
   ["17", "Threshold calibration of both arms", "False alarms; fair comparison"],
   ["18 / 18b", "Recipe r4: hard negatives + heart rate, RR and run-length side inputs; run-length decodability measured as run ≥ 3 balanced accuracy", "False alarms and facts missing from the vector; the planned R² was ill-posed on this split"],
   ["19", "RR encoder retrained with 10 seeds", "Its gains were single-run numbers"],
+  ["20", "Filtered text baseline (abnormal beats listed, normal beats counted)", "Strongest objection to the efficiency claim"],
+  ["21", "Confirmatory test of the frozen system on INCART", "DS2 has informed several iterations"],
+  ["22", "Second sender architecture (ResNet1D-RR)", "Results came from one sender architecture"],
+  ["23", "Serving conditions: batching, prefix caching, energy", "Timing so far was batch 1, no caching"],
+  ["24", "Compression sweep (1, 2, 4, 8 tokens per event)", "Cost against accuracy and recoverability"],
+  ["25", "Text generation stopped at the tier token, if verified on DS2 first", "Compute for the confirmatory run"],
 ], [1000, 4600, 3426]));
-children.push(caption("Table 9. Deviations 1–19 (full text in the analysis plan)."));
+children.push(caption("Table 11. Deviations 1–25 (full text in the analysis plan)."));
 
 // ---------- document ----------
 const doc = new Document({

@@ -270,6 +270,40 @@ def fig_audit():
     save(fig, "fig8_auditability.png")
 
 
+def fig_two_senders():
+    """Deviations 20 and 22: both senders against default, calibrated and filtered text."""
+    a, f = load(R4), load("results/p1_item7_filtered.json")
+    s = load("results/p1_second_sender_analysis.json")["RQ2"]["by_n"]
+    d, c = a["primary_default"], a["primary_calibrated_text"]["by_n"]
+    panels = [("Main sender: CNN-LSTM-RR",
+               {"adapter": ([d[str(n)]["mea_mean"] for n in NS], [min(d[str(n)]["per_seed"].values()) for n in NS],
+                            [max(d[str(n)]["per_seed"].values()) for n in NS]),
+                "text": [d[str(n)]["text"] for n in NS], "cal": [c[str(n)]["text"] for n in NS],
+                "filtered": [f["vs_filtered_default"][str(n)]["base"] for n in NS]}),
+              ("Second sender: ResNet1D-RR (convolutional)",
+               {"adapter": ([s[str(n)]["MEA_mean"] for n in NS],
+                            [min(s[str(n)][f"MEA:r4_res_seed{k}"] for k in (101, 202, 303)) for n in NS],
+                            [max(s[str(n)][f"MEA:r4_res_seed{k}"] for k in (101, 202, 303)) for n in NS]),
+                "text": [s[str(n)]["A-compact"] for n in NS], "cal": [s[str(n)]["A-compact-cal"] for n in NS],
+                "filtered": [s[str(n)]["A-filtered"] for n in NS]})]
+    fig, axes = plt.subplots(1, 2, figsize=(8.6, 3.4), sharey=True)
+    for ax, (title, v) in zip(axes, panels):
+        mean, lo, hi = v["adapter"]
+        ax.fill_between(NS, lo, hi, color=BLUE, alpha=0.14, linewidth=0)
+        ax.plot(NS, mean, color=BLUE, lw=2, marker="o", ms=5, label="Latent adapter (r4 protocol), 3-seed mean; band = seed range")
+        ax.plot(NS, v["text"], color=ORANGE, lw=2, marker="o", ms=5, label="Text, all events (A-compact), default")
+        ax.plot(NS, v["cal"], color=AQUA, lw=2, ls="--", marker="s", ms=5, label="Text, all events, calibrated threshold")
+        ax.plot(NS, v["filtered"], color=INK2, lw=1.6, ls="-.", marker="^", ms=5, label="Filtered text: abnormal beats listed, normal counted")
+        ax.set_title(title, fontsize=9, color=INK)
+        ax.set_xscale("log"); ax.set_xticks(NS); ax.set_xticklabels(NS); ax.set_ylim(0.45, 1.02)
+        ax.set_xlabel("Events per prompt (N)")
+    axes[0].set_ylabel("Balanced accuracy (DS2 test)")
+    h, l = axes[0].get_legend_handles_labels()
+    fig.legend(h, l, loc="lower center", ncol=2, fontsize=7.5, bbox_to_anchor=(0.5, -0.1))
+    fig.tight_layout(rect=(0, 0.08, 1, 1))
+    save(fig, "fig11_two_senders.png")
+
+
 if __name__ == "__main__":
     fig_pipeline(); fig_latency(); fig_accuracy(); fig_forest(); fig_why_text_fails(); fig_confusion(); fig_training(); fig_audit()
-    fig_false_alarms(); fig_side_info()
+    fig_false_alarms(); fig_side_info(); fig_two_senders()
