@@ -187,3 +187,16 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - Second-sender queue started 2026-10-01 evening: `bash scripts/run_second_sender.sh` (idempotent; re-run after any interruption: finished steps are skipped, adapter seeds resume from reasoning/checkpoints/p1_item7_mea_r4_res_seedS.resume.pt). Logs: logs/p1_res_*.log, logs/p1_item7_r4_res_seed*.log
 - Fri 2 Oct 02:22: second-sender DS2 eval running (`bash scripts/run_second_sender_eval.sh`, resumable); serving benchmark chained after it (`python p1_serving.py`, resumable, Deviation 23). Compression sweep ready for Sat night (`bash scripts/run_compression_sweep.sh`, Deviation 24). Still to write: second-sender analysis, sweep analysis, freeze manifest, INCART windows/analysis scripts
 - 02:55: the session's background time limit stopped the eval queue's wrapper (the eval itself kept running). Replaced by a detached runner `scripts/run_friday.sh` (launched hidden via Git Bash; log logs/friday_queue.log): waits for the eval, re-runs the idempotent second-sender queue (calibration, tokens, timing), then the serving benchmark. Long GPU queues should be launched this way from now on
+
+## Journal targeting (added 2026-10-02)
+- [x] Journal shortlist + JBHI submission rules + structure of comparable papers: docs/journal_writing_guide.md
+- [ ] Decide target conflict: TASKS plan says TMLR / Engineering Applications of AI; publication_plan section 3 says JBHI first
+- [ ] Ask JBHI editorial office whether an arXiv/workshop preprint counts as prior publication
+- [ ] Pull 5-8 recent JBHI papers by hand and fill the section-4 table in docs/journal_writing_guide.md
+
+## Session paused 2026-10-02 ~05:00 (user request) -- resume here
+State: second-sender DS2 eval: MEA r4_res seeds 101/202/303 DONE (1,182 windows each); A-compact 15/1,182 done; A-filtered, calibration logits, tokens, timing and the serving benchmark not yet run. All jobs stopped cleanly; every result file is saved atomically and resumable.
+Early second-sender result (adapter only; text arms pending): balanced accuracy mean 0.79 / 0.77 / 0.82 / 0.78 / 0.79 at N = 1 / 5 / 10 / 20 / 50 (main sender r4: 0.80 / 0.81 / 0.83 / 0.83 / 0.84); false alarms 1.3-2.1% all routine, 0-1.6% natural; parse 100%.
+To resume (detached, survives session limits), from PowerShell:
+  Start-Process -FilePath "C:\Program Files\Git\usr\bin\bash.exe" -ArgumentList '-c', '"cd /c/Users/alift/project && /usr/bin/bash scripts/run_friday.sh >> logs/friday_queue.log 2>&1"' -WindowStyle Hidden
+It continues the eval (A-compact from window 16, then A-filtered), then calibration/tokens/timing, then the serving benchmark (~10 h total). Then: Sat night compression sweep (scripts/run_compression_sweep.sh, launch the same detached way); Mon freeze + INCART (docs/run_order.md). Plan shifts by the pause length; buffer nights Tue-Wed absorb about one day.
