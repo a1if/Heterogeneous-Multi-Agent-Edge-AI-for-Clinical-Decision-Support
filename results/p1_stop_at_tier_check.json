@@ -1,0 +1,21 @@
+{
+  "design": "Deviation 25: does stopping text generation at the tier token change any answer? CPU.\n\nCompares the stop-at-tier generations (results/p1_item7_eval_ds2v2_stoptier.json; p1_item7_eval.py\n--stop-at-tier, main sender) with the saved full generations (results/p1_item7_eval_ds2v2_r4.json) for\nA-compact and A-filtered on every Deviation 16 DS2 window. Decision rule (fixed before the data): if the\ntier is identical on every window of both arms, the INCART text arms are generated with --stop-at-tier\n(amendment to docs/confirmatory_plan.md, made before the freeze); otherwise full generation is kept.\n\nRun (from repo root):\n    python p1_stop_at_tier_check.py\n",
+  "by_arm": {
+    "A-compact": {
+      "n_windows": 1195,
+      "missing": 0,
+      "n_different": 0,
+      "agreement": 1.0,
+      "differences": []
+    },
+    "A-filtered": {
+      "n_windows": 1195,
+      "missing": 0,
+      "n_different": 0,
+      "agreement": 1.0,
+      "differences": []
+    }
+  },
+  "identical": true,
+  "decision": "use --stop-at-tier for the INCART text arms (amend the confirmatory plan before the freeze)"
+}

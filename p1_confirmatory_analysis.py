@@ -104,7 +104,8 @@ def main():
                                  "natural": float(np.mean([x["tier"] != "routine" for x in nat])) if nat else None}
     out["parse_rate"] = {a: float(np.mean([x["parsed"] for x in rows if x["arm"] == a])) for a in arms if not a.endswith("-cal")}
     out["field_cap_rate"] = {a: float(np.mean([x["hit_field_cap"] for x in rows if x["arm"] == a])) for a in arms
-                             if not a.endswith("-cal")}
+                             if not a.endswith("-cal")  # undefined for text arms stopped at the tier (Deviation 25)
+                             and all(x["hit_field_cap"] is not None for x in rows if x["arm"] == a)}
     out["timing"] = {str(n): ttft(n) for n in (1, 5, 10, 20, 50) if any(x["n"] == n for x in tm)}
     save_json_atomic(OUT, out)
     for h, d in out["hypotheses"].items():
