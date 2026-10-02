@@ -68,8 +68,9 @@ def text_ids(processor, content):
                                          tokenize=True, return_dict=True, return_tensors="pt")
 
 
-def windows():
-    v2 = json.loads(Path(f"results/p1_item7_testset_v2{_TAG}.json").read_text(encoding="utf-8"))["windows"]
+def windows(split="ds2v2"):
+    path = f"results/p1_item7_testset_v2{_TAG}.json" if split == "ds2v2" else "results/p1_item7_testset_incart.json"
+    v2 = json.loads(Path(path).read_text(encoding="utf-8"))["windows"]
     return [{k: w[k] for k in ("set", "n", "start", "reference", "record")} for w in v2]
 
 
@@ -101,18 +102,22 @@ def tokens():
 
 
 # ---------- calibration logits (GPU) ----------
-def collect(text_arm="A-filtered"):
+def collect(text_arm="A-filtered", split="ds2v2"):
     import torch
     from p1_item7_common import replay_split
     from p1_item7_train import RECIPES, build_windows
     from reasoning.constrained_json import TokenTable
     from reasoning.model_loader import load_model
-    r1, r2 = replay_split("ds1"), replay_split("ds2")
-    rc = RECIPES["r3"]
-    _, v3 = build_windows(r1, rc["val_per_cell"], rc["val_max_per_record"], rc["ns"])
-    sets = {"val": (r1, [{"set": "val", "n": w["n"], "start": w["start"], "reference": w["tier"]} for w in v3]),
-            "ds2v2": (r2, windows())}
-    logits_path = LOGITS if text_arm == "A-filtered" else Path(f"results/p1_item7_compact_logits{_TAG}.json")
+    if split == "incart":  # Deviation 21: confirmatory set only; calibration biases stay frozen from DS1 validation
+        sets = {"incart": (replay_split("incart"), windows("incart"))}
+        logits_path = Path(f"results/p1_incart_{'filtered' if text_arm == 'A-filtered' else 'compact'}_logits.json")
+    else:
+        r1, r2 = replay_split("ds1"), replay_split("ds2")
+        rc = RECIPES["r3"]
+        _, v3 = build_windows(r1, rc["val_per_cell"], rc["val_max_per_record"], rc["ns"])
+        sets = {"val": (r1, [{"set": "val", "n": w["n"], "start": w["start"], "reference": w["tier"]} for w in v3]),
+                "ds2v2": (r2, windows())}
+        logits_path = LOGITS if text_arm == "A-filtered" else Path(f"results/p1_item7_compact_logits{_TAG}.json")
     build = filtered_content if text_arm == "A-filtered" else compact_content
     state = json.loads(logits_path.read_text(encoding="utf-8")) if logits_path.exists() else {"design": __doc__, "arm": text_arm, "rows": []}
     done = {(x["split"], x["set"], x["n"], x["start"]) for x in state["rows"]}
@@ -137,7 +142,7 @@ def collect(text_arm="A-filtered"):
 
 
 # ---------- timing (GPU) ----------
-def timing():
+def timing(split="ds2v2"):
     import torch
     from transformers import StoppingCriteriaList
     from p1_item7_common import replay_split, window_vectors
@@ -148,9 +153,14 @@ def timing():
     from reasoning.model_loader import load_model
     from reasoning.multi_event_adapter import MultiEventVirtualAdapter, compose_multi_event_inputs
     from reasoning.virtual_adapter import _render_prompt_with_placeholder, _tokenize_and_remove_placeholder
-    r = replay_split("ds2")
-    ws = select(load_windows("ds2", r) + load_windows("ds2_n50", r))
-    state = json.loads(TIMING.read_text(encoding="utf-8")) if TIMING.exists() else {"design": __doc__, "rows": []}
+    timing_path = TIMING if split == "ds2v2" else Path("results/p1_incart_timing.json")
+    if split == "incart":  # Deviation 21: first 7 stratified windows per tier per N of the INCART set
+        r = replay_split("incart")
+        ws = select(windows("incart"))
+    else:
+        r = replay_split("ds2")
+        ws = select(load_windows("ds2", r) + load_windows("ds2_n50", r))
+    state = json.loads(timing_path.read_text(encoding="utf-8")) if timing_path.exists() else {"design": __doc__, "rows": []}
     done = {(x["arm"], x["n"], x["start"]) for x in state["rows"]}
     model, processor = load_model()
     tok = processor.tokenizer
@@ -201,7 +211,7 @@ def timing():
             if (a, w["n"], w["start"]) not in done:
                 state["rows"].append({"arm": a, "n": w["n"], "start": w["start"], "reference": w["reference"],
                                       "order": order.index(a), **timed(a, w)})
-        save_json_atomic(TIMING, state)
+        save_json_atomic(timing_path, state)
     print("timing done", len(state["rows"]), flush=True)
 
 
@@ -328,5 +338,11 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=("tokens", "collect", "timing", "analyse"))
     ap.add_argument("--text-arm", choices=("A-filtered", "A-compact"), default="A-filtered", help="collect only")
+    ap.add_argument("--split", choices=("ds2v2", "incart"), default="ds2v2", help="collect / timing (Deviation 21)")
     a = ap.parse_args()
-    collect(a.text_arm) if a.mode == "collect" else {"tokens": tokens, "timing": timing, "analyse": analyse}[a.mode]()
+    if a.mode == "collect":
+        collect(a.text_arm, a.split)
+    elif a.mode == "timing":
+        timing(a.split)
+    else:
+        {"tokens": tokens, "analyse": analyse}[a.mode]()
