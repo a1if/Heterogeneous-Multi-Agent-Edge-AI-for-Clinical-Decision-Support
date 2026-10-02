@@ -32,6 +32,7 @@ Written 2026-10-01, before any INCART data is downloaded, converted or inspected
 ## 3. Arms and runs
 - Arms: r4 seeds 101, 202 and 303; A-compact; A-filtered. Each is generated once through `p1_item7_eval.py`.
 - Calibrated text answers come from tier logits with the frozen biases.
+- **Conditional on Deviation 25** (decided on DS2 before the freeze): if stopping at the tier token reproduces every DS2 text-arm tier, the INCART text arms are generated with `--stop-at-tier` and their field-cap rate is not reported; otherwise full generation for all arms.
 - Timing (time to first token and time to the tier token) uses batch 1, on the first 7 stratified windows per tier per N (21 per N), with arm order rotated, on the same RTX 5070 used for the earlier timing runs.
 
 ## 4. Hypotheses (tested in this order; fixed sequence at α = 0.05, stopping at the first failure)

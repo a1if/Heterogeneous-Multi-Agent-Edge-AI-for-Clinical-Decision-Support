@@ -11,7 +11,8 @@ Window sets:
   --split ds2_n50    Deviation 13: DS2 N = 50 windows, class-balanced by the same rule and seed
                      (20 per tier) + 20 natural windows (first 50 beats of the E3 windows)
 Greedy decoding constrained to the ReasoningOutput schema (reasoning/constrained_json.py),
-128 new tokens, field cap 40. Per generation: the tier, whether a field hit the cap, the
+128 new tokens, field cap 40 (--stop-at-tier, Deviation 25: text arms stop after the tier token,
+7 new tokens; the tier is read from the generated text and the field-cap flag is not defined). Per generation: the tier, whether a field hit the cap, the
 raw text. MEA windows are batched 8 per same-N group (no padding); A-compact runs one at a
 time (prompt lengths differ). Atomic save per generation; resumable.
 
@@ -34,6 +35,7 @@ TIERS = ("routine", "priority", "urgent")
 MAX_NEW, FIELD_CAP, MEA_BATCH = 128, 40, 8
 NS_TEST = (1, 5, 10, 20)
 MARGIN = -0.05
+TIER_TOKEN_INDEX = 7  # as p1_item7_ttd: 6 forced opening tokens, then the tier (Deviation 25)
 
 
 def results_path(split, suffix=""):
@@ -80,7 +82,7 @@ def n50_windows(r):
     return out
 
 
-def run(split, arms, suffix=""):
+def run(split, arms, suffix="", stop_at_tier=False):
     from p1_item7_common import replay_split, window_vectors
     from p1_pilot_multi_event import scaffold_parts
     from reasoning.baseline_arm import _extract_last_json_object
@@ -98,7 +100,7 @@ def run(split, arms, suffix=""):
         "analysis_plan": "docs/analysis_plan.md (Deviations 9-13)", "design": __doc__, "rows": []}
     base = results_path(split)
     from p1_item7_common import ENCODER_TAG
-    if suffix and not state["rows"] and base.exists() and not ENCODER_TAG:  # never reuse text rows across senders
+    if suffix and not state["rows"] and base.exists() and not ENCODER_TAG and not stop_at_tier:  # never reuse text rows across senders
         # Separate results file (e.g. recipe r3 at N = 5-20): reuse the A-compact generations for the
         # same windows (identical prompts, constrained greedy decoding), flagged as reused.
         state["rows"] = [{**x, "reused_from": str(base)} for x in json.loads(base.read_text(encoding="utf-8"))["rows"]
@@ -120,14 +122,18 @@ def run(split, arms, suffix=""):
             scaffold[n] = _tokenize_and_remove_placeholder(processor, rendered, s0, s1)
         return scaffold[n]
 
-    def record(arm, w, text, info, n_tokens):
-        try:
-            answer = ReasoningOutput(**_extract_last_json_object(text)).urgency_tier
-        except (ValueError, TypeError):
-            answer = None  # must not happen under constrained decoding; counted if it does
+    def record(arm, w, text, info, n_tokens, stopped=False):
+        if stopped:  # Deviation 25: generation ended at the tier token, which the decoder never consumes,
+            answer = next((t for t in TIERS if text.endswith(t)), None)  # so read it from the text (as p1_item7_ttd)
+        else:
+            try:
+                answer = ReasoningOutput(**_extract_last_json_object(text)).urgency_tier
+            except (ValueError, TypeError):
+                answer = None  # must not happen under constrained decoding; counted if it does
         state["rows"].append({**w, "arm": arm, "tier": answer, "parsed": answer is not None,
-                              "correct": answer == w["reference"], "hit_field_cap": info["hit_field_cap"],
-                              "n_tokens": n_tokens, "text": text})
+                              "correct": answer == w["reference"],
+                              "hit_field_cap": None if stopped else info["hit_field_cap"],
+                              "n_tokens": n_tokens, "text": text, **({"stopped_at_tier": True} if stopped else {})})
 
     t0 = time.time()
     for arm in arms:
@@ -148,10 +154,11 @@ def run(split, arms, suffix=""):
                 with torch.no_grad():
                     out = model.generate(input_ids=ids["input_ids"].to(device),
                                          attention_mask=ids["attention_mask"].to(device), do_sample=False,
-                                         max_new_tokens=MAX_NEW, logits_processor=[proc])
+                                         max_new_tokens=TIER_TOKEN_INDEX if stop_at_tier else MAX_NEW,
+                                         logits_processor=[proc])
                 gen = out[0][ids["input_ids"].shape[1]:]
                 record(arm, w, tok.decode(gen, skip_special_tokens=True), proc.summary()[0],
-                       int((gen != tok.pad_token_id).sum()))
+                       int((gen != tok.pad_token_id).sum()), stopped=stop_at_tier)
                 save_json_atomic(path, state)
                 if (k + 1) % 20 == 0:
                     print(f"[{arm} {k + 1}/{len(todo)}] elapsed {time.time() - t0:.0f}s", flush=True)
@@ -204,7 +211,8 @@ def summarize(rows, split, n_boot=10000, seed=0):
                                          for t in TIERS if any(x["n"] == n and x["reference"] == t for x in a)}}
                       for n in sorted({x["n"] for x in a})},
             "parse_rate": float(np.mean([x["parsed"] for x in a])) if a else None,
-            "field_cap_rate": float(np.mean([x["hit_field_cap"] for x in a])) if a else None}
+            "field_cap_rate": (float(np.mean([x["hit_field_cap"] for x in a]))
+                               if a and all(x["hit_field_cap"] is not None for x in a) else None)}
         nat = [x for x in rows if x["arm"] == arm and x["set"] == "natural"]
         if nat:
             out["by_arm"][arm]["natural"] = {
@@ -254,9 +262,12 @@ if __name__ == "__main__":
     ap.add_argument("--arms", nargs="*", default=[])
     ap.add_argument("--summary", action="store_true")
     ap.add_argument("--suffix", default="", help="separate results file, e.g. r3 -> p1_item7_eval_ds2_r3.json")
+    ap.add_argument("--stop-at-tier", action="store_true", help="Deviation 25: text arms stop after the tier token")
     a = ap.parse_args()
     if a.summary:
         p = results_path(a.split, a.suffix)
         print(json.dumps(summarize(json.loads(p.read_text(encoding="utf-8"))["rows"], a.split), indent=1))
     else:
-        run(a.split, a.arms, a.suffix)
+        if a.stop_at_tier and (any(x.startswith("MEA") for x in a.arms) or (a.split != "incart" and not a.suffix)):
+            ap.error("--stop-at-tier: text arms only, and its own results file (--suffix) except on INCART")
+        run(a.split, a.arms, a.suffix, a.stop_at_tier)

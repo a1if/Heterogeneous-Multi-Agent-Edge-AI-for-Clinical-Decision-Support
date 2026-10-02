@@ -188,6 +188,8 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - Fri 2 Oct 02:22: second-sender DS2 eval running (`bash scripts/run_second_sender_eval.sh`, resumable); serving benchmark chained after it (`python p1_serving.py`, resumable, Deviation 23). Compression sweep ready for Sat night (`bash scripts/run_compression_sweep.sh`, Deviation 24). Still to write: second-sender analysis, sweep analysis, freeze manifest, INCART windows/analysis scripts
 - 02:55: the session's background time limit stopped the eval queue's wrapper (the eval itself kept running). Replaced by a detached runner `scripts/run_friday.sh` (launched hidden via Git Bash; log logs/friday_queue.log): waits for the eval, re-runs the idempotent second-sender queue (calibration, tokens, timing), then the serving benchmark. Long GPU queues should be launched this way from now on
 
+- [ ] Fri 2 ~17:00: **Deviation 25 stop-at-tier check** queued detached (`scripts/run_stoptier_check.sh`, log logs/stoptier_check.log). Waits for "FRIDAY QUEUE DONE" (after serving), then `p1_item7_eval.py --split ds2v2 --suffix stoptier --stop-at-tier --arms A-compact A-filtered` (~30 min), then `p1_stop_at_tier_check.py` -> results/p1_stop_at_tier_check.json. If 2,390/2,390 tiers match: in scripts/run_incart.sh split the generation step into MEA x3 (full) + text arms with `--stop-at-tier`, before the freeze. Else no change
+
 ## Journal targeting (added 2026-10-02)
 - [x] Journal shortlist + JBHI submission rules + structure of comparable papers: docs/journal_writing_guide.md
 - [ ] Decide target conflict: TASKS plan says TMLR / Engineering Applications of AI; publication_plan section 3 says JBHI first
