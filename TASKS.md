@@ -200,6 +200,10 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - [ ] Fri 2 23:11: **compression sweep started** (Deviation 24, a day early; `scripts/run_compression_sweep.sh`, log logs/sweep_queue.log). Smoke k=8 memory OK (10.7 GB peak). Training k=1, 2, 8 (seed 101), then DS2 eval; ~8 h. Then `python p1_sweep_analysis.py`
 
 ## Session paused 2026-10-03 00:40 (user request) -- resume here
+- 2026-10-03 02:11: k=2 resumed alone from update 200 (`scripts/run_k2_then_shutdown.sh`); the PC shuts down 2 min after it finishes. Next session: k=8 + DS2 eval (`scripts/run_compression_sweep.sh` skips finished k=1/k=2)
+
+## Session paused 2026-10-03 00:40 (user request) -- resume here
+
 State:
 - Compression sweep (Deviation 24, main sender CNN-LSTM-RR, seed 101): k=1 DONE (val bal-acc 0.844 at update 1,332, ran to the 1,341 cap); k=2 STOPPED at update ~200 (resume.pt saved 00:36); k=8 and the DS2 eval not started. Smoke k=8 memory OK.
 - Done this session: Deviation 22 (second sender) result; Deviation 23/23a (serving) result; Deviation 25 passed (2,390/2,390) and applied to scripts/run_incart.sh; report updated (7.6 filtered, 6.1 serving, 9 second sender).
