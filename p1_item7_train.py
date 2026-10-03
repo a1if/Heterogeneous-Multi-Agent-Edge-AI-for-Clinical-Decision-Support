@@ -65,6 +65,8 @@ RECIPES = {
 # Deviation 24: compression sweep, recipe r4 with k virtual tokens per event (k = 4 is r4 itself)
 for _k in (1, 2, 8):
     RECIPES[f"r4k{_k}"] = dict(RECIPES["r4"], tokens=_k)
+# Deviation 26: ablation, r4 with hard negatives but without the side inputs (32-d input)
+RECIPES["r4hn"] = dict(RECIPES["r4"], input_dim=32)
 
 
 def hard_negative_windows(r, records, per_n, rng, ns, conf_thr=0.8, max_per_record=3, exclude=()):
