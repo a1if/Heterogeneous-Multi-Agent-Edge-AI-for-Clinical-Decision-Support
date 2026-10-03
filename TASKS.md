@@ -201,8 +201,7 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 
 ## Session paused 2026-10-03 00:40 (user request) -- resume here
 - 2026-10-03 02:11: k=2 resumed alone from update 200 (`scripts/run_k2_then_shutdown.sh`); the PC shuts down 2 min after it finishes. Next session: k=8 + DS2 eval (`scripts/run_compression_sweep.sh` skips finished k=1/k=2)
-
-## Session paused 2026-10-03 00:40 (user request) -- resume here
+- 2026-10-03 03:16: k=2 DONE (val 0.846 at update 555, early stop at 999); PC shut down. Sat 12:57: sweep relaunched (k=8 training, then DS2 eval of k=1/2/8; ~5 h)
 
 State:
 - Compression sweep (Deviation 24, main sender CNN-LSTM-RR, seed 101): k=1 DONE (val bal-acc 0.844 at update 1,332, ran to the 1,341 cap); k=2 STOPPED at update ~200 (resume.pt saved 00:36); k=8 and the DS2 eval not started. Smoke k=8 memory OK.
