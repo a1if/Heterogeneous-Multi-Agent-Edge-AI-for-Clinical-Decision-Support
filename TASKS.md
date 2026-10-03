@@ -197,7 +197,8 @@ Scope decisions (user, 2026-10-01): keep r4 as the final adapter (no r5 scale-up
 - [x] Fri 2 22:24: **serving benchmark done** (Deviation 23 result in analysis_plan; two technical corrections to 23a recorded). Adapter fits every batch cell; compact text cannot batch at N=50 or B=8; filtered fits half the B=8 chunks; adapter highest throughput / lowest J per decision with batching
 - [ ] Fri 2 21:32: serving benchmark **restarted under the memory rule** (Deviation 23a: PyTorch capped at 90% of VRAM; batches that do not fit are recorded as exceeds_memory, not timed; first uncapped partial run kept as results/p1_serving_uncapped_partial.json). Queue `scripts/run_serving_then_stoptier.sh` (log logs/serving_queue.log): serving (~1 h) then the Deviation 25 stop-at-tier check (~30 min). The old run_friday / run_stoptier_check waiters were stopped
 
-- [ ] Fri 2 23:11: **compression sweep started** (Deviation 24, a day early; `scripts/run_compression_sweep.sh`, log logs/sweep_queue.log). Smoke k=8 memory OK (10.7 GB peak). Training k=1, 2, 8 (seed 101), then DS2 eval; ~8 h. Then `python p1_sweep_analysis.py`
+- [x] Sat 3 17:38: **compression sweep done**, analysis run (Deviation 24 result in analysis_plan). k=1 matches k=4 on DS2 (0.78-0.86, FA 2.7%) at 150 fewer tokens at N=50 -> three-seed comparison condition MET (see Queued GPU work)
+- [x] Fri 2 23:11: **compression sweep started** (Deviation 24, a day early; `scripts/run_compression_sweep.sh`, log logs/sweep_queue.log). Smoke k=8 memory OK (10.7 GB peak). Training k=1, 2, 8 (seed 101), then DS2 eval; ~8 h. Then `python p1_sweep_analysis.py`
 
 ## Session paused 2026-10-03 00:40 (user request) -- resume here
 - 2026-10-03 02:11: k=2 resumed alone from update 200 (`scripts/run_k2_then_shutdown.sh`); the PC shuts down 2 min after it finishes. Next session: k=8 + DS2 eval (`scripts/run_compression_sweep.sh` skips finished k=1/k=2)
