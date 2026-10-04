@@ -1,0 +1,288 @@
+{
+  "design": "Deviation 21: confirmatory analysis of r4-confirmatory on INCART (docs/confirmatory_plan.md). CPU.\n\nInputs: results/p1_item7_eval_incart.json (r4 seeds, A-compact, A-filtered), results/p1_incart_compact_logits.json\nand results/p1_incart_filtered_logits.json (tier logits; calibration biases FROZEN in\nresults/p1_freeze_manifest.json, never re-tuned), results/p1_incart_timing.json, and the patient ids in\ndata/processed/incart_test.npz.\n\nHypotheses in fixed sequence (alpha 0.05; stop at the first failure; later ones are reported descriptively\nas 'not tested in sequence'):\n  H1  r4 (3-seed mean) non-inferior to calibrated A-compact at N = 10, 20 and 50 (all must pass; margin -0.05)\n  H2  r4 superior to calibrated A-compact at N = 10 and 20\n  H3  r4 non-inferior to calibrated A-filtered at N = 10, 20 and 50\n  H4  r4 median time to first token lower than A-compact's at N = 10, 20 and 50 (95% CI upper bound < 0)\nPatient-cluster bootstrap, 20,000 resamples, seed 0. A failed generation (no tier) counts as incorrect and\nas an alarm. Everything else is descriptive.\n\nRun (from repo root):\n    python p1_confirmatory_analysis.py\n",
+  "frozen_manifest_sha": "5ac078dbb187a14b4b4b07f76564ab9ea4b2548e6777ad0443872dd511d31bb4",
+  "deltas": {
+    "A-compact": -3.75,
+    "A-filtered": 8.0
+  },
+  "hypotheses": {
+    "H1": {
+      "tests": {
+        "10": {
+          "difference": 0.08148148148148149,
+          "cluster_ci95": [
+            0.025240299823633263,
+            0.1482550973657795
+          ],
+          "n_windows": 180,
+          "n_records": 31,
+          "non_inferior": true,
+          "superior": true,
+          "pass": true
+        },
+        "20": {
+          "difference": 0.09444444444444455,
+          "cluster_ci95": [
+            0.035231278062435596,
+            0.1548708107136677
+          ],
+          "n_windows": 180,
+          "n_records": 32,
+          "non_inferior": true,
+          "superior": true,
+          "pass": true
+        },
+        "50": {
+          "difference": 0.047222222222222276,
+          "cluster_ci95": [
+            -0.04147477972249959,
+            0.12903357579590974
+          ],
+          "n_windows": 120,
+          "n_records": 25,
+          "non_inferior": true,
+          "superior": false,
+          "pass": true
+        }
+      },
+      "passed": true,
+      "status": "confirmed"
+    },
+    "H2": {
+      "tests": {
+        "10": {
+          "difference": 0.08148148148148149,
+          "cluster_ci95": [
+            0.025240299823633263,
+            0.1482550973657795
+          ],
+          "n_windows": 180,
+          "n_records": 31,
+          "non_inferior": true,
+          "superior": true,
+          "pass": true
+        },
+        "20": {
+          "difference": 0.09444444444444455,
+          "cluster_ci95": [
+            0.035231278062435596,
+            0.1548708107136677
+          ],
+          "n_windows": 180,
+          "n_records": 32,
+          "non_inferior": true,
+          "superior": true,
+          "pass": true
+        }
+      },
+      "passed": true,
+      "status": "confirmed"
+    },
+    "H3": {
+      "tests": {
+        "10": {
+          "difference": -0.10740740740740728,
+          "cluster_ci95": [
+            -0.1684871352898681,
+            -0.048215702703368765
+          ],
+          "n_windows": 180,
+          "n_records": 31,
+          "non_inferior": false,
+          "superior": false,
+          "pass": false
+        },
+        "20": {
+          "difference": -0.1055555555555554,
+          "cluster_ci95": [
+            -0.1597158525344037,
+            -0.0564385921899218
+          ],
+          "n_windows": 180,
+          "n_records": 32,
+          "non_inferior": false,
+          "superior": false,
+          "pass": false
+        },
+        "50": {
+          "difference": -0.06944444444444431,
+          "cluster_ci95": [
+            -0.14597169512966462,
+            -0.004211957870494674
+          ],
+          "n_windows": 120,
+          "n_records": 25,
+          "non_inferior": false,
+          "superior": false,
+          "pass": false
+        }
+      },
+      "passed": false,
+      "status": "not confirmed"
+    },
+    "H4": {
+      "tests": {
+        "10": {
+          "median_rel": -0.2680396385652536,
+          "ci95": [
+            -0.2846468366212871,
+            -0.26132413204520033
+          ],
+          "n_windows": 21,
+          "pass": true
+        },
+        "20": {
+          "median_rel": -0.5056722237285187,
+          "ci95": [
+            -0.5200889713900079,
+            -0.4935835447897928
+          ],
+          "n_windows": 21,
+          "pass": true
+        },
+        "50": {
+          "median_rel": -0.9694013335672157,
+          "ci95": [
+            -0.9725192263884155,
+            -0.9484647525959433
+          ],
+          "n_windows": 21,
+          "pass": true
+        }
+      },
+      "passed": true,
+      "status": "not tested in sequence"
+    }
+  },
+  "balanced_accuracy": {
+    "1": {
+      "A-compact": 0.9833333333333334,
+      "A-compact-cal": 0.9777777777777779,
+      "A-filtered": 0.9722222222222223,
+      "A-filtered-cal": 0.9722222222222223,
+      "MEA:r4_seed101": 0.7444444444444445,
+      "MEA:r4_seed202": 0.7611111111111111,
+      "MEA:r4_seed303": 0.7333333333333334
+    },
+    "5": {
+      "A-compact": 0.7222222222222223,
+      "A-compact-cal": 0.8055555555555557,
+      "A-filtered": 0.938888888888889,
+      "A-filtered-cal": 0.9333333333333335,
+      "MEA:r4_seed101": 0.7944444444444444,
+      "MEA:r4_seed202": 0.7777777777777777,
+      "MEA:r4_seed303": 0.7944444444444444
+    },
+    "10": {
+      "A-compact": 0.5833333333333334,
+      "A-compact-cal": 0.7333333333333334,
+      "A-filtered": 0.9388888888888888,
+      "A-filtered-cal": 0.9222222222222222,
+      "MEA:r4_seed101": 0.7888888888888889,
+      "MEA:r4_seed202": 0.8111111111111112,
+      "MEA:r4_seed303": 0.8444444444444444
+    },
+    "20": {
+      "A-compact": 0.5166666666666666,
+      "A-compact-cal": 0.7277777777777777,
+      "A-filtered": 0.9333333333333332,
+      "A-filtered-cal": 0.9277777777777777,
+      "MEA:r4_seed101": 0.8166666666666668,
+      "MEA:r4_seed202": 0.7944444444444444,
+      "MEA:r4_seed303": 0.8555555555555555
+    },
+    "50": {
+      "A-compact": 0.5333333333333333,
+      "A-compact-cal": 0.775,
+      "A-filtered": 0.8916666666666666,
+      "A-filtered-cal": 0.8916666666666666,
+      "MEA:r4_seed101": 0.7916666666666666,
+      "MEA:r4_seed202": 0.8333333333333334,
+      "MEA:r4_seed303": 0.8416666666666667
+    }
+  },
+  "false_alarm": {
+    "A-compact": {
+      "all": 0.0,
+      "natural": 0.0
+    },
+    "A-compact-cal": {
+      "all": 0.0,
+      "natural": 0.0
+    },
+    "A-filtered": {
+      "all": 0.0,
+      "natural": 0.0
+    },
+    "A-filtered-cal": {
+      "all": 0.0,
+      "natural": 0.0
+    },
+    "MEA:r4_seed101": {
+      "all": 0.002178649237472767,
+      "natural": 0.0
+    },
+    "MEA:r4_seed202": {
+      "all": 0.032679738562091505,
+      "natural": 0.027932960893854747
+    },
+    "MEA:r4_seed303": {
+      "all": 0.010893246187363835,
+      "natural": 0.0111731843575419
+    }
+  },
+  "parse_rate": {
+    "A-compact": 1.0,
+    "A-filtered": 1.0,
+    "MEA:r4_seed101": 1.0,
+    "MEA:r4_seed202": 1.0,
+    "MEA:r4_seed303": 1.0
+  },
+  "field_cap_rate": {
+    "MEA:r4_seed101": 0.11048387096774194,
+    "MEA:r4_seed202": 0.16370967741935483,
+    "MEA:r4_seed303": 0.12419354838709677
+  },
+  "timing": {
+    "1": {
+      "median_rel": 0.010969566550054877,
+      "ci95": [
+        0.005533964618633425,
+        0.015784662863774557
+      ],
+      "n_windows": 21
+    },
+    "5": {
+      "median_rel": -0.06948906241937192,
+      "ci95": [
+        -0.08574159209276166,
+        -0.020865695978803833
+      ],
+      "n_windows": 21
+    },
+    "10": {
+      "median_rel": -0.2680396385652536,
+      "ci95": [
+        -0.2846468366212871,
+        -0.26132413204520033
+      ],
+      "n_windows": 21
+    },
+    "20": {
+      "median_rel": -0.5056722237285187,
+      "ci95": [
+        -0.5200889713900079,
+        -0.4935835447897928
+      ],
+      "n_windows": 21
+    },
+    "50": {
+      "median_rel": -0.9694013335672157,
+      "ci95": [
+        -0.9725192263884155,
+        -0.9484647525959433
+      ],
+      "n_windows": 21
+    }
+  }
+}
