@@ -1,97 +1,109 @@
-# Paper outline (draft 0, 2026-10-02)
+# Paper outline (draft 1, 2026-10-04)
 
 **Working title:** *Latent communication from a non-transformer perception agent to a frozen LLM: efficiency, accuracy and information recoverability*
 
-**Target:** TMLR (primary) or Engineering Applications of Artificial Intelligence. ECG triage is the case study, not the topic.
+**Target:** TMLR (primary; double-blind, so anonymised paper and code) or Engineering Applications of Artificial Intelligence. ECG triage is the case study, not the topic. Decide the venue before formatting (it changes template and anonymisation).
 
 **Scope:** RQ1–RQ3, unchanged from the dissertation, extended from one event per call to many:
 - **RQ1:** Does a learned adapter reduce the token count, latency and memory of the perception-to-LLM handoff compared with text interfaces?
 - **RQ2:** Does it preserve downstream task accuracy?
 - **RQ3:** How much information is recoverable from the virtual tokens, and how can that cost be measured rather than asserted?
 
-## Abstract (skeleton; [..] = pending results)
-- **Problem:** latent communication between agents has been restricted to transformer pairs.
-- **Approach:** a learned adapter maps a non-transformer perception agent's per-event vectors (CNN-LSTM; replicated on a convolutional ResNet) into a frozen Gemma 4 E4B's embedding space at 4 tokens per event.
-- **Evidence base:** pre-registered evaluation (24 deviations), 3 seeds, patient-level confidence intervals, an external confirmatory test on INCART.
-- **RQ1:** prefill −19 to −78% and decision time −4 to −36% against full-record JSON at 10–50 events; [batching and prefix caching]; parity with sender-side filtered text.
-- **RQ2:** better than full-record and calibrated JSON at N = 10–20; not preserved for a single event or against filtered text.
-- **RQ3:** per-event label, tier, heart rate, RR interval and run length are recoverable from each slot; [compression curve].
-- **Design rule:** filter when the receiver's question is known in advance; use a latent channel when it isn't, or when many events must be communicated at constant cost.
+## Abstract (skeleton; [..] = pending INCART)
+- **Problem:** latent communication between agents has been restricted to transformer pairs; a non-transformer perception agent can only talk to an LLM through text.
+- **Approach:** a learned adapter maps a non-transformer perception agent's per-event vectors (CNN-LSTM; replicated on a convolutional ResNet) into a frozen Gemma 4 E4B's embedding space, 4 tokens per event, up to 50 events per call.
+- **Evidence base:** pre-registered evaluation (27 deviations, each logged before its data), 3 seeds throughout, patient-level confidence intervals, an external confirmatory test on INCART [result].
+- **RQ1:** prefill −34 to −81% and energy per decision −25 to −62% against full-record JSON at 10–50 events; under batching the adapter is the only interface that fits every batch size on a 12 GB GPU, with 10–30% higher throughput than sender-side filtered text.
+- **RQ2:** more accurate than full-record and calibrated JSON at N = 10–20 (replicated at N = 10 on the second sender); not better for a single event, and less accurate than filtered text when the receiver's question is known in advance.
+- **RQ3:** per-event label, tier, heart rate, RR interval and run length are recoverable from every slot; facts are recoverable only when passed to the adapter, and the receiver uses them (they drive the accuracy gain and the false-alarm cut); compression to 1–2 tokens per event keeps the information recoverable but makes its use unreliable (decodable is not the same as used).
+- **Design rule:** filter when the receiver's question is known in advance; use a latent channel when it isn't, when many events must be sent at constant and predictable cost, or when requests are batched.
 
 ## Contributions
 1. **A latent channel from a non-transformer sender into a frozen LLM,** scaled to 50 events per call and replicated on two sender architectures (RQ1–RQ3).
 2. **A rigorous efficiency–accuracy evaluation:**
-   - compact, full and **filtered** text baselines;
-   - calibration;
-   - serving with batching and prefix caching;
+   - compact, full and **filtered** text baselines, default and calibrated;
+   - serving with batching, prefix caching and energy, under a GPU memory cap;
    - a pre-registered external confirmatory test.
-3. **A measurement protocol for information recoverability** (per slot, per field), plus the rate–recoverability curve.
-4. **An actionable protocol-selection rule,** and an honest negative result: filtered text beats the latent channel for a known single question.
-5. **An open artifact:** adapter, training recipe, constrained decoder, measurement harness, and the analysis plan with its deviations.
+3. **A measurement protocol for information recoverability** (per slot, per field) and two findings it enables: (a) the facts that are made recoverable are the facts the receiver uses (ablation); (b) recoverable is not the same as used (compression with three seeds).
+4. **An actionable protocol-selection rule,** with honest negative results: filtered text beats the latent channel on accuracy for a known single question; fewer than 4 tokens per event is not reliable.
+5. **An open artifact:** adapter, training recipe, constrained decoder, measurement harness, analysis plan with all deviations, results ledger.
 
 ## Sections
 1. **Introduction:** the agent-communication cost; the non-transformer gap (*Beyond Tokens*); RQ1–RQ3; contributions.
 2. **Related work** (see below).
 3. **System:**
-   - senders: CNN-LSTM-RR, and ResNet1D-RR as the replication;
-   - multi-event adapter (4 tokens per event, position embeddings, L2 scale, side inputs);
+   - senders: CNN-LSTM-RR (main), ResNet1D-RR (replication);
+   - multi-event adapter (k tokens per event, position embeddings, L2 scale, side inputs heart rate / RR / run length);
+   - recipe r4 (hard negatives, side inputs, schedule, early stopping on validation balanced accuracy);
    - schema-constrained decoding;
-   - the task, framed explicitly as a communication-fidelity benchmark.
+   - the task, framed explicitly as a communication-fidelity benchmark (the receiver reproduces a fixed rule over perception outputs).
 4. **Evaluation protocol:**
-   - pre-registration and deviations;
+   - pre-registration and deviations (summary table; full log as supplementary material);
    - data (MIT-BIH DS1 training / DS2 test; INCART confirmatory);
-   - window sampling;
-   - arms (A-compact, A-filtered, MEA);
-   - statistics (patient bootstrap, non-inferiority margin, seeds).
+   - window sampling (class-balanced stratified + natural prevalence);
+   - arms (A-compact, A-filtered, calibrated variants, MEA);
+   - statistics (patient-cluster bootstrap, non-inferiority margin −0.05, three seeds, fixed-sequence hypotheses on INCART).
 5. **Results, RQ1 (efficiency):**
-   - tokens, prefill, decision time, memory, energy against N (Table 3, Figure 3);
-   - serving: batching and prefix caching [Deviation 23];
-   - filtered-text cost growth with abnormal burden.
+   - tokens, prefill, decision time, memory, energy against N (batch 1);
+   - serving: batching, prefix caching, throughput, energy; what does not fit in memory;
+   - filtered-text cost growth with abnormal burden;
+   - second sender.
 6. **Results, RQ2 (accuracy):**
-   - against default, calibrated and filtered text (Tables 4–5, Figures 4–5);
-   - false alarms (Figure 8);
-   - mechanisms: lost in the middle, the numeric threshold;
-   - the r3 → r4 iteration;
-   - the second sender [Deviation 22];
-   - INCART confirmatory [Deviation 21].
+   - against default, calibrated and filtered text; false alarms;
+   - mechanisms of text failure: numeric threshold, lost in the middle, sparse evidence (second sender at N = 50);
+   - the r3 → r4 iteration and the **ablation** (side inputs drive the gain; hard negatives alone change little);
+   - the second sender;
+   - INCART confirmatory [Deviation 21; H1–H4 as pre-registered].
 7. **Results, RQ3 (recoverability):**
-   - per-slot decoding (Figures 9–10);
-   - side inputs;
-   - run ≥ 3;
+   - per-slot decoding of label, tier, heart rate, RR, run ≥ 3;
    - encoder ceiling and 10-seed robustness;
-   - the gap between decodable and used (0.92–0.95 against 0.83);
-   - compression curve [Deviation 24].
+   - facts recoverable only when passed (ablation);
+   - **compression:** 1 / 2 / 4 / 8 tokens per event, three seeds for 1, 2, 4: information recoverable at every k; use reliable only at k = 4 (one failed run at k = 1; false alarms ×2.4 at k = 2).
 8. **Discussion:**
    - the protocol-selection rule;
-   - when latent beats text (unknown questions, many events);
-   - limits of filtering;
-   - engineering implications.
+   - when latent beats text (unknown questions, many events, batching and predictable memory);
+   - decodable vs used: what recoverability metrics can and cannot certify;
+   - limits of filtering (depends on the sender's evidence density);
+   - engineering implications for agent pipelines.
 9. **Limitations:**
-   - one receiver LLM (Qwen as future work);
-   - one domain;
-   - test-set reuse (answered by INCART);
+   - one receiver LLM (second receiver as future work);
+   - one domain; two databases;
+   - test-set reuse on DS2 (answered by INCART);
    - the F class;
    - perception specificity;
-   - a zero-shot text baseline under a frozen-model constraint.
+   - zero-shot text baselines under a frozen-receiver constraint;
+   - seed variability (validation 0.72–0.82 at k = 4; one failed run at k = 1);
+   - k = 8 a single run; its heart-rate / RR decodability likely limited by the decoder (32 PCA components).
 10. **Conclusion.**
 
-## Figures and tables → source files
-| Item | Source |
-|---|---|
-| Pipeline | reports/figures/fig1_pipeline.png |
-| Efficiency vs N | results/p1_item7_ttd.json, p1_item7_filtered_timing.json, E3/E3b |
-| Serving (batch, cache) | results/p1_serving.json [Deviation 23] |
-| Accuracy vs N (r3, r4, text, calibrated, filtered) | results/p1_item7_r4_analysis.json, p1_item7_filtered.json |
-| Forest plots | the same files |
-| False alarms | results/p1_item7_r4_analysis.json |
-| Second sender | results/p1_second_sender_analysis.json [Deviation 22] |
-| INCART confirmatory | results/p1_confirmatory_incart.json [Deviation 21] |
-| Recoverability per slot | results/p1_item7_slot_decoder.json, p1_item7_r4_analysis.json, p1_item7_runlen.json |
-| Compression curve | results/p1_sweep_analysis.json [Deviation 24] |
-| RR encoder over 10 seeds | results/p1_rr_seeds.json |
-| Deviations table | docs/analysis_plan.md |
+## Key findings to state exactly (source: docs/analysis_plan.md, results_ledger.json)
+| Finding | Deviation | Ledger |
+|---|---|---|
+| Adapter vs calibrated compact text +0.10 at N = 10 and 20 (superior) | 18 | p1.table.07 |
+| Filtered text more accurate at every N (−0.11 to −0.17) | 20 | p1.table.09 |
+| Second sender: superior to calibrated text at N = 10, non-inferior at 20 and 50 | 22 | p1.table.10 |
+| Serving: adapter fits every batch; +10–30% throughput, −12–28% energy vs filtered text | 23 / 23a | p1.table.05 |
+| Stop-at-tier reproduces every text tier (2,390 / 2,390) | 25 | (analysis_plan) |
+| Ablation: side inputs +0.03 to +0.05 accuracy, false alarms 8.6% → 3.6%; hard negatives ≈ +0.01 | 26 | p1.table.11 |
+| Compression: k = 1 and k = 2 not non-inferior to k = 4; information recoverable at every k | 24 / 27 | p1.table.12, p1.figure.12 |
+| INCART H1–H4 | 21 | [pending] |
 
-## Related work (paragraph plan; keys from the dissertation's references.bib, new ones to verify)
+## Figures and tables → source files (all in results_ledger.json as p1.table.* / p1.figure.*)
+Planned paper figures (5–7), redrawn from the report figures in the venue's style:
+| Paper item | From report | Source |
+|---|---|---|
+| Fig. 1 Pipeline | Figure 1 | reports/figures/fig1_pipeline.png |
+| Fig. 2 Efficiency vs N + serving | Figure 3, Table 5 | results/p1_item7_ttd.json, p1_e3*.json, p1_serving.json |
+| Fig. 3 Accuracy vs N, both senders, all text arms | Figures 4, 11 | p1_item7_r4_analysis.json, p1_item7_filtered.json, p1_second_sender_analysis.json |
+| Fig. 4 Why text fails | Figure 6 | results/p1_item7_eval_ds2v2_r4.json |
+| Fig. 5 Recoverability per slot + side inputs | Figures 9, 10 | p1_item7_slot_decoder.json, p1_item7_runlen.json |
+| Fig. 6 Compression: every run at each k | Figure 12 | p1_dev27_kseeds.json, p1_sweep_analysis.json |
+| Table: ablation | Table 11 | results/p1_dev26_ablation.json |
+| Table: INCART confirmatory | (new) | results/p1_confirmatory_incart.json |
+| Table: deviations summary | Table 14 | docs/analysis_plan.md |
+All numbers in the text come from ledger placeholders rendered by render_ledger.py (never retyped); add scalar keys for INCART after Monday.
+
+## Related work (paragraph plan; keys from the dissertation's references.bib, new ones to verify before citing)
 1. **Latent communication between LLM agents:**
    - *Beyond Tokens* survey (liu2026beyondtokens);
    - agent primitives (jin2026agentprimitives);
@@ -115,16 +127,23 @@
    - xRAG (Cheng et al., NeurIPS 2024);
    - LLMLingua (Jiang et al., EMNLP 2023).
 
-   These compress text into embeddings, whereas this work compresses a non-text agent's state.
-4. **Long-context and calibration effects behind the text baseline's failures:**
+   These compress text into embeddings, whereas this work compresses a non-text agent's state; our compression study adds the reliability-of-use dimension they rarely report.
+4. **Probing and the decodable-vs-used distinction:** linear/MLP probes and their limits (to add and verify: e.g. Hewitt & Liang, EMNLP 2019 control tasks; Belinkov, CL 2022 probing survey). Supports the RQ3 framing.
+5. **Long-context and calibration effects behind the text baseline's failures:**
    - lost in the middle (Liu et al., TACL 2024) and found in the middle (Hsieh et al., Findings of ACL 2024);
    - calibrate before use (Zhao et al., ICML 2021).
-5. **Pre-registration and evaluation practice in ML:** a brief note justifying the deviation log.
+6. **Pre-registration and evaluation practice in ML:** a brief note justifying the deviation log.
 
 ## Writing schedule (docs/run_order.md)
 | Dates | Sections |
 |---|---|
-| Fri 2 – Sat 3 | Outline (this file), related work, introduction |
-| Sun 4 – Tue 6 | System and protocol |
-| Wed 7 – Sat 10 | Results and discussion |
-| Sun 11 | Full draft |
+| Sun 4 – Mon 5 | Related work (verify references first) |
+| Mon 5 | INCART freeze and run |
+| Mon 5 – Tue 6 | Introduction |
+| Tue 6 – Wed 7 | System and protocol |
+| Thu 8 – Sat 10 | Results and discussion (INCART section after its result) |
+| Sun 11 | Full draft, abstract |
+| Mon 12 – Wed 14 | Supervisor review (with the updated technical report) |
+| Thu 15 – Sat 17 | Revise; figures in venue style; code release |
+| Sun 18 | Final checks (ledger render, references, anonymisation) |
+| Mon 19 | Submission-ready |
