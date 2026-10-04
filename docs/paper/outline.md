@@ -2,7 +2,7 @@
 
 **Working title:** *Latent communication from a non-transformer perception agent to a frozen LLM: efficiency, accuracy and information recoverability*
 
-**Target:** TMLR (primary; double-blind, so anonymised paper and code) or Engineering Applications of Artificial Intelligence. ECG triage is the case study, not the topic. Decide the venue before formatting (it changes template and anonymisation).
+**Target:** *Information Fusion* (Elsevier; the LaTeX draft in this folder, `main.tex`, uses elsarticle with `\journal{Information Fusion}`). ECG triage is the case study, not the topic. The draft (abstract, introduction, related work, system, protocol, results, discussion; 49 references) already exists in `sections/`; this outline tracks what it must cover.
 
 **Scope:** RQ1–RQ3, unchanged from the dissertation, extended from one event per call to many:
 - **RQ1:** Does a learned adapter reduce the token count, latency and memory of the perception-to-LLM handoff compared with text interfaces?
