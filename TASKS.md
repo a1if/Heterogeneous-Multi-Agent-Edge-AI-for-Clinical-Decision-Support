@@ -218,7 +218,9 @@ Then: `python p1_sweep_analysis.py`, record the Deviation 24 result. Monday: p1_
 - [x] Sun 4 18:40: all 14 report tables and 12 figures saved in results_ledger.json (keys p1.table.01-14, p1.figure.01-12; captions, sections, rows as printed, source files, run dates). Regenerate after any report change: `LEDGER_OUT=<file> node reports/make_report.js` then `python p1_export_ledger.py <file>`. Existing dissertation keys untouched (backup results_ledger.json.bak_pre_p1_tables)
 
 - [x] Sun 4 19:20: **INCART pre-flight PASSED** (`scripts/preflight_incart.py`, log logs/preflight_incart.log): full Monday pipeline on a stand-in made from 6 DS2 records in a sandbox (tmp/preflight_incart); no INCART data touched. Not covered: incart_prep.py on the real WFDB files (only possible after the freeze).
-- [ ] **FREEZE ON HOLD (user decision, Sun 4)** -- next: p1_freeze.py, commit, tag r4-confirmatory, run_incart_prep.sh, run_incart.sh, confirmatory analysis; only on the user's go-ahead.
+- [x] Sun 4 19:21: **FROZEN** (user go-ahead): r4 checkpoints committed, results/p1_freeze_manifest.json (sha256 5ac078db...), tag `r4-confirmatory` (bf80878). Calibration biases frozen: A-compact -3.75, A-filtered 8.0
+- [x] Sun 4 19:27: INCART prep: 75 recordings, 32 patients, 175,777 beats; 1,240 windows (all stratified cells full), window sha256 667128202efd52df... committed (5655c69) before any model output
+- [ ] Sun 4 19:29: **INCART confirmatory run** (`scripts/run_incart.sh`, detached, log logs/incart_queue.log): adapters x3 full, text arms stop-at-tier, logits, timing, then p1_confirmatory_analysis.py. Report every hypothesis outcome as is; no changes after results
 
 ## Queued GPU work (agreed 2026-10-03; pre-register each before training)## Queued GPU work (agreed 2026-10-03; pre-register each before training)
 - Sat 3 23:35: Deviation 27 trainings done (val best: k1 0.844/0.824/0.513, k2 0.846/0.905/0.872); DS2 eval running; **PC shuts down 2 min after it ends** (`scripts/shutdown_after_kseeds.sh`). Next session: `python p1_seed_group_analysis.py --dev 27`, record the result; launch Deviation 26 (`scripts/run_r4_ablation.sh`, detached).
