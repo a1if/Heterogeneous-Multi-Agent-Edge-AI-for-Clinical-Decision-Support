@@ -2024,8 +2024,139 @@
     "note": "values as printed in the report (rounded); full precision in the source files"
   },
   "p1.table.13": {
-    "caption": "Table 13. Research questions: dissertation answer and how Phase 1 refined or extended it.",
-    "section": "11. Status of the research questions",
+    "caption": "Table 13. INCART hypotheses (adapter: mean of three seeds; patient-cluster bootstrap, margin −0.05). *The N = 50 timing was re-measured under the GPU memory cap (Deviation 21a): the original run was distorted by memory paging (compact text 6.9 s instead of about 0.86 s).",
+    "section": "11. External confirmatory test on INCART (Deviation 21)",
+    "subsection": null,
+    "type": "results",
+    "columns": [
+      "Hypothesis",
+      "N",
+      "Estimate [95% CI]",
+      "Result"
+    ],
+    "rows": [
+      [
+        "H1 (primary): adapter non-inferior to calibrated text",
+        "10",
+        "+0.08 [+0.03, +0.15]",
+        "Confirmed"
+      ],
+      [
+        "",
+        "20",
+        "+0.09 [+0.04, +0.15]",
+        ""
+      ],
+      [
+        "",
+        "50",
+        "+0.05 [−0.04, +0.13]",
+        ""
+      ],
+      [
+        "H2: adapter superior to calibrated text",
+        "10",
+        "+0.08 [+0.03, +0.15]",
+        "Confirmed"
+      ],
+      [
+        "",
+        "20",
+        "+0.09 [+0.04, +0.15]",
+        ""
+      ],
+      [
+        "H3: adapter non-inferior to calibrated filtered text",
+        "10",
+        "−0.11 [−0.17, −0.05]",
+        "Not confirmed"
+      ],
+      [
+        "",
+        "20",
+        "−0.11 [−0.16, −0.06]",
+        ""
+      ],
+      [
+        "",
+        "50",
+        "−0.07 [−0.15, −0.004]",
+        ""
+      ],
+      [
+        "H4: faster time to first token than text",
+        "10 / 20 / 50",
+        "−27% / −51% / −77%*",
+        "Not tested in sequence (H3 failed); descriptive"
+      ]
+    ],
+    "source": [
+      "results/p1_confirmatory_incart.json",
+      "results/p1_incart_timing_n50_capped.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.14": {
+    "caption": "Table 14. Balanced accuracy on INCART by number of events (default decoding unless stated).",
+    "section": "11. External confirmatory test on INCART (Deviation 21)",
+    "subsection": null,
+    "type": "results",
+    "columns": [
+      "N",
+      "Adapter (3 seeds)",
+      "Text",
+      "Text, calibrated",
+      "Filtered text"
+    ],
+    "rows": [
+      [
+        "1",
+        "0.746",
+        "0.983",
+        "0.978",
+        "0.972"
+      ],
+      [
+        "5",
+        "0.789",
+        "0.722",
+        "0.806",
+        "0.939"
+      ],
+      [
+        "10",
+        "0.815",
+        "0.583",
+        "0.733",
+        "0.939"
+      ],
+      [
+        "20",
+        "0.822",
+        "0.517",
+        "0.728",
+        "0.933"
+      ],
+      [
+        "50",
+        "0.822",
+        "0.533",
+        "0.775",
+        "0.892"
+      ]
+    ],
+    "source": [
+      "results/p1_confirmatory_incart.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.15": {
+    "caption": "Table 15. Research questions: dissertation answer and how Phase 1 refined or extended it.",
+    "section": "12. Status of the research questions",
     "subsection": null,
     "type": "qualitative",
     "columns": [
@@ -2042,7 +2173,7 @@
       [
         "RQ2 accuracy",
         "95% on the evaluation set; seed variance flagged as open",
-        "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events. Filtered text is more accurate at every N; second sender superior to calibrated text at N = 10 and non-inferior at 20 and 50"
+        "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events. Confirmed on an unseen database (INCART: non-inferior at 10–50 events, superior at 10 and 20). Filtered text is more accurate at every N; second sender superior to calibrated text at N = 10 and non-inferior at 20 and 50"
       ],
       [
         "RQ3 auditability",
@@ -2057,8 +2188,8 @@
     "report": "reports/Phase1_Technical_Report.docx",
     "note": "values as printed in the report (rounded); full precision in the source files"
   },
-  "p1.table.14": {
-    "caption": "Table 14. Deviations 1–27 (full text in the analysis plan).",
+  "p1.table.16": {
+    "caption": "Table 16. Deviations 1–27 (full text in the analysis plan).",
     "section": "Appendix A. Pre-registered deviations",
     "subsection": null,
     "type": "reference",
@@ -2144,9 +2275,9 @@
         "Strongest objection to the efficiency claim"
       ],
       [
-        "21",
-        "Confirmatory test of the frozen system on INCART",
-        "DS2 has informed several iterations"
+        "21 / 21a",
+        "Confirmatory test of the frozen system on INCART (H1, H2 confirmed; H3 not; H4 not tested in sequence); N = 50 timing re-measured under the memory cap",
+        "DS2 has informed several iterations; memory paging in the timing step"
       ],
       [
         "22",

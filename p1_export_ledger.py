@@ -36,8 +36,10 @@ TABLE_SOURCES = {  # report table number -> (type, source files)
     10: ("results", ["results/p1_second_sender_analysis.json"]),
     11: ("results", ["results/p1_dev26_ablation.json"]),
     12: ("results", ["results/p1_dev27_kseeds.json", "results/p1_sweep_analysis.json"]),
-    13: ("qualitative", ["docs/analysis_plan.md"]),
-    14: ("reference", ["docs/analysis_plan.md"]),
+    13: ("results", ["results/p1_confirmatory_incart.json", "results/p1_incart_timing_n50_capped.json"]),
+    14: ("results", ["results/p1_confirmatory_incart.json"]),
+    15: ("qualitative", ["docs/analysis_plan.md"]),
+    16: ("reference", ["docs/analysis_plan.md"]),
 }
 FIGURE_SOURCES = {  # image file -> (make_figures.py function, source files)
     "fig1_pipeline.png": ("fig_pipeline", []),
