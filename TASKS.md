@@ -220,12 +220,13 @@ Then: `python p1_sweep_analysis.py`, record the Deviation 24 result. Monday: p1_
 - Sat 3 17:55: both pre-registered (Deviation 26 ablation = recipe r4hn, input_dim 32; Deviation 27 three-seed k). Order: **Sat night: Deviation 27** (`scripts/run_k_seeds.sh`, log logs/kseeds_queue.log, ~6.5 h); **Sun night: Deviation 26** (`scripts/run_r4_ablation.sh`, log logs/ablation_queue.log, ~6 h). Analysis scripts for both still to write (CPU).
 - [ ] **r4 ablation, option A: hard negatives only** (r4 without the side inputs, 32-d input), seeds 101/202/303, then DS2 v2 eval. Answers which r4 change drove the accuracy gain / false-alarm cut. ~4 h training + ~2 h eval. Pre-register as Deviation 26 first. Slot: Sunday night or Tue/Wed buffer night. Does not affect the r4-confirmatory freeze.
 - [x] **Deviation 27 DONE** (Sun 4 10:55; result in analysis_plan): neither k=1 nor k=2 non-inferior at all N (k=2 only at N=20; k=1 one failed seed); k=2 FA 8.6% vs 3.6%; info recoverable at every k -> k=4 is the operating point
-- [ ] Sun 4 10:47: **Deviation 26 ablation running** (`scripts/run_r4_ablation.sh`, log logs/ablation_queue.log), ~6 h; then `python p1_seed_group_analysis.py --dev 26`
+- [x] Sun 4 18:00: **Deviation 26 DONE** (result in analysis_plan): side inputs drive r4's gain (acc +0.03-0.05, sig. at N=50; FA 8.6% -> 3.6%; HR/RR/run recoverable only with them); hard negatives alone ~+0.01 acc, FA 10.6% -> 8.6%. Deviation 18 attribution revised
+- [x] Sun 4 10:47: **Deviation 26 ablation running** (`scripts/run_r4_ablation.sh`, log logs/ablation_queue.log), ~6 h; then `python p1_seed_group_analysis.py --dev 26`
 - [x] **Three-seed compression comparison**: if the DS2 sweep shows k=1 or k=2 matching k=4, train seeds 202 and 303 for k=1 and k=2 (~1.2 h each) + DS2 eval, so the comparison with r4's three seeds is like-for-like. Pre-register (amendment to Deviation 24 or Deviation 27) before training. Slot: the other of Sunday / Tue night. Reason: seed 101 at k=4 is the weakest r4 run (val 0.719, DS2 0.78-0.80) and "seed 101" is not paired across k (layer shapes differ), so single-run k differences are within run-to-run noise.
 
 ## Journal targeting (added 2026-10-02)
 - [x] Journal shortlist + JBHI submission rules + structure of comparable papers: docs/journal_writing_guide.md
-- [ ] Decide target conflict: TASKS plan says TMLR / Engineering Applications of AI; publication_plan section 3 says JBHI first
+- [x] Target decided 2026-10-04 (delegated, 'go with your guts'): JBHI primary; fallback AIIM, then Computers in Biology and Medicine. TMLR / Engineering Applications of AI dropped as targets. Reason: INCART gives the second-database result that the venue rule in publication_plan section 3 asks for; TMLR/EAAI fit the ML framing but not the clinical-informatics evidence. Revisit if INCART (H1-H4) fails
 - [ ] Ask JBHI editorial office whether an arXiv/workshop preprint counts as prior publication
 - [ ] Pull 5-8 recent JBHI papers by hand and fill the section-4 table in docs/journal_writing_guide.md
 
@@ -235,3 +236,20 @@ Early second-sender result (adapter only; text arms pending): balanced accuracy 
 To resume (detached, survives session limits), from PowerShell:
   Start-Process -FilePath "C:\Program Files\Git\usr\bin\bash.exe" -ArgumentList '-c', '"cd /c/Users/alift/project && /usr/bin/bash scripts/run_friday.sh >> logs/friday_queue.log 2>&1"' -WindowStyle Hidden
 It continues the eval (A-compact from window 16, then A-filtered), then calibration/tokens/timing, then the serving benchmark (~10 h total). Then: Sat night compression sweep (scripts/run_compression_sweep.sh, launch the same detached way); Mon freeze + INCART (docs/run_order.md). Plan shifts by the pause length; buffer nights Tue-Wed absorb about one day.
+
+## Paper draft v0 (2026-10-04), docs/paper/ (IEEEtran, builds with `latexmk -pdf main.tex`)
+- [x] Scaffold + Abstract, Introduction, Related Work, System, Evaluation Protocol, Results (MIT-BIH numbers from Phase1_Technical_Report), Discussion/Limitations, Conclusion
+- [ ] Fill TODOs (grep TODO docs/paper): INCART results (H1-H4), compression sweep curve, deviation count, adapter parameter count from checkpoint, window-count table, timing window count, null/shuffle results or move to future work
+- [ ] Numbers: replace hand-copied values with ledger-generated values before submission (render_ledger.py: never write literal double braces in prose, see memory trap)
+- [ ] Verify new refs.bib entries against publishers (volume/pages/DOI): jin2024timellm, liu2023llava, mu2023gist, ge2024icae, cheng2024xrag, jiang2023llmlingua, liu2024lost, hsieh2024found, zhao2021calibrate, lowe2019pitfalls (arXiv id), zhang2026causalaudit, goldberger2000physionet; fix empty-journal warnings (li2024survey, zheng2025areview, babu2025modality, moody2001impact, dechazal2004automatic)
+- [ ] Figures: redraw pipeline (vector); mechanisms, accuracy-vs-N, recoverability, serving
+- [ ] JBHI constraints: 14 pages incl. supplement (currently 9 with placeholders), abstract <= 250 words and no abbreviations, ORCIDs, consent form, cover letter (cite dissertation; ask editorial office about preprints)
+- [ ] Supervisor review of authorship order and framing before sharing
+- [x] 2026-10-04: Introduction and Related Work rewritten (clinical framing, token-cost arithmetic, verified summaries of LatentMAS, C2C, latent cache flow, bicameral, SensorLM, ELF, fetal-monitoring benchmark, KV persistence). New refs to verify: hannun2019cardiologist, singhal2023large. Not re-checked against full text: pham2024ciphers, zheng2025thought, jin2026agentprimitives, liu2026beyondtokens, zhao2025ecgchat, liu2024zeroshot, babu2025modality, liu2026visionwormhole (summaries rely on titles/abstract snippets)
+
+## Reframe (2026-10-04, user: focus is efficient agent communication)
+- [x] Paper reframed around three communication-efficiency levers (say less / reuse / send latent); ECG is the case study. Format switched to Elsevier elsarticle (review, 12pt) with highlights; abstract about 280 words (limit not yet checked; trim to 250 if needed)
+- [x] Target changed again: Information Fusion primary (publishes communication-efficient agentic edge intelligence and heterogeneous fusion), fallbacks Engineering Applications of AI and IEEE Internet of Things Journal (needs real edge-hardware numbers); JBHI kept only as a clinical-spin-off option. TMLR has no impact factor. Supersedes the JBHI-first decision above. Check Information Fusion guide for authors (page returned 403): abstract limit, article types, preprint and generative-AI declaration
+- [ ] Related-work refs to verify: zhang2024cut (venue, published version?), dong2026bandmas, dai2026tokenkv (arXiv only), aei2026survey (author names missing in refs.bib: fill from the publisher page); add Information Fusion reference style check
+- [ ] Add a gap check: search 'hybrid latent-text protocol' and 'KV cache handover edge' (both surfaced in search, not read) for missing related work
+- [x] 2026-10-04: framing pass on System, Protocol, Results opening and Discussion done (levers table, selection table, why-filter-vs-adapter subsection, new conclusion). Still to reframe: individual Results subsection leads (RQ1-RQ3) if wanted

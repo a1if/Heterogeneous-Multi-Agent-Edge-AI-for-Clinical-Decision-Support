@@ -1,0 +1,377 @@
+{
+  "design": "Deviations 26 and 27: three-seed group comparisons on DS2 v2 (CPU).\n\n  --dev 27  three-seed compression comparison: k = 1 and k = 2 (recipes r4k1, r4k2; seeds 101/202/303)\n            against k = 4 (r4 seeds 101/202/303). Primary: group-mean balanced accuracy difference at\n            N = 5, 10, 20, 50 with record-cluster bootstrap 95% CI; non-inferior if the lower bound > -0.05.\n  --dev 26  r4 ablation: r4hn (hard negatives, no side inputs) against r4 (side-input contribution) and\n            r3 against r4hn (hard-negative contribution; approximate, see Deviation 26).\nBoth report, per group: balanced accuracy by N (mean and seed range), false alarms (all / natural routine\nwindows), parse rate, and per-slot decodability (slots 0 and 49; Deviation 18 / 18b methods) per seed.\nRows: results/p1_item7_eval_ds2v2.json (r3), results/p1_item7_eval_ds2v2_r4.json (r4),\nresults/p1_item7_eval_ds2v2_sweep.json (k = 1, 2), results/p1_item7_eval_ds2v2_ablation.json (r4hn).\n\nRun (from repo root):\n    python p1_seed_group_analysis.py --dev 27      # -> results/p1_dev27_kseeds.json\n    python p1_seed_group_analysis.py --dev 26      # -> results/p1_dev26_ablation.json\n",
+  "deviation": 26,
+  "groups": {
+    "r3": [
+      "MEA:r3_seed101",
+      "MEA:r3_seed202",
+      "MEA:r3_seed303"
+    ],
+    "r4hn": [
+      "MEA:r4hn_seed101",
+      "MEA:r4hn_seed202",
+      "MEA:r4hn_seed303"
+    ],
+    "r4": [
+      "MEA:r4_seed101",
+      "MEA:r4_seed202",
+      "MEA:r4_seed303"
+    ]
+  },
+  "describe": {
+    "r3": {
+      "balanced_accuracy": {
+        "1": {
+          "mean": 0.7887914230019493,
+          "range": [
+            0.7339181286549707,
+            0.8219298245614035
+          ]
+        },
+        "5": {
+          "mean": 0.7938234239081696,
+          "range": [
+            0.7774213075060533,
+            0.8093758407317729
+          ]
+        },
+        "10": {
+          "mean": 0.7720874513327343,
+          "range": [
+            0.7263327343516023,
+            0.8056978137166816
+          ]
+        },
+        "20": {
+          "mean": 0.7951916829109811,
+          "range": [
+            0.7851143009037745,
+            0.8054935318093213
+          ]
+        },
+        "50": {
+          "mean": 0.7698948948948949,
+          "range": [
+            0.6990990990990991,
+            0.8056306306306306
+          ]
+        }
+      },
+      "false_alarm": {
+        "MEA:r3_seed101": {
+          "all": 0.1336116910229645,
+          "natural": 0.09900990099009901
+        },
+        "MEA:r3_seed202": {
+          "all": 0.08559498956158663,
+          "natural": 0.06435643564356436
+        },
+        "MEA:r3_seed303": {
+          "all": 0.10020876826722339,
+          "natural": 0.07920792079207921
+        }
+      },
+      "parse_rate": 1.0
+    },
+    "r4hn": {
+      "balanced_accuracy": {
+        "1": {
+          "mean": 0.7558479532163743,
+          "range": [
+            0.7067251461988304,
+            0.7880116959064328
+          ]
+        },
+        "5": {
+          "mean": 0.7875078468298807,
+          "range": [
+            0.7641041162227603,
+            0.8209039548022599
+          ]
+        },
+        "10": {
+          "mean": 0.7863806528900869,
+          "range": [
+            0.7210017969451932,
+            0.8393680742737346
+          ]
+        },
+        "20": {
+          "mean": 0.8021619705830232,
+          "range": [
+            0.7878079035973773,
+            0.8165160375686692
+          ]
+        },
+        "50": {
+          "mean": 0.7811561561561562,
+          "range": [
+            0.7355855855855856,
+            0.8279279279279278
+          ]
+        }
+      },
+      "false_alarm": {
+        "MEA:r4hn_seed101": {
+          "all": 0.08350730688935282,
+          "natural": 0.054455445544554455
+        },
+        "MEA:r4hn_seed202": {
+          "all": 0.08350730688935282,
+          "natural": 0.054455445544554455
+        },
+        "MEA:r4hn_seed303": {
+          "all": 0.0918580375782881,
+          "natural": 0.07920792079207921
+        }
+      },
+      "parse_rate": 1.0
+    },
+    "r4": {
+      "balanced_accuracy": {
+        "1": {
+          "mean": 0.8038011695906432,
+          "range": [
+            0.797953216374269,
+            0.80906432748538
+          ]
+        },
+        "5": {
+          "mean": 0.8138104205900816,
+          "range": [
+            0.8035579768630616,
+            0.8309927360774818
+          ]
+        },
+        "10": {
+          "mean": 0.8298392732354997,
+          "range": [
+            0.7909404013177598,
+            0.8856768493560946
+          ]
+        },
+        "20": {
+          "mean": 0.8302794022092268,
+          "range": [
+            0.8022328548644339,
+            0.8581251107566897
+          ]
+        },
+        "50": {
+          "mean": 0.8355855855855855,
+          "range": [
+            0.7828828828828828,
+            0.870945945945946
+          ]
+        }
+      },
+      "false_alarm": {
+        "MEA:r4_seed101": {
+          "all": 0.027139874739039668,
+          "natural": 0.0297029702970297
+        },
+        "MEA:r4_seed202": {
+          "all": 0.04801670146137787,
+          "natural": 0.039603960396039604
+        },
+        "MEA:r4_seed303": {
+          "all": 0.033402922755741124,
+          "natural": 0.024752475247524754
+        }
+      },
+      "parse_rate": 1.0
+    }
+  },
+  "contrasts": {
+    "side_inputs_r4_minus_r4hn": {
+      "5": {
+        "difference": 0.026302573760200842,
+        "cluster_ci95": [
+          -0.016594301645669513,
+          0.062370677821840796
+        ],
+        "n_windows": 175,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "10": {
+        "difference": 0.04345862034541281,
+        "cluster_ci95": [
+          -0.012270597045603418,
+          0.10918885984647263
+        ],
+        "n_windows": 169,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "20": {
+        "difference": 0.028117431626203615,
+        "cluster_ci95": [
+          -0.009388134329953553,
+          0.06967339595770973
+        ],
+        "n_windows": 157,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "50": {
+        "difference": 0.0544294294294293,
+        "cluster_ci95": [
+          0.00943364122987247,
+          0.10826210826210814
+        ],
+        "n_windows": 117,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": true
+      }
+    },
+    "hard_negatives_r4hn_minus_r3": {
+      "5": {
+        "difference": -0.006315577078288892,
+        "cluster_ci95": [
+          -0.03621936338033042,
+          0.02651114564219154
+        ],
+        "n_windows": 175,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "10": {
+        "difference": 0.014293201557352586,
+        "cluster_ci95": [
+          -0.01847493408639491,
+          0.04587747186013915
+        ],
+        "n_windows": 169,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "20": {
+        "difference": 0.006970287672042108,
+        "cluster_ci95": [
+          -0.043077285528958786,
+          0.04702406340585741
+        ],
+        "n_windows": 157,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "50": {
+        "difference": 0.011261261261261257,
+        "cluster_ci95": [
+          -0.02907476205951523,
+          0.050715279820461756
+        ],
+        "n_windows": 117,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      }
+    }
+  },
+  "decodability": {
+    "MEA:r4hn_seed101": {
+      "slot0": {
+        "label": 0.9685681685761329,
+        "tier": 0.8668343598186882,
+        "run3": 0.5901793468301584,
+        "heart_rate_r2": -0.19204037197927337,
+        "rr_r2": -0.7561745761952767
+      },
+      "slot49": {
+        "label": 0.9504891730055539,
+        "tier": 0.9030549191443149,
+        "run3": 0.5151420990988838,
+        "heart_rate_r2": -0.055032744021245694,
+        "rr_r2": -0.19504970503551
+      }
+    },
+    "MEA:r4hn_seed202": {
+      "slot0": {
+        "label": 0.9516763169905317,
+        "tier": 0.8845705361438029,
+        "run3": 0.5499996016285426,
+        "heart_rate_r2": -0.009712621660123988,
+        "rr_r2": -0.3974378321361327
+      },
+      "slot49": {
+        "label": 0.977894144604613,
+        "tier": 0.9069228475991084,
+        "run3": 0.552573081243875,
+        "heart_rate_r2": 0.08599200676207541,
+        "rr_r2": -0.6313408625548522
+      }
+    },
+    "MEA:r4hn_seed303": {
+      "slot0": {
+        "label": 0.9707493505110283,
+        "tier": 0.8812778460165496,
+        "run3": 0.5251372389671025,
+        "heart_rate_r2": -0.4317351888541543,
+        "rr_r2": -0.11940546908592253
+      },
+      "slot49": {
+        "label": 0.9596852772702125,
+        "tier": 0.8928085045836128,
+        "run3": 0.5926532335811203,
+        "heart_rate_r2": -0.06787284374070124,
+        "rr_r2": -0.3971331244481384
+      }
+    },
+    "MEA:r4_seed101": {
+      "slot0": {
+        "label": 0.954649459524741,
+        "tier": 0.9222895898607831,
+        "run3": 0.932858474556015,
+        "heart_rate_r2": 0.66473715841563,
+        "rr_r2": 0.6512723007526386
+      },
+      "slot49": {
+        "label": 0.9494775477684727,
+        "tier": 0.9256491636636768,
+        "run3": 0.9668913481686864,
+        "heart_rate_r2": 0.7762829242873799,
+        "rr_r2": 0.7681742822091393
+      }
+    },
+    "MEA:r4_seed202": {
+      "slot0": {
+        "label": 0.9779486811520811,
+        "tier": 0.9283749396256257,
+        "run3": 0.946526599262216,
+        "heart_rate_r2": 0.7620206273613542,
+        "rr_r2": 0.7176681560958174
+      },
+      "slot49": {
+        "label": 0.9843819492716928,
+        "tier": 0.9328630665632923,
+        "run3": 0.97743624064823,
+        "heart_rate_r2": 0.5943899348442108,
+        "rr_r2": 0.6940749407369982
+      }
+    },
+    "MEA:r4_seed303": {
+      "slot0": {
+        "label": 0.9479206474857051,
+        "tier": 0.9339263331000631,
+        "run3": 0.9612942291910669,
+        "heart_rate_r2": 0.7162009559024421,
+        "rr_r2": 0.7181352297370563
+      },
+      "slot49": {
+        "label": 0.9805613525618007,
+        "tier": 0.9472532684435849,
+        "run3": 0.9766116117312427,
+        "heart_rate_r2": 0.7202322798499561,
+        "rr_r2": 0.7426853324551361
+      }
+    }
+  }
+}
