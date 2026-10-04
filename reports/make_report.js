@@ -17,11 +17,18 @@ function runs(text) {
   return text.split(/(\*\*[^*]+\*\*)/).filter(Boolean).map(s =>
     s.startsWith("**") ? new TextRun({ text: s.slice(2, -2), bold: true }) : new TextRun(s));
 }
-const h1 = t => new Paragraph({ heading: HeadingLevel.HEADING_1, keepNext: true, keepLines: true, children: [new TextRun(t)] });
-const h2 = t => new Paragraph({ heading: HeadingLevel.HEADING_2, keepNext: true, keepLines: true, children: [new TextRun(t)] });
+// Ledger export (LEDGER_OUT=<path>): every table and figure as built, with its caption and section.
+const LEDGER = { section: null, tables: [], figures: [] };
+const h1 = t => (LEDGER.section = t, LEDGER.subsection = null, new Paragraph({ heading: HeadingLevel.HEADING_1, keepNext: true, keepLines: true, children: [new TextRun(t)] }));
+const h2 = t => (LEDGER.subsection = t, new Paragraph({ heading: HeadingLevel.HEADING_2, keepNext: true, keepLines: true, children: [new TextRun(t)] }));
 const bullet = (t, level = 0) => new Paragraph({ numbering: { reference: "bullets", level }, spacing: { after: 60 }, children: runs(t) });
 const num = t => new Paragraph({ numbering: { reference: "numbers", level: 0 }, spacing: { after: 60 }, children: runs(t) });
-const caption = t => new Paragraph({ spacing: { before: 60, after: 240 }, alignment: AlignmentType.LEFT,
+const caption = t => {
+  const last = LEDGER.tables[LEDGER.tables.length - 1];
+  if (t.startsWith("Table ") && last && !last.caption) last.caption = t;
+  return captionPara(t);
+};
+const captionPara = t => new Paragraph({ spacing: { before: 60, after: 240 }, alignment: AlignmentType.LEFT,
   children: [new TextRun({ text: t, italics: true, size: 18, color: "52514E" })] });
 
 function pngSize(file) {
@@ -29,6 +36,7 @@ function pngSize(file) {
   return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) };
 }
 function figure(name, cap, widthIn = 6.3) {
+  LEDGER.figures.push({ file: "reports/figures/" + name, caption: cap, section: LEDGER.section, subsection: LEDGER.subsection });
   const f = path.join(FIG, name);
   const { w, h } = pngSize(f);
   const wpx = Math.round(widthIn * 96);
@@ -40,6 +48,7 @@ function figure(name, cap, widthIn = 6.3) {
 const border = { style: BorderStyle.SINGLE, size: 4, color: "BFBFBF" };
 const borders = { top: border, bottom: border, left: border, right: border };
 function table(rows, widths, opts = {}) {
+  LEDGER.tables.push({ rows, section: LEDGER.section, subsection: LEDGER.subsection, caption: null });
   const total = widths.reduce((a, b) => a + b, 0);
   return new Table({
     width: { size: total, type: WidthType.DXA }, columnWidths: widths,
@@ -405,3 +414,7 @@ const doc = new Document({
   }],
 });
 Packer.toBuffer(doc).then(b => { fs.writeFileSync(OUT, b); console.log("wrote", OUT, b.length, "bytes"); });
+if (process.env.LEDGER_OUT) {
+  fs.writeFileSync(process.env.LEDGER_OUT, JSON.stringify({ tables: LEDGER.tables, figures: LEDGER.figures }, null, 1));
+  console.log("ledger export:", LEDGER.tables.length, "tables,", LEDGER.figures.length, "figures");
+}

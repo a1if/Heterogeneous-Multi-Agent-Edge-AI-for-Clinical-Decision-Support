@@ -215,6 +215,8 @@ Resume (detached; k=1 is skipped, k=2 resumes from its checkpoint; ~6 h), in Pow
 
 Then: `python p1_sweep_analysis.py`, record the Deviation 24 result. Monday: p1_freeze.py, tag r4-confirmatory, run_incart_prep.sh, run_incart.sh (text arms now stop at the tier, ~2 h). Writing: related work and introduction.
 
+- [x] Sun 4 18:40: all 14 report tables and 12 figures saved in results_ledger.json (keys p1.table.01-14, p1.figure.01-12; captions, sections, rows as printed, source files, run dates). Regenerate after any report change: `LEDGER_OUT=<file> node reports/make_report.js` then `python p1_export_ledger.py <file>`. Existing dissertation keys untouched (backup results_ledger.json.bak_pre_p1_tables)
+
 ## Queued GPU work (agreed 2026-10-03; pre-register each before training)
 - Sat 3 23:35: Deviation 27 trainings done (val best: k1 0.844/0.824/0.513, k2 0.846/0.905/0.872); DS2 eval running; **PC shuts down 2 min after it ends** (`scripts/shutdown_after_kseeds.sh`). Next session: `python p1_seed_group_analysis.py --dev 27`, record the result; launch Deviation 26 (`scripts/run_r4_ablation.sh`, detached).
 - Sat 3 17:55: both pre-registered (Deviation 26 ablation = recipe r4hn, input_dim 32; Deviation 27 three-seed k). Order: **Sat night: Deviation 27** (`scripts/run_k_seeds.sh`, log logs/kseeds_queue.log, ~6.5 h); **Sun night: Deviation 26** (`scripts/run_r4_ablation.sh`, log logs/ablation_queue.log, ~6 h). Analysis scripts for both still to write (CPU).
