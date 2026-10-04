@@ -12,6 +12,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 import numpy as np
 from matplotlib.patches import FancyBboxPatch
 
@@ -304,6 +305,39 @@ def fig_two_senders():
     save(fig, "fig11_two_senders.png")
 
 
+def fig_compression():
+    """Deviations 24 and 27: tokens per event against accuracy and false alarms, every seed shown."""
+    import p1_item7_tier1 as t1
+    import p1_seed_group_analysis as G
+    rows = G.load_rows()
+    wins = t1.windows_by_n(rows)
+    ks = {1: G.group("r4k1"), 2: G.group("r4k2"), 4: G.group("r4"), 8: ["MEA:r4k8_seed101"]}
+    tokens = {1: 563, 2: 613, 4: 713, 8: 913}  # median prompt tokens at N = 50 (results/p1_sweep_analysis.json)
+
+    def acc(a):
+        return np.mean([t1.bal([(v["reference"], v["arms"][a]) for v in wins[n].values() if a in v["arms"]]) for n in (5, 10, 20, 50)])
+
+    def fa(a):
+        rt = [x for x in rows if x["arm"] == a and x["reference"] == "routine"]
+        return np.mean([x["tier"] != "routine" for x in rt])
+
+    fig, axes = plt.subplots(1, 2, figsize=(8.6, 3.2))
+    for ax, f, lab, scale in ((axes[0], acc, "Balanced accuracy, mean over N = 5-50", 1), (axes[1], fa, "False alarms (routine windows)", 100)):
+        for i, (k, arms) in enumerate(ks.items()):
+            vals = [f(a) * scale for a in arms]
+            ax.scatter([i] * len(vals), vals, color=BLUE if k != 8 else INK2, s=28, zorder=3, alpha=0.85)
+            if len(vals) > 1:
+                ax.plot([i - 0.18, i + 0.18], [np.mean(vals)] * 2, color=INK, lw=2)
+        ax.set_xticks(range(4)); ax.set_xticklabels([f"k = {k}" + chr(10) + f"{tokens[k]} tokens" for k in ks], fontsize=8)
+        ax.set_ylabel(lab)
+    axes[0].set_ylim(0.45, 0.9)
+    axes[1].yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:.0f}%"))
+    fig.text(0.5, -0.04, "Dots: individual training runs (three seeds; k = 8 one run). Bars: mean. Tokens: median prompt length at N = 50.",
+             ha="center", fontsize=7.5, color=INK2)
+    fig.tight_layout()
+    save(fig, "fig12_compression.png")
+
+
 if __name__ == "__main__":
     fig_pipeline(); fig_latency(); fig_accuracy(); fig_forest(); fig_why_text_fails(); fig_confusion(); fig_training(); fig_audit()
-    fig_false_alarms(); fig_side_info(); fig_two_senders()
+    fig_false_alarms(); fig_side_info(); fig_two_senders(); fig_compression()

@@ -63,7 +63,7 @@ children.push(
     children: [new TextRun({ text: "Latent Perception-to-Reasoning Interfaces for ECG Triage", bold: true, size: 40 })] }),
   new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: "Phase 1 technical report: from single-event adapter to multi-event reasoning", size: 28, color: "52514E" })] }),
   p("**Author:** Alif Tasbir"),
-  p("**Date:** 2 October 2026 (updated with the filtered-text baseline, a second sender architecture and serving measurements)"),
+  p("**Date:** 4 October 2026 (updated with the filtered-text baseline, a second sender, serving measurements, the r4 ablation and the compression study)"),
   p("**Status:** post-viva extension of the MSc dissertation, working towards journal submission"),
   new Paragraph({ spacing: { before: 400 }, children: [] }),
   new TableOfContents("Contents", { hyperlink: true, headingStyleRange: "1-2" }),
@@ -77,12 +77,13 @@ children.push(p("The dissertation built and evaluated a small learned adapter th
   "**Weaknesses identified in the single-event evaluation.** The dissertation compared against the most verbose text interface, measured latency without fixing output length, and reported one training run. With a compact text baseline, fixed-length timing and several seeds, a single event gives the adapter little room: no prompt-processing saving (about −2%), and lower accuracy than text (0.79 vs 0.97 balanced accuracy; the adapter's single-event accuracy varies across seeds, 78.8–95.0%). This motivated the multi-event iteration.",
   "**The advantage appears when many events share one prompt.** A trained multi-event adapter keeps prompt processing flat (about 183 ms from 1 to 50 events), while text grows with every event: −24% / −50% / −78% time to first token at 10 / 20 / 50 events, and −4% / −14% / −36% time to the urgency decision.",
   "**Accuracy at scale (pre-registered, 1,195 test windows, 22 held-out patients, 3 seeds, patient-level confidence intervals).** The final adapter (recipe r4) reaches 0.81 / 0.83 / 0.83 / 0.84 balanced accuracy at 5 / 10 / 20 / 50 events. It is more accurate than default text at every N (+0.08 to +0.35) and, the stricter comparison, **more accurate than text with a calibrated threshold at 10 and 20 events (+0.10 each, confidence intervals exclude zero)**, and non-inferior at 5 and 50.",
-  "**How the adapter reached this.** The previous recipe (r3) matched calibrated text but did not beat it, and raised false alarms on about 11% of routine windows. Two targeted changes in r4 (training on hard routine examples, and passing heart rate, RR interval and run length alongside each event) cut false alarms to 3.6% and raised accuracy at every N. The headline is now **equal or better accuracy than calibrated text at 19–78% lower prompt-processing cost**.",
+  "**How the adapter reached this.** The previous recipe (r3) matched calibrated text but did not beat it, and raised false alarms on about 11% of routine windows. Two targeted changes in r4 (training on hard routine examples, and passing heart rate, RR interval and run length alongside each event) cut false alarms to 3.6% and raised accuracy at every N. An ablation later showed that the side inputs account for most of this gain (Section 10). The headline is now **equal or better accuracy than calibrated text at 19–78% lower prompt-processing cost**.",
   "**Auditability holds per event.** Each event's label, tier and urgency flag can be decoded from its slot of virtual tokens as well as from the encoder vector itself, at any of 50 positions. With r4, heart rate and RR interval (R² about 0.7) and the presence of a run of abnormal beats (0.96 balanced accuracy) are now also recoverable from the tokens; the previous design could not carry them.",
   "**A stronger text baseline changes the accuracy picture.** A filtered text prompt that lists only the abnormal beats (normal beats given as a count) is 11–17 points more accurate than the adapter at 5–50 events, raises no false alarms and is equally fast for a single request. It costs 5–19% more prompt tokens, and its length grows by about 68 tokens per abnormal beat. Against the best text prompt, the adapter's case therefore rests on a cost that does not depend on the number of abnormal beats and on carrying information about every beat, not on accuracy.",
   "**The method replicates on a second, purely convolutional sender** (ResNet1D-RR, no recurrence). Text again collapses as events are added while the adapter stays at 0.77–0.82; the adapter is more accurate than calibrated text at 10 events and non-inferior at 20 and 50; heart rate and RR interval are recoverable from every token slot (R² about 0.9). Filtered text is again more accurate at 5–20 events; at 50 events it drops to 0.81 and the difference is inconclusive.",
   "**Under realistic serving the adapter is the most efficient interface, including against filtered text.** With requests batched, it serves 10–30% more decisions per second than filtered text at 12–28% less energy per decision, and it fits every batch size tested on a 12 GB GPU; text listing every event cannot be batched at 50 events, and filtered text fits only some batches of 8 because its length depends on the content.",
-  "**Remaining weaknesses:** the adapter still raises false alarms on 1–4% of routine windows where text raises none; filtered text is more accurate when the question is known in advance; the two r4 changes were made together, so their separate effects are not yet known; text remains better for a single event.",
+  "**What the channel needs, and how small it can be.** An ablation shows that passing heart rate, RR interval and run length with each event drives r4's improvement (accuracy +0.03 to +0.05; false alarms 8.6% to 3.6%), and those facts are recoverable from the tokens only when they are passed. A three-seed compression study shows that 4 tokens per event is the smallest setting at which every training run was reliable: with 1 token one run in three failed, and with 2 tokens accuracy was close but false alarms more than doubled, although the information remained recoverable from the tokens in every case.",
+  "**Remaining weaknesses:** the adapter still raises false alarms on 1–4% of routine windows where text raises none; filtered text is more accurate when the question is known in advance; text remains better for a single event.",
 ].forEach(t => children.push(bullet(t)));
 
 // 2 Background
@@ -149,6 +150,7 @@ children.push(p("Evaluating r3 (Section 7) exposed two weaknesses, each traced t
   "**False alarms on routine windows (about 11%).** They concentrated on windows containing a normal beat classified with low confidence, which the training set almost never showed. r4 adds such routine windows as **hard negatives**: 72 training and 23 validation windows whose lowest beat confidence is below 0.8.",
   "**Facts the vector does not carry.** Heart rate, RR interval and the length of a run of abnormal beats (one of the two urgent rules) were absent from the adapter's input, while the text arm includes them. r4 passes three scaled **side inputs** with each event (35-d input instead of 32-d), at no extra token cost: still 4 tokens per event.",
   "Training otherwise as r3, scaled to the larger set (447 training windows, 170 validation windows). Validation is harder than for r3 because it includes the hard negatives, so r3 and r4 validation scores are not directly comparable; the DS2 test set is identical.",
+  "**Which change mattered** was tested afterwards with an ablation (Section 10): the side inputs account for most of the improvement, including most of the drop in false alarms; the hard negatives alone had little effect.",
 ].forEach(t => children.push(bullet(t)));
 children.push(...figure("fig7_training_r4.png", "Figure 2. Validation balanced accuracy during training, recipe r4, three seeds. The best checkpoint per seed is selected on validation only; seed 303 was still improving when it reached the 3-epoch cap and was evaluated as pre-registered."));
 children.push(h2("5.4 Schema-constrained decoding"));
@@ -218,7 +220,7 @@ children.push(p("Both mechanisms are documented in the literature: position effe
 children.push(p("Urgent recall on windows made urgent by a run of three or more abnormal beats barely changed between recipes (r3 0.61, r4 0.64, text 0.44), though it varies less across r4 seeds (0.56–0.74 vs 0.32–0.82). The run-length side input therefore helped little with this rule at this evaluation size."));
 children.push(...figure("fig6_confusion_n50.png", "Figure 7. Confusion at N = 50. Text under-escalates (priority → routine, urgent → priority) and never raises a false alarm; the r4 adapter never calls an urgent window routine and escalates 3% of routine windows."));
 children.push(h2("7.4 False alarms: identified in r3, reduced in r4"));
-children.push(p("With r3, the adapter escalated about 11% of routine windows (text: 0%). They sat on windows containing a normal beat classified with low confidence (median lowest confidence 0.56 vs 0.99; an abnormal class as strong second choice), and only 12% of them contained a truly abnormal beat. Threshold calibration could not target them because the validation set had almost no such windows. Training on such windows as hard negatives (r4) cut the rate by two thirds, at every seed."));
+children.push(p("With r3, the adapter escalated about 11% of routine windows (text: 0%). They sat on windows containing a normal beat classified with low confidence (median lowest confidence 0.56 vs 0.99; an abnormal class as strong second choice), and only 12% of them contained a truly abnormal beat. Threshold calibration could not target them because the validation set had almost no such windows. Recipe r4 cut the rate by two thirds, at every seed. The ablation in Section 10 shows that most of this reduction comes from the side inputs (heart rate, RR interval and run length), which give the receiver the context to tell a low-confidence normal beat from a real event; the hard negatives alone reduced it only from 10.6% to 8.6%."));
 children.push(...figure("fig9_false_alarms.png", "Figure 8. Routine windows escalated to priority or urgent (bars: mean of 3 seeds; lines: seed range). Text never escalates a routine window."));
 children.push(table([
   ["N", "Accuracy: text", "Accuracy: r4 (3 seeds)", "False alarms: text", "False alarms: r3", "False alarms: r4"],
@@ -281,21 +283,55 @@ children.push(...figure("fig11_two_senders.png", "Figure 11. Both senders side b
   "**Why filtered text drops at 50 events here** (exploratory, after the fact). Not prompt length (median 684 tokens vs 750 on the main sender). Almost all errors are urgent windows answered 'priority', and this sender's urgent windows carry sparser, more borderline evidence: often a single urgent beat among about 13 listed abnormal beats, a deciding V/F confidence just above the 0.85 threshold, or urgency only through a run of three. Filtered text's accuracy therefore depends on how the sender's evidence is distributed; the adapter's does not change much (40 windows per sender, so this is indicative only).",
 ].forEach(t => children.push(bullet(t)));
 
-// 10 RQs
-children.push(h1("10. Status of the research questions"));
+// 10 Ablation and compression
+children.push(h1("10. What the channel needs: ablation and compression (Deviations 24, 26, 27)"));
+children.push(h2("10.1 Ablation of recipe r4"));
+children.push(p("Recipe r4 made two changes at once. To separate them, r4 was retrained without the side inputs (hard negatives only, 'r4hn'), three seeds, everything else identical, and compared with r3 (neither change) and r4 (both)."));
+children.push(table([
+  ["Recipe", "N = 5", "N = 10", "N = 20", "N = 50", "False alarms", "Heart rate / RR from tokens (R²)", "Run ≥ 3 from tokens"],
+  ["r3: neither change", "0.794", "0.772", "0.795", "0.770", "10.6%", "below 0", "0.56"],
+  ["r4hn: hard negatives only", "0.788", "0.786", "0.802", "0.781", "8.6%", "below 0", "0.55"],
+  ["r4: hard negatives + side inputs", "0.814", "0.830", "0.830", "0.836", "3.6%", "0.70 / 0.72", "0.96"],
+  ["Side inputs (r4 − r4hn), 95% CI", "+0.03 [−0.02, +0.06]", "+0.04 [−0.01, +0.11]", "+0.03 [−0.01, +0.07]", "+0.05 [+0.01, +0.11]", "−5.0 points", "", ""],
+], [2000, 900, 900, 900, 900, 900, 1300, 1226]));
+children.push(caption("Table 11. r4 ablation: balanced accuracy on DS2 (3-seed means; record-cluster bootstrap CIs), false alarms on routine windows, and recoverability of each event's facts from its tokens (slots 0 and 49)."));
+[
+  "**The side inputs drive the improvement.** Accuracy is higher at every N (significantly at N = 50) and false alarms fall from 8.6% to 3.6% in every seed. Without them, heart rate, RR and run length cannot be recovered from the tokens at all.",
+  "**Hard negatives alone change little:** accuracy within about 0.01 of r3 and false alarms 10.6% to 8.6%. The earlier interpretation, that the hard negatives cut the false alarms, is corrected here.",
+  "**Link between RQ2 and RQ3:** the information the channel makes recoverable is the information the receiver uses for its decision.",
+].forEach(t => children.push(bullet(t)));
+children.push(h2("10.2 How many tokens per event?"));
+children.push(p("The adapter gives each event 4 virtual tokens. The same recipe was retrained with 1, 2 and 8 tokens per event; after a single-run sweep suggested that 1 token might be enough, 1 and 2 tokens were repeated with three seeds each (pre-registered before training, with the rule that a setting is called free of accuracy cost only if it is non-inferior to 4 tokens at every N)."));
+children.push(table([
+  ["Tokens per event (prompt at N = 50)", "Balanced accuracy, N = 5 / 10 / 20 / 50", "Difference from 4 tokens, worst N [95% CI]", "False alarms", "Facts recoverable from tokens"],
+  ["1 (563 tokens), 3 seeds", "0.70 / 0.72 / 0.75 / 0.73", "−0.11 [−0.16, −0.07]", "6.3% (2.7–10.0)", "yes (heart rate R² 0.87)"],
+  ["2 (613 tokens), 3 seeds", "0.80 / 0.82 / 0.83 / 0.80", "−0.04 [−0.13, +0.03]", "8.6% (7.3–10.0)", "yes (0.81)"],
+  ["4 (713 tokens, r4), 3 seeds", "0.81 / 0.83 / 0.83 / 0.84", "–", "3.6% (2.7–4.8)", "yes (0.71)"],
+  ["8 (913 tokens), 1 run", "0.77 / 0.80 / 0.78 / 0.80", "single run", "6.1%", "label, tier, run yes"],
+], [2100, 2200, 2000, 1300, 1426]));
+children.push(caption("Table 12. Tokens per event: accuracy (3-seed means), the least favourable difference from 4 tokens across N, false alarms (mean and seed range) and recoverability (slot 0)."));
+children.push(...figure("fig12_compression.png", "Figure 12. Every training run at each setting. With 1 token one run in three failed; with 2 tokens accuracy is close to 4 tokens but false alarms are higher in every run; 4 tokens is the smallest setting at which all runs were reliable on both measures."));
+[
+  "**Neither 1 nor 2 tokens per event passes the pre-registered rule.** One of three 1-token runs failed to learn the task; 2 tokens is within about 0.01 of 4 tokens at N = 5–20 but not demonstrably non-inferior, and its false alarms are more than twice as high on average (8.6% vs 3.6%) and higher in every run.",
+  "**The information survives compression even when performance does not.** Each event's label, tier, run length, heart rate and RR interval are recoverable from a single token, including from the 1-token run that failed the task. Compression therefore limits how reliably the receiver uses the information, not whether the information is there: decodable is not the same as used.",
+  "**4 tokens per event is kept as the operating point** (unchanged for the confirmatory test). Using fewer tokens would save 14–21% of the prompt at 50 events, at a cost in reliability.",
+].forEach(t => children.push(bullet(t)));
+
+// 11 RQs
+children.push(h1("11. Status of the research questions"));
 children.push(table([
   ["Question", "Dissertation", "Now"],
-  ["RQ1 cost", "Token and latency savings vs full JSON", "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text; replicated on a second sender. Against filtered text, single-request latency is similar; with batching the adapter has 10–30% higher throughput, 12–28% less energy per decision and a fixed memory footprint (Section 6.1)"],
+  ["RQ1 cost", "Token and latency savings vs full JSON", "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text; replicated on a second sender. Against filtered text, single-request latency is similar; with batching the adapter has 10–30% higher throughput, 12–28% less energy per decision and a fixed memory footprint (Section 6.1); 4 tokens per event is the smallest reliable setting (Section 10.2)"],
   ["RQ2 accuracy", "95% on the evaluation set; seed variance flagged as open", "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events. Filtered text is more accurate at every N; second sender superior to calibrated text at N = 10 and non-inferior at 20 and 50"],
-  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 81% ± 5 (10 seeds); per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); replicated on a second sender (heart rate and RR R² about 0.9); uncertainty check available"],
+  ["RQ3 auditability", "67.6% recoverability vs 100%", "Extended: cost located in the encoder; RR branch raises it to 81% ± 5 (10 seeds); per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); replicated on a second sender (heart rate and RR R² about 0.9); facts are recoverable only when passed to the adapter, and remain recoverable at 1 token per event; recoverable is not the same as used (Section 10); uncertainty check available"],
 ], [1700, 2700, 4626]));
-children.push(caption("Table 11. Research questions: dissertation answer and how Phase 1 refined or extended it."));
+children.push(caption("Table 13. Research questions: dissertation answer and how Phase 1 refined or extended it."));
 
 // 10 Limitations
-children.push(h1("11. Limitations and threats to validity"));
+children.push(h1("12. Limitations and threats to validity"));
 [
   "Many design changes (Deviations 9–19) were made after early results. Each was logged before the data it affected, but the DS2 test set has now informed several iterations. A confirmatory test of the frozen system on an unseen database (INCART) is pre-registered (Deviation 21).",
-  "Recipe r4 changed two things at once (hard negatives and side inputs), so their separate contributions are not identified; an ablation is planned. One r4 seed was still improving at the epoch cap and was evaluated as pre-registered.",
+  "One r4 seed was still improving at the epoch cap and was evaluated as pre-registered. Training outcomes vary noticeably between seeds (validation 0.72–0.82 for r4; one failed run at 1 token per event), so every adapter result is reported over three seeds.",
   "One database so far (MIT-BIH, 22 test patients), one receiving language model (Gemma 4 E4B, 4-bit), one consumer GPU. Two sender architectures have now been tested; a second receiving model is future work.",
   "The task is communication fidelity: the language model reproduces a fixed rule over perception outputs, which a three-line rule also solves. The contribution is about the interface, not clinical reasoning.",
   "The text baselines are zero-shot; the adapter is trained. This matches the setting studied (a frozen receiver shared by several agents, not fine-tuned for one sender), but a receiver fine-tuned on text could do better. The filtered text prompt, the strongest text baseline tested, is more accurate than the adapter on this task (Section 7.6).",
@@ -306,11 +342,9 @@ children.push(h1("11. Limitations and threats to validity"));
 ].forEach(t => children.push(bullet(t)));
 
 // 11 Next steps
-children.push(h1("12. Proposed next steps"));
+children.push(h1("13. Proposed next steps"));
 [
   "**Confirmatory test on INCART** (32 patients, never used for any decision): the system is frozen and versioned first, then run once with fixed hypotheses (Deviation 21).",
-  "**Compression curve:** 1, 2, 4 and 8 tokens per event, measuring accuracy and recoverability against cost (Deviation 24).",
-  "**Ablation of recipe r4:** train with hard negatives only, to separate their effect from the side inputs'.",
   "**A second receiving language model** is left as future work.",
   "Writing: present Phase 1 as a post-viva extension that strengthens the dissertation's evaluation (fair baselines, seeds, held-out patients) and carries the idea to multi-event reasoning; deviations summarised in one table.",
 ].forEach(t => children.push(num(t)));
@@ -338,9 +372,11 @@ children.push(table([
   ["22", "Second sender architecture (ResNet1D-RR)", "Results came from one sender architecture"],
   ["23 / 23a", "Serving conditions: batching, prefix caching, energy; memory cap so that oversized batches are recorded, not paged", "Timing so far was batch 1, no caching"],
   ["24", "Compression sweep (1, 2, 4, 8 tokens per event)", "Cost against accuracy and recoverability"],
-  ["25", "Text generation stopped at the tier token, if verified on DS2 first", "Compute for the confirmatory run"],
+  ["25", "Text generation stopped at the tier token, if verified on DS2 first (verified: 2,390 of 2,390 identical)", "Compute for the confirmatory run"],
+  ["26", "Ablation of r4: hard negatives only (no side inputs), 3 seeds", "Separate the two r4 changes"],
+  ["27", "1 and 2 tokens per event repeated with 3 seeds", "A single-run sweep cannot separate the setting from training variance"],
 ], [1000, 4600, 3426]));
-children.push(caption("Table 12. Deviations 1–25 (full text in the analysis plan)."));
+children.push(caption("Table 14. Deviations 1–27 (full text in the analysis plan)."));
 
 // ---------- document ----------
 const doc = new Document({
