@@ -13,8 +13,9 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-RES = ROOT / "results"
-OUT = ROOT / "docs" / "paper" / "tables"
+import os
+RES = pathlib.Path(os.environ.get("PAPER_RES_DIR", ROOT / "results"))
+OUT = pathlib.Path(os.environ.get("PAPER_TABLES_DIR", ROOT / "docs" / "paper" / "tables"))
 OUT.mkdir(parents=True, exist_ok=True)
 NS = ["1", "5", "10", "20", "50"]
 
@@ -243,6 +244,90 @@ for reason in ("run>=3", "high-conf V/F"):
     audit[f"urgent_recall_{reason}_r4_mean"] = round(sum(urg[f"MEA:r4_seed{s}"][reason]["recall"] for s in (101, 202, 303)) / 3, 2)
     audit[f"urgent_recall_{reason}_r3_mean"] = round(sum(urg[f"MEA:r3_seed{s}"][reason]["recall"] for s in (101, 202, 303)) / 3, 2)
     audit[f"urgent_recall_{reason}_text"] = round(urg["A-compact"][reason]["recall"], 2)
+
+# ---- Test windows per N and tier (achieved counts) -----------------------------------------------------------------
+ts = load("p1_item7_testset_v2.json")
+mix, nat = ts["stratified_class_mix"], ts["natural_reference_counts"]
+rows, tot_s, tot_n = [], 0, 0
+for n in NS:
+    r = sum(mix[f"{n}|routine"].values())
+    p = sum(mix[f"{n}|priority"].values())
+    u = sum(mix[f"{n}|urgent"].values())
+    nn = sum(v for k, v in nat.items() if k.startswith(n + "|")) if n != "1" else 0
+    rows.append([n, str(r), str(p), str(u), str(r + p + u), str(nn) if nn else "---", str(r + p + u + nn)])
+    tot_s += r + p + u
+    tot_n += nn
+rows.append(["All", "", "", "", str(tot_s), str(tot_n), str(tot_s + tot_n)])
+write("windows.tex", rows, ["$N$", "Routine", "Priority", "Urgent", "Stratified", "Natural prevalence", "Total"], "rrrrrrr")
+audit["windows_total"] = (tot_s + tot_n, ts["n_windows"])
+assert tot_s + tot_n == ts["n_windows"], "window table does not add up to the test set"
+
+# ---- INCART confirmatory evaluation (Deviation 21) -------------------------------------------------------------------
+# The window and conversion tables are written from pre-run files (counts only). The hypothesis, accuracy and false-alarm
+# tables are written only when results/p1_confirmatory_incart.json exists, so that the manuscript builds before and after.
+conv = load("p1_incart_conversion.json")
+iw = load("p1_item7_testset_incart.json")["cells"]
+rows = []
+for n in NS:
+    cells = {t: iw.get(f"stratified|{n}|{t}") for t in ("routine", "priority", "urgent")}
+    nat = sum(v for k, v in iw.items() if k.startswith(f"natural|{n}|"))
+    if any(v is None for v in cells.values()):
+        continue
+    s = sum(cells.values())
+    rows.append([n, str(cells["routine"]), str(cells["priority"]), str(cells["urgent"]), str(s), str(nat) if nat else "---", str(s + nat)])
+if rows:
+    tot_i = sum(int(r[6]) for r in rows)
+    rows.append(["All", "", "", "", str(sum(int(r[4]) for r in rows[:-0 or None])), str(sum(int(r[5]) for r in rows if r[5] != "---")), str(tot_i)])
+    write("incart_windows.tex", rows, ["$N$", "Routine", "Priority", "Urgent", "Stratified", "Natural prevalence", "Total"], "rrrrrrr")
+    audit["incart_windows_total"] = (tot_i, load("p1_item7_testset_incart.json")["n_windows"])
+
+inc_path = RES / "p1_confirmatory_incart.json"
+if inc_path.exists():
+    inc = load("p1_confirmatory_incart.json")
+    names = {"H1": "H1: non-inferior to calibrated text", "H2": "H2: superior to calibrated text",
+             "H3": "H3: non-inferior to calibrated filtered text", "H4": "H4: faster first token than text"}
+    # Deviation 21a: the N = 50 timing of the confirmatory run was dominated by memory paging; the value
+    # re-measured under the memory cap (same 21 windows, frozen routine) replaces it, marked with a dagger.
+    recheck = None
+    rpath = RES / "p1_incart_timing_n50_capped.json"
+    if rpath.exists():
+        import numpy as np
+        tr = load("p1_incart_timing_n50_capped.json")["rows"]
+        by = {}
+        for x in tr:
+            by.setdefault(x["start"], {})[x["arm"]] = x
+        rel = np.array([v["MEA"]["ttft_ms"] / v["A-compact"]["ttft_ms"] - 1 for v in by.values() if "MEA" in v and "A-compact" in v])
+        rng = np.random.default_rng(0)
+        boots = [np.median(rel[rng.integers(0, len(rel), len(rel))]) for _ in range(20000)]
+        recheck = (float(np.median(rel)), float(np.percentile(boots, 2.5)), float(np.percentile(boots, 97.5)))
+        audit["incart_h4_n50_capped"] = tuple(round(x, 3) for x in recheck)
+    rows = []
+    for h in ("H1", "H2", "H3", "H4"):
+        d = inc["hypotheses"][h]
+        for n, v in d["tests"].items():
+            est = v.get("difference", v.get("median_rel"))
+            lo, hi = v.get("cluster_ci95", v.get("ci95"))
+            if h == "H4" and n == "50" and recheck:
+                est, lo, hi = recheck
+                n = "50$^\\dagger$"
+            first = n == list(d["tests"])[0]
+            rows.append([names[h] if first else "", n, pm(est), ci(lo, hi), "pass" if (hi < 0 if h == "H4" else v["pass"]) else "fail",
+                         d["status"] if first else ""])
+    write("incart_hyp.tex", rows, ["Hypothesis", "$N$", "Estimate", "95\\% CI", "Result", "Status"], "llrrll")
+    arms = [("MEA:r4_seed101", None), ("A-compact", "Text"), ("A-compact-cal", "Text cal."), ("A-filtered", "Filtered"), ("A-filtered-cal", "Filtered cal.")]
+    rows = []
+    for n, d in inc["balanced_accuracy"].items():
+        r4m = sum(d[f"MEA:r4_seed{s}"] for s in (101, 202, 303)) / 3
+        rows.append([n, f"{r4m:.3f}"] + [f"{d[a]:.3f}" for a, _ in arms[1:]])
+    write("incart_acc.tex", rows, ["$N$", "Adapter r4"] + [l for _, l in arms[1:]], "rrrrrr")
+    fa = inc["false_alarm"]
+    rows = []
+    for a, lab in [("MEA:r4_seed101", "Adapter, seed 101"), ("MEA:r4_seed202", "Adapter, seed 202"), ("MEA:r4_seed303", "Adapter, seed 303"),
+                   ("A-compact-cal", "Text, calibrated"), ("A-filtered-cal", "Filtered, calibrated")]:
+        if a in fa:
+            rows.append([lab, "---" if fa[a]["all"] is None else f"{fa[a]['all'] * 100:.1f}\\%", "---" if fa[a]["natural"] is None else f"{fa[a]['natural'] * 100:.1f}\\%"])
+    write("incart_fa.tex", rows, ["Arm", "All routine windows", "Natural prevalence"], "lrr")
+    audit["incart_status"] = {h: inc["hypotheses"][h]["status"] for h in inc["hypotheses"]}
 
 # ---- Audit of prose numbers ---------------------------------------------------------------------------------------
 print("AUDIT (computed from result files):")

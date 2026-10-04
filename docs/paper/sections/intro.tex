@@ -21,8 +21,8 @@ The answers do not all favour the latent channel. It keeps prompt processing fla
 The contributions are as follows.
 \begin{enumerate}
 \item A formulation of the interface choice for a non-transformer sender as a comparison of the three efficiency levers (filter, reuse, latent), with a text baseline that includes a sender-side filter.
-\item A latent channel from such a sender into a frozen language model, extended from one event per call to fifty, in which the language model is untouched and only about 0.9 million adapter parameters are trained \todo{verify parameter count at freeze}.
-\item A controlled, pre-registered evaluation of cost, accuracy and recoverability, including serving under batching and prefix caching, replication on a second sender architecture, and an external confirmatory test \todo{insert result once the frozen run completes}.
+\item A latent channel from such a sender into a frozen language model, extended from one event per call to fifty, in which the language model is untouched and only 0.88 million adapter parameters are trained.
+\item A controlled, pre-registered evaluation of cost, accuracy and recoverability, including serving under batching and prefix caching, replication on a second sender architecture, and an external confirmatory test that confirmed both the adapter's advantage over calibrated text and the filter's advantage over the adapter (Section~\ref{sec:incart}).
 \item A recoverability protocol that decodes each event's label, tier, heart rate, interval and abnormal-run status from its slot of virtual tokens, separating what the channel carries from what the receiver uses.
 \item A rule for choosing between a filtered text interface and a latent one, with the pre-registration log and code to reproduce every table.
 \end{enumerate}

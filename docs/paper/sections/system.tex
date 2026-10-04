@@ -22,9 +22,8 @@ Adapter (r4) & send latent & Four virtual tokens per event \\
 
 \begin{figure}[t]
 \centering
-% Source: reports/figures/fig1_pipeline.png (to be redrawn in vector form for submission)
-\fbox{\parbox{0.9\columnwidth}{\centering \todo{Figure 1: pipeline; perception agent $\rightarrow$ interface (text or adapter) $\rightarrow$ frozen reasoning agent. Redraw from reports/figures/fig1\_pipeline.png.}}}
-\caption{System overview. The highlighted block, the adapter, is the only component trained for this work.}
+\resizebox{\linewidth}{!}{\input{figures/fig_pipeline}}
+\caption{System overview. A perception agent that is not a transformer classifies each heartbeat. Its events cross one of three interfaces, one per row, to a frozen reasoning agent. Only the adapter is trained; the sender, the receiver and the decoding scheme are identical across arms. Message sizes are the median measured costs of Section~\ref{sec:results}.}
 \label{fig:pipeline}
 \end{figure}
 
@@ -48,7 +47,7 @@ The adapter is the third lever. It must satisfy three requirements that follow f
 \end{equation}
 where $\mathbf{W}$ and $\mathbf{b}$ define one linear map from 35 to $4 \times 2560$ dimensions, $\mathbf{P}_i \in \mathbb{R}^{4\times 2560}$ is a learned embedding for event position $i$ (up to 50 positions), $\mathrm{norm}$ rescales each token to unit length, and $\gamma$ is one learnable scalar initialised to the median norm of the embeddings the model computes for real tokens. The normalisation fixes a failure observed early in development: without it, the norm of the virtual tokens drifted far from that of real tokens, and many of them together broke generation. The tokens of the window are the concatenation of the $\mathbf{T}_i$ in event order and replace the text of the events in the prompt. Prompt length therefore depends only on $N$.
 
-Because the map is linear and acts on one event at a time, slot $i$ is a function of event $i$ alone, so each event's content can be audited independently (Section~\ref{sec:results}). The map has rank at most 35, so the adapter cannot introduce information absent from its input. About 0.9 million parameters are trained, against 4 billion in the frozen model \todo{confirm parameter count from the checkpoint at freeze}.
+Because the map is linear and acts on one event at a time, slot $i$ is a function of event $i$ alone, so each event's content can be audited independently (Section~\ref{sec:results}). The map has rank at most 35, so the adapter cannot introduce information absent from its input. The adapter has 880,641 trainable parameters (358,400 in the projection weights, 10,240 in its bias, 512,000 in the position embeddings and one scale), against the roughly four billion effective parameters of the frozen model.
 
 Training minimises a weighted next-token loss on the structured answer, with the tier tokens weighted fourfold, using AdamW with warm-up and cosine decay, a batch size of one window, and early stopping on a validation set of held-out recordings. The final recipe, r4, differs from the earlier recipe r3 in two ways, both pre-registered before training. First, 72 training and 23 validation windows were added in which a normal beat is classified with confidence below 0.8 (\emph{hard negatives}), because r3 raised false alarms on exactly such windows. Second, the three side inputs were added, because heart rate, interval and run length were present in the text interface but could not be recovered from the 32-dimensional vector. The two changes were made together; their separate effects are not identified (Section~\ref{sec:discussion}).
 
