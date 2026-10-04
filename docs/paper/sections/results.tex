@@ -1,0 +1,142 @@
+\section{Results}
+\label{sec:results}
+
+All numbers in this section come from the pre-registered DS2 evaluation (1,195 windows, 22 patients) unless stated otherwise, and are generated from the results ledger \todo{generate the tables from the ledger before submission}. Adapter values are means of three training seeds. Intervals are 95\% patient-cluster bootstrap limits.
+
+The results answer one question for each research question: what does the latent lever cost relative to the others (RQ1), what does it give up or gain in the decision (RQ2), and what can still be read back from the message (RQ3). Throughout, the relevant comparison is against the strongest text arm that is available for the question being asked: calibrated compact text for accuracy against listing every event, and filtered text, the first lever, for every claim about whether the latent channel is worth building. Section~\ref{sec:discussion} brings the three answers together in a selection rule.
+
+\subsection{RQ1: Cost of the Interface}
+At a single event the adapter has nothing to save. Its four tokens replace about 57 tokens of compact text, but the fixed scaffold dominates the prompt (end-to-end lengths of 486 and 458 tokens for the two arms in the single-event study), and time to first token is unchanged. The advantage appears only when a prompt carries many events (Table~\ref{tab:cost}). Text grows by about 60 tokens per event whereas the adapter adds four, so the adapter's prompt-processing time stays near 183~ms from 1 to 50 events while the time of compact text rises to 845~ms. Time to the tier token falls by a smaller factor because the decision includes the generation of the first answer tokens, which is the same in both arms.
+
+\begin{table}[t]
+\caption{Cost of the adapter relative to compact text (batch one, median over 21 windows per $N$).}
+\label{tab:cost}
+\centering
+\small
+\
+esizebox{inewidth}{!}{input{tables/cost}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_cost.pdf}
+\caption{Cost of the three interfaces against the number of events per prompt (batch one, median of 21 windows per $N$). The shaded band in the right panel is the 90th percentile of the filtered prompt: its length depends on content, whereas the adapter's depends only on $N$. Time to decision is almost identical for filtered text and the adapter.}
+\label{fig:cost}
+\end{figure}
+
+\textbf{Serving.} Single-request timing flatters neither arm because nothing is reused. Under batching, text that lists every event could not be served at 50 events, nor at a batch of eight at any $N \ge 10$, on the 12~GB card, whereas the adapter fitted every configuration with a peak of 10.0~GB. Against A-filtered, the adapter was within about 5\% for single requests and was ahead once requests were batched, with 10 to 30\% more decisions per second and 12 to 28\% less energy per decision (Table~\ref{tab:serving}). Filtered text fitted only some batches of eight, because its length depends on how many abnormal beats a window contains; the filtered figures at batch eight come only from the batches that fit, which are its shortest, so they favour filtered text. Prefix caching shortened every arm's prefill and did not change the ranking.
+
+\begin{table}[t]
+\caption{Decisions per second and GPU energy per decision when requests are batched (adapter: r4, seed 101). ``Does not fit'': the batch exceeds the 12~GB memory cap.}
+\label{tab:serving}
+\centering
+\small
+\
+esizebox{inewidth}{!}{input{tables/serving}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/fig_serving.pdf}
+\caption{Throughput (top) and GPU energy per decision (bottom) when requests are batched, for 10, 20 and 50 events per prompt (adapter: recipe r4, seed 101). A cross marks a configuration that did not fit in the memory cap of the 12~GB card. Filtered text at batch eight is plotted from the batches that fit, which are its shortest prompts.}
+\label{fig:serving}
+\end{figure}
+
+\subsection{RQ2: Accuracy}
+\textbf{Against text that lists every event.} Default compact text falls from 0.97 balanced accuracy at one event to 0.48 to 0.56 at 10 to 50 events. Calibration recovers part of this (0.73 to 0.76) and is the fair comparison. The adapter (r4) holds 0.81 to 0.84 at 5 to 50 events (Table~\ref{tab:accuracy}). Against calibrated text, the adapter was superior at 10 and 20 events (both $+0.10$, intervals excluding zero) and non-inferior at 5 and 50 events. At a single event, text was better (0.97 against 0.80), as expected from the cost analysis.
+
+\begin{table}[t]
+\caption{Balanced accuracy on class-balanced DS2 windows, and adapter minus calibrated text with 95\% patient-cluster intervals. The adapter is superior at $N=10$ and 20 (interval above zero) and non-inferior at $N=5$ and 50 (lower limit above the margin of $-0.05$).}
+\label{tab:accuracy}
+\centering
+\small
+\input{tables/accuracy}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/fig_accuracy.pdf}
+\caption{Balanced accuracy against the number of events per prompt on the class-balanced test windows. The shaded band is the range of the three adapter seeds. Filtered text is the most accurate arm; text with every event listed degrades as events are added and calibration recovers only part of the loss.}
+\label{fig:accuracy}
+\end{figure}
+
+\textbf{Why text with every event fails.} Two mechanisms account for most of the loss (Figure~\ref{fig:mechanisms}). Text misses urgent windows caused by a single high-confidence ventricular or fusion beat (a numeric threshold of 0.85 buried in a long list) far more often than windows caused by a run of abnormal beats, and the first of these is the clearest effect: text recalls 0.17 of such windows against 0.82 for the adapter. The position of the deciding beat points in the direction reported for long contexts \cite{liu2024lost,hsieh2024found}: text accuracy is lowest when that beat is in the middle third of the window (0.19, against 0.30 in the first and 0.38 in the last third). The evidence is weak, however. The middle group has 73 windows, and its interval overlaps those of the other thirds (right panel of Figure~\ref{fig:mechanisms}). The adapter varies less across positions (0.74 to 0.78) but is not flat, with a similar small dip in the middle third. We therefore report a position effect as suggested for text and not as established, and as not distinguishable from the adapter's.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.65\linewidth]{figures/fig_mechanisms.pdf}
+\caption{Urgent recall by the reason a window is urgent. Text with every event listed misses windows made urgent by a single high-confidence ventricular or fusion beat far more often than windows made urgent by a run; the adapter does not show this gap. Bars for the adapter are the mean of three seeds, with each seed's value marked. Right: accuracy on non-routine windows with $N \ge 10$ by the position of the window's most urgent beat; whiskers are 95\% Wilson intervals, and the adapter counts are windows times three seeds. This panel is exploratory (not pre-registered) and is computed by \texttt{scripts/position\_effect.py}.}
+\label{fig:mechanisms}
+\end{figure}
+
+\textbf{False alarms.} The previous recipe escalated about 11\% of routine windows, concentrated on windows with a normal beat of low classification confidence. Recipe r4 reduced the rate by about two thirds at every seed, to 3.6\% overall (0\% to 2.5\% at 50 events). Text raised none, because its error is the opposite one: it under-escalates urgent windows to priority. The adapter never called an urgent window routine in the 50-event confusion matrix.
+
+\textbf{What the final recipe's gain comes from.} Recipe r4 changed two things at once, hard-negative routine windows in training and three side inputs per event (heart rate, interval and run length), so we retrained it without the side inputs, three seeds, everything else identical (Table~\ref{tab:ablation}). The side inputs account for most of the improvement: accuracy rose at every $N$ (by 0.03 to 0.05, with the interval excluding zero at 50 events) and false alarms fell from 8.6\% to 3.6\% in every seed. Hard negatives alone moved accuracy by about 0.01 and false alarms from 10.6\% to 8.6\%. The false-alarm reduction therefore comes mainly from giving the receiver the context to tell a low-confidence normal beat from a real event, not from the extra training examples.
+
+\begin{table}[t]
+\caption{Ablation of recipe r4 (three seeds each): balanced accuracy, false alarms (FA) on routine windows, and the two contrasts with patient-cluster 95\% intervals. HN: hard-negative routine windows in training; SI: side inputs (heart rate, interval, run length). The SI contrast is clean (same windows and schedule); the HN contrast is approximate, because r3 also used fewer training windows and a proportionally shorter schedule.}
+\label{tab:ablation}
+\centering
+\footnotesize
+\resizebox{\linewidth}{!}{\input{tables/ablation}}
+\end{table}
+
+\textbf{Against text that lists only abnormal events.} A-filtered was more accurate than the adapter at every $N$ (Table~\ref{tab:filtered}), raised no false alarms, and for a single request was equal in time to first token and to decision within 1.5\%. Its cost depends on content: each listed abnormal beat adds about 68 tokens, so at 50 events its prompt is longer than the adapter's in half of the windows. The pre-registered decision rule for this comparison anticipated a filtered prompt that was cheaper but less accurate, and applied literally it returned ``advantage holds'' because the filtered prompt turned out to be longer. We do not read it that way. Against filtered text, on this task, the latent interface offers no accuracy advantage and no latency advantage for a single request.
+
+\begin{table}[t]
+\caption{Adapter against filtered text (default decoding) with patient-cluster intervals, and median prompt tokens (adapter / filtered).}
+\label{tab:filtered}
+\centering
+\small
+\input{tables/filtered}
+\end{table}
+
+\textbf{Against the annotations.} Scored against the database annotations instead of the sender's own rule, the encoder's rule has sensitivity of 0.92 to 0.94 and specificity of only 0.46 to 0.52 for a truly abnormal beat in the window. The clinical ceiling is therefore set by perception and not by the interface, and the adapter tracked the reference (sensitivity 0.89 to 0.98 for the earlier recipe) while default text missed more abnormal windows (0.67 to 0.71 at 10 events).
+
+\textbf{Second sender.} The replication with a convolutional sender (validation accuracy 0.955 against a gate of 0.85) reproduced the pattern (Table~\ref{tab:second}). Text with every event listed fell as events were added while the adapter stayed at 0.77 to 0.82; the adapter was superior to calibrated text at 10 events and non-inferior at 20 and 50, but not at 5; false alarms were 1.3 to 2.1\%. A-filtered was again the most accurate arm except at 50 events, where it fell to 0.80 and the difference was inconclusive ($-0.01$ [$-0.09$, $+0.08$]). An exploratory look at those windows (40 per sender, so indicative only) suggests that this sender's urgent windows carry sparser, more borderline evidence, often one urgent beat among about 13 listed abnormal beats with a deciding confidence just above 0.85. Filtered text depends on how the sender's evidence is distributed, whereas the adapter did not change much.
+
+\begin{table}[t]
+\caption{Second sender (ResNet1D-RR): balanced accuracy on its own DS2 windows and adapter minus calibrated text (non-inferiority margin $-0.05$).}
+\label{tab:second}
+\centering
+\footnotesize
+\input{tables/second}
+\end{table}
+
+\textbf{External confirmatory test.} \todo{INCART: H1 to H4 results from the frozen run (non-inferiority at $N$ = 10, 20, 50; superiority at 10 and 20; non-inferiority against filtered text; time to first token). Report a failure of any hypothesis as plainly as a pass.}
+
+\subsection{RQ3: What Can Be Recovered}
+\textbf{Single events.} Decoders trained on the training records and applied to the test records recovered the predicted beat label (99.5\%) and tier (95\%) from the virtual tokens as well as from the 32-dimensional input, so the adapter loses nothing the vector holds.
+
+\textbf{Every position.} For slots 0, 9, 19 and 49 of a 50-event window, label, tier and urgency decoded at the level of the input vector. Decoders are slot-specific: a decoder trained on slot 0 applied at slot 49 fell to 0.64 to 0.91, so an auditor needs a position-aware decoder.
+
+\textbf{What the vector never carried.} The 32-dimensional context vector does not contain heart rate, interval or run length ($R^2$ about 0.3), so the first recipe could not carry them either. With the side inputs of r4 they are recoverable from the tokens (Table~\ref{tab:recover}). The decoder registered in advance was a small multilayer perceptron, and with it heart rate ($R^2$ 0.59 to 0.78) and interval (0.65 to 0.77) fall well short of the input (0.98 and 0.95), while the presence of a run of three abnormal beats is recovered at 0.93 to 0.98 balanced accuracy (0.53 to 0.61 for the first recipe, near chance). A linear decoder, fitted in the same analysis, recovers much more of the numeric fields from the same tokens (heart rate 0.95 to 0.97, interval 0.92 to 0.96), which indicates that the multilayer decoder understates what the tokens hold, and that the information is held in a nearly linear form. We report both because the registered figure is the conservative one, and treat the linear figures as the better estimate of what an auditor could recover. On the second sender, heart rate and interval are recovered from every token slot at $R^2$ 0.89 to 0.94 with the registered decoder. Signal quality is not carried by either sender.
+
+\begin{table}[t]
+\caption{Recoverability of each event's fields from its virtual tokens (recipe r4, main sender), decoders trained on the training records and applied to the test records. Token columns give the range over slots 0 and 49 and three seeds. The multilayer perceptron was the registered decoder; the linear decoder is reported for comparison.}
+\label{tab:recover}
+\centering
+\footnotesize
+\resizebox{\linewidth}{!}{\input{tables/recover}}
+\end{table}
+
+\textbf{Carried and used.} The ablation shows both directions. Without the side inputs, heart rate, interval and run length are not recoverable from the tokens at all ($R^2$ below zero; run $\geq 3$ at 0.55, near chance); with them they are, and the receiver uses them, since they account for most of the accuracy gain and the false-alarm reduction (Table~\ref{tab:ablation}). Use is partial, however: urgent recall on windows made urgent by a run of three or more abnormal beats rose only from 0.61 to 0.64 when run length entered the tokens, against 0.44 for text.
+
+\textbf{Pre-generation check.} A score computed from the context vector alone predicts the adapter's wrong answers (AUROC 0.89 to 0.97) and flags noise and powerline interference (0.99), which gives an inspection that does not need to read the tokens.
+
+\textbf{Compression.} We retrained the adapter with one, two and eight virtual tokens per event in place of four (Table~\ref{tab:sweep}, Figure~\ref{fig:sweep}). A first sweep with one seed per setting suggested that a single token might suffice, so one and two tokens were repeated with three seeds each, under a rule registered before training: a setting is free of accuracy cost only if it is non-inferior to four tokens (margin $-0.05$) at every $N$. Neither passed. With one token, one run in three failed to learn the task (0.49 to 0.55 at 5 to 50 events) while the other two matched four tokens, so the three-seed mean was 0.09 to 0.11 lower. With two tokens accuracy was within about 0.01 of four tokens at 5 to 20 events and 0.04 lower at 50, non-inferior only at 20 events, and false alarms were higher in every run (8.6\% on average against 3.6\%). Eight tokens, a single run, was no better than four. Each event's label, heart rate and run status remained recoverable from a single token, including from the one-token run that failed the task (label 0.96 to 0.99, heart-rate $R^2$ about 0.9 with the registered decoder). Compression below four tokens per event therefore preserved what the tokens carry but made the receiver's use of it unreliable, and four tokens was the smallest setting at which every run was reliable. The prompt saving it would buy is modest, because the scaffold dominates: 563 tokens at one token per event against 713 at four, at 50 events.
+
+\begin{table}[t]
+\caption{Virtual tokens per event: three seeds for $k$ = 1, 2 and 4 (means), one run for $k$ = 8. Tokens: prompt length at 50 events. $k-4$: difference from $k$ = 4 at the least favourable $N$ (50 in both cases), with its patient-cluster 95\% interval; NI: number of $N$ (of 5, 10, 20, 50) at which $k$ is non-inferior (margin $-0.05$). FA: false alarms on routine windows (seed ranges in the text). Label and HR $R^2$: recoverability from slot 0 with the registered decoder (multilayer perceptron); the negative $R^2$ at $k$ = 8 is likely a decoder limit (32 principal components of a 20,480-dimensional slot).}
+\label{tab:sweep}
+\centering
+\footnotesize
+\resizebox{\linewidth}{!}{\input{tables/sweep}}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.7\linewidth]{figures/fig_sweep.pdf}
+\caption{Balanced accuracy against the number of events for $k$ = 1, 2 and 4 virtual tokens per event (lines: mean of three seeds; bands: seed range) and $k$ = 8 (one run). The wide band at $k$ = 1 is one failed run.}
+\label{fig:sweep}
+\end{figure}

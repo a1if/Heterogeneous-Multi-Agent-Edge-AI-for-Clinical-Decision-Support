@@ -1,0 +1,15 @@
+\begin{tabular}{rrccc}
+\toprule
+$N$ & Batch & Adapter & Text, all events & Filtered text \\
+\midrule
+10 & 1 & 0.98/s, 83 J & 0.92/s, 111 J & 0.97/s, 95 J \\
+10 & 4 & 3.19/s, 38 J & 2.23/s, 65 J & 2.80/s, 49 J \\
+10 & 8 & 4.72/s, 33 J & does not fit & 3.63/s, 43 J (3 of 6 fit) \\
+20 & 1 & 0.98/s, 81 J & 0.85/s, 134 J & 0.97/s, 92 J \\
+20 & 4 & 3.17/s, 39 J & 1.70/s, 92 J & 2.49/s, 54 J \\
+20 & 8 & 4.55/s, 33 J & does not fit & 4.00/s, 38 J (3 of 6 fit) \\
+50 & 1 & 1.00/s, 89 J & 0.60/s, 232 J & 0.96/s, 92 J \\
+50 & 4 & 2.79/s, 48 J & does not fit & 2.25/s, 63 J (12 of 15 fit) \\
+50 & 8 & 4.11/s, 38 J & does not fit & 3.72/s, 43 J (3 of 6 fit) \\
+\bottomrule
+\end{tabular}

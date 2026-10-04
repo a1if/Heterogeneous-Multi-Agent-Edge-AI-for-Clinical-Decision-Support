@@ -313,7 +313,7 @@ children.push(h2("10.2 How many tokens per event?"));
 children.push(p("The adapter gives each event 4 virtual tokens. The same recipe was retrained with 1, 2 and 8 tokens per event; after a single-run sweep suggested that 1 token might be enough, 1 and 2 tokens were repeated with three seeds each (pre-registered before training, with the rule that a setting is called free of accuracy cost only if it is non-inferior to 4 tokens at every N)."));
 children.push(table([
   ["Tokens per event (prompt at N = 50)", "Balanced accuracy, N = 5 / 10 / 20 / 50", "Difference from 4 tokens, worst N [95% CI]", "False alarms", "Facts recoverable from tokens"],
-  ["1 (563 tokens), 3 seeds", "0.70 / 0.72 / 0.75 / 0.73", "−0.11 [−0.16, −0.07]", "6.3% (2.7–10.0)", "yes (heart rate R² 0.87)"],
+  ["1 (563 tokens), 3 seeds", "0.70 / 0.72 / 0.75 / 0.73", "−0.11 [−0.16, −0.06]", "6.3% (2.7–10.0)", "yes (heart rate R² 0.87)"],
   ["2 (613 tokens), 3 seeds", "0.80 / 0.82 / 0.83 / 0.80", "−0.04 [−0.13, +0.03]", "8.6% (7.3–10.0)", "yes (0.81)"],
   ["4 (713 tokens, r4), 3 seeds", "0.81 / 0.83 / 0.83 / 0.84", "–", "3.6% (2.7–4.8)", "yes (0.71)"],
   ["8 (913 tokens), 1 run", "0.77 / 0.80 / 0.78 / 0.80", "single run", "6.1%", "label, tier, run yes"],

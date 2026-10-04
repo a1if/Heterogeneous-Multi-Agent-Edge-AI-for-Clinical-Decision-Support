@@ -1,0 +1,65 @@
+\section{System}
+\label{sec:system}
+
+Figure~\ref{fig:pipeline} shows the pipeline. A perception agent classifies each heartbeat and emits an event. The events of a window cross an interface to a reasoning agent, which returns a structured triage decision. The interface is the only thing that varies between arms; both agents are identical across arms. Each arm implements one of the efficiency levers of Section~\ref{sec:intro} (Table~\ref{tab:levers}), so that the comparison is a comparison of levers on a fixed sender and a fixed receiver.
+
+\begin{table}[t]
+\caption{The interfaces compared, and the efficiency lever each implements. Prefix caching is applied to every arm as a second condition and is not a separate arm.}
+\label{tab:levers}
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+Arm & Lever & What crosses the interface \\
+\midrule
+A-full & none (reference) & Full record of every event, as text \\
+A-compact & none (baseline) & One compact line per event, as text \\
+A-filtered & say less & Abnormal events only, normal events as a count \\
+Adapter (r4) & send latent & Four virtual tokens per event \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+% Source: reports/figures/fig1_pipeline.png (to be redrawn in vector form for submission)
+\fbox{\parbox{0.9\columnwidth}{\centering \todo{Figure 1: pipeline; perception agent $\rightarrow$ interface (text or adapter) $\rightarrow$ frozen reasoning agent. Redraw from reports/figures/fig1\_pipeline.png.}}}
+\caption{System overview. The highlighted block, the adapter, is the only component trained for this work.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Task}
+Each window contains $N$ consecutive heartbeats from one recording, with $N \in \{1,5,10,20,50\}$. The reasoning agent must return the most urgent triage tier in the window and say which beat set it. The tier of a single beat follows a fixed escalation rule applied to the perception agent's event: \emph{urgent} if the event requires urgent review (a run of three or more consecutive abnormal beats, or a single ventricular or fusion beat classified with confidence of at least 0.85), \emph{routine} if the beat is classified as normal, and \emph{priority} otherwise. The reference tier of a window is the maximum over its beats. The rule is applied to the perception agent's \emph{predictions}, not to the annotations, because the question being tested is whether the channel delivers the sender's output faithfully. Agreement with the annotations is reported separately (Section~\ref{sec:results}). We treat the task as a communication-fidelity benchmark and not as a clinical reasoning task: a fixed rule over the perception outputs solves it, so it cannot show that a language model adds clinical judgement.
+
+\subsection{Perception Agent}
+The perception agent is a convolutional--recurrent classifier trained only on the five-class AAMI EC57 beat task \cite{aami1998ec57}. A 360-sample window (1~s at 360~Hz) passes through three one-dimensional convolutional blocks (32, 64 and 128 channels, with batch normalisation, ReLU and max-pooling), a bidirectional LSTM with hidden size 64, and a unidirectional context LSTM with hidden size 32. The output of the context LSTM, a 32-dimensional \emph{context vector}, feeds the classification head and is the only representation passed downstream. There is no pretraining, no contrastive objective and no auxiliary loss.
+
+The original design saw a single window and no timing, yet the text interface carried the RR interval. A five-feature RR branch (previous and next RR interval, local mean RR and two ratios) was therefore added to the context stage. Across ten training seeds it improved overall accuracy from 0.854 to $0.926 \pm 0.019$, ventricular sensitivity from 77\% to $93\% \pm 3\%$ and the class recoverability of the context vector from 69.6\% to $81.2\% \pm 5.0\%$, at the cost of one beat of latency. Fusion-beat detection stayed poor ($5\% \pm 7\%$ sensitivity). All adapters were trained on seed~0 of this encoder, which ranked third, fourth and seventh of ten on accuracy, supraventricular sensitivity and recoverability and was designated representative by a rule fixed beforehand.
+
+A second, purely convolutional sender (residual one-dimensional convolutions without recurrence, the same RR branch and the same 32-dimensional vector) tests whether the channel depends on the first sender's architecture (Section~\ref{sec:results}).
+
+\subsection{Reasoning Agent}
+The reasoning agent is Gemma~4 E4B, loaded in 4-bit NF4 quantisation and frozen in every arm. Its weights are never updated, either by adapter training or by calibration. The model uses per-layer embeddings, a lookup keyed by token identity, which virtual tokens do not have. Virtual positions therefore receive the lookup of a padding token. This is an architectural cost of the latent channel and applies to every adapter result.
+
+\subsection{Adapter: the Latent Channel}
+The adapter is the third lever. It must satisfy three requirements that follow from the setting: the sender is not changed and is not a transformer, the receiver is not changed, and the message must have a length that depends only on the number of events. A linear map from the sender's own vector meets all three, and keeps each event's tokens a function of that event alone. For event $i$ with context vector $\mathbf{z}_i \in \mathbb{R}^{32}$ and three scaled side inputs $\mathbf{s}_i \in \mathbb{R}^{3}$ (heart rate, RR interval and abnormal-run length, each clipped and standardised), the adapter forms $\mathbf{x}_i = [\mathbf{z}_i; \mathbf{s}_i] \in \mathbb{R}^{35}$ and produces $k=4$ virtual tokens
+\begin{equation}
+\mathbf{T}_i = \gamma \cdot \mathrm{norm}\!\left(\mathbf{W}\mathbf{x}_i + \mathbf{b} + \mathbf{P}_i\right) \in \mathbb{R}^{4 \times 2560},
+\end{equation}
+where $\mathbf{W}$ and $\mathbf{b}$ define one linear map from 35 to $4 \times 2560$ dimensions, $\mathbf{P}_i \in \mathbb{R}^{4\times 2560}$ is a learned embedding for event position $i$ (up to 50 positions), $\mathrm{norm}$ rescales each token to unit length, and $\gamma$ is one learnable scalar initialised to the median norm of the embeddings the model computes for real tokens. The normalisation fixes a failure observed early in development: without it, the norm of the virtual tokens drifted far from that of real tokens, and many of them together broke generation. The tokens of the window are the concatenation of the $\mathbf{T}_i$ in event order and replace the text of the events in the prompt. Prompt length therefore depends only on $N$.
+
+Because the map is linear and acts on one event at a time, slot $i$ is a function of event $i$ alone, so each event's content can be audited independently (Section~\ref{sec:results}). The map has rank at most 35, so the adapter cannot introduce information absent from its input. About 0.9 million parameters are trained, against 4 billion in the frozen model \todo{confirm parameter count from the checkpoint at freeze}.
+
+Training minimises a weighted next-token loss on the structured answer, with the tier tokens weighted fourfold, using AdamW with warm-up and cosine decay, a batch size of one window, and early stopping on a validation set of held-out recordings. The final recipe, r4, differs from the earlier recipe r3 in two ways, both pre-registered before training. First, 72 training and 23 validation windows were added in which a normal beat is classified with confidence below 0.8 (\emph{hard negatives}), because r3 raised false alarms on exactly such windows. Second, the three side inputs were added, because heart rate, interval and run length were present in the text interface but could not be recovered from the 32-dimensional vector. The two changes were made together; their separate effects are not identified (Section~\ref{sec:discussion}).
+
+\subsection{Text Interfaces}
+All text arms use the same scaffold, instructions and decoder as the adapter arm. They differ only in how the events are written into the prompt. A-compact and A-full list every event and so involve no effort to say less; A-filtered is the sender-side filter, the first lever.
+\begin{itemize}
+\item \textbf{A-compact:} one line per event with class, confidence, run length and signal quality. This is the strongest text arm that lists every event and is the primary comparator.
+\item \textbf{A-full:} the full JSON record of each event, as in the earlier single-event study, reported only for cost.
+\item \textbf{A-filtered:} only the non-normal events, with their position in the window, and the number of normal events as a count. No task information is lost: the filtered window yields the reference tier on all 1,195 test windows.
+\end{itemize}
+A text arm that lists every event is also reported under a \emph{calibrated} threshold (Section~\ref{sec:protocol}).
+
+\subsection{Schema-Constrained Decoding}
+Free generation produced malformed JSON in 9 to 20\% of answers across arms, through misnamed fields and loops. Every arm therefore uses the same constrained decoder. The structure of the answer is forced, the tier is restricted to the three valid words and chosen by the model's own scores, and free-text fields cannot close or break the structure. Every arm then produces a valid answer on every window. A check of 380 windows confirmed that the decoder changes no tier.
