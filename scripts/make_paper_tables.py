@@ -108,14 +108,14 @@ for n in NS:
     d_cal = r4["primary_calibrated_text"]["by_n"][n]
     t = d_cal.get("test")
     rows.append([
-        n, f"{d_def['text']:.2f}", f"{d_cal['text']:.2f}", f"{d_cal['mea_mean']:.2f}",
+        n, "1.00", f"{d_def['text']:.2f}", f"{d_cal['text']:.2f}", f"{d_cal['mea_mean']:.2f}",
         "---" if t is None else f"{pm(t['difference'])} {ci(*t['cluster_ci95'])}",
     ])
     audit[f"acc_adapter_{n}"] = round(d_cal["mea_mean"], 2)
     audit[f"acc_textcal_{n}"] = round(d_cal["text"], 2)
     if t:
         audit[f"acc_diff_cal_{n}"] = (round(t["difference"], 2), t["superior"], t["non_inferior"])
-write("accuracy.tex", rows, ["$N$", "Text", "Text cal.", "Adapter r4", "Adapter $-$ cal. text [95\\% CI]"], "rrrrl")
+write("accuracy.tex", rows, ["$N$", "Rule", "Text", "Text cal.", "Adapter", "Adapter $-$ cal. text [95\\% CI]"], "rrrrrl")
 
 fa = r4["false_alarm"]
 r4_all = [fa[f"MEA:r4_seed{s}"]["all_routine"] for s in (101, 202, 303)]
@@ -134,7 +134,7 @@ for n in NS:
         "---" if t is None else f"{pm(t['difference'])} {ci(*t['cluster_ci95'])}",
         f"{pt['MEA']['median']:.0f} / {pt['A-filtered']['median']:.0f}",
     ])
-write("filtered.tex", rows, ["$N$", "Adapter r4", "Filtered", "Difference [95\\% CI]", "Tokens"], "rrrrr")
+write("filtered.tex", rows, ["$N$", "Adapter", "Filtered", "Difference [95\\% CI]", "Tokens"], "rrrrr")
 audit["filtered_tokens_per_abnormal_beat"] = round(flt["cost_growth"]["tokens_per_abnormal_beat"])
 audit["filtered_share_above_adapter_n50"] = round(flt["cost_growth"]["share_of_windows_above_mea"]["50"], 2)
 
@@ -195,19 +195,19 @@ write("sweep.tex", rows, ["$k$", "Tokens", "Bal. acc., $N$ = 5/10/20/50", "$k-4$
 
 # ---- Ablation of recipe r4 (Deviation 26): r3, r4hn (hard negatives only), r4 (hard negatives + side inputs) -------
 ab = load("p1_dev26_ablation.json")
-names = {"r3": "r3 (neither)", "r4hn": "HN only", "r4": "r4 (HN + SI)"}
+names = {"r3": "Earlier adapter (neither)", "r4hn": "Hard negatives only", "r4": "Final adapter (both)"}
 rows = []
 for g in ("r3", "r4hn", "r4"):
     d = ab["describe"][g]
     fa = [v["all"] for v in d["false_alarm"].values()]
     rows.append([names[g]] + [f"{d['balanced_accuracy'][n]['mean']:.3f}" for n in Nq]
                 + [f"{100 * sum(fa) / 3:.1f}\\%"])
-for name, key in (("SI: r4 $-$ HN only", "side_inputs_r4_minus_r4hn"),
-                  ("HN: HN only $-$ r3", "hard_negatives_r4hn_minus_r3")):
+for name, key in (("Side inputs: final $-$ hard negatives only", "side_inputs_r4_minus_r4hn"),
+                  ("Hard negatives: hard negatives only $-$ earlier", "hard_negatives_r4hn_minus_r3")):
     c = ab["contrasts"][key]
     rows.append([name] + [f"{pm(c[n]['difference'])} {ci(*c[n]['cluster_ci95'])}" for n in Nq] + [""])
     audit[f"ablation_{key}"] = {n: round(c[n]["difference"], 3) for n in Nq}
-write("ablation.tex", rows, ["Recipe", "$N$=5", "$N$=10", "$N$=20", "$N$=50", "FA"], "lccccr")
+write("ablation.tex", rows, ["Adapter", "$N$=5", "$N$=10", "$N$=20", "$N$=50", "FA"], "lccccr")
 
 # ---- Recoverability from the virtual tokens (RQ3), main sender, recipe r4, slots 0 and 49, three seeds ----------
 slots = r4["slots"]
@@ -318,8 +318,8 @@ if inc_path.exists():
     rows = []
     for n, d in inc["balanced_accuracy"].items():
         r4m = sum(d[f"MEA:r4_seed{s}"] for s in (101, 202, 303)) / 3
-        rows.append([n, f"{r4m:.3f}"] + [f"{d[a]:.3f}" for a, _ in arms[1:]])
-    write("incart_acc.tex", rows, ["$N$", "Adapter r4"] + [l for _, l in arms[1:]], "rrrrrr")
+        rows.append([n, "1.000", f"{r4m:.3f}"] + [f"{d[a]:.3f}" for a, _ in arms[1:]])
+    write("incart_acc.tex", rows, ["$N$", "Rule", "Adapter"] + [l for _, l in arms[1:]], "rrrrrrr")
     fa = inc["false_alarm"]
     rows = []
     for a, lab in [("MEA:r4_seed101", "Adapter, seed 101"), ("MEA:r4_seed202", "Adapter, seed 202"), ("MEA:r4_seed303", "Adapter, seed 303"),
