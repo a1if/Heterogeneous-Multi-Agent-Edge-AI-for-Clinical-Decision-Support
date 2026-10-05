@@ -67,6 +67,10 @@ for _k in (1, 2, 8):
     RECIPES[f"r4k{_k}"] = dict(RECIPES["r4"], tokens=_k)
 # Deviation 26: ablation, r4 with hard negatives but without the side inputs (32-d input)
 RECIPES["r4hn"] = dict(RECIPES["r4"], input_dim=32)
+# Deviation 29: training-data scaling (schedule scaled with the training-set size as r4 relates to its own)
+RECIPES["r4d25"] = dict(RECIPES["r4"], train_frac=0.25, scale_schedule=True)
+RECIPES["r4d50"] = dict(RECIPES["r4"], train_frac=0.50, scale_schedule=True)
+RECIPES["r4dmax"] = dict(RECIPES["r4"], train_per_cell=50, hard_neg_train=30, scale_schedule=True)
 
 
 def hard_negative_windows(r, records, per_n, rng, ns, conf_thr=0.8, max_per_record=3, exclude=()):
@@ -96,7 +100,7 @@ def hard_negative_windows(r, records, per_n, rng, ns, conf_thr=0.8, max_per_reco
     return out
 
 
-def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3, ns=NS):
+def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3, ns=NS, train_per_cell=TRAIN_PER_CELL):
     """Deterministic train / validation windows from the DS1 replay dict r. Cells are
     drawn in N order from one generator, so appending a larger N (recipe r3) leaves
     the smaller-N windows unchanged."""
@@ -105,7 +109,7 @@ def build_windows(r, val_per_cell=VAL_PER_CELL, val_max_per_record=3, ns=NS):
     def cells_to_list(cells):
         return [{"n": n, "tier": t, "start": s} for (n, t), ss in sorted(cells.items()) for s in ss]
     train = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(0), ns=ns,
-                               per_cell=TRAIN_PER_CELL, classes=r["classes"], records=all_records - VAL_RECORDS)
+                               per_cell=train_per_cell, classes=r["classes"], records=all_records - VAL_RECORDS)
     val = stratified_windows(r["tiers"], r["record_ids"], np.random.default_rng(1), ns=ns,
                              per_cell=val_per_cell, max_per_record=val_max_per_record,
                              classes=r["classes"], records=VAL_RECORDS)
@@ -229,7 +233,8 @@ def main():
 
     rc = RECIPES[args.recipe]
     r = replay_split("ds1")
-    train, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"], rc.get("ns", NS))
+    train, val = build_windows(r, rc["val_per_cell"], rc["val_max_per_record"], rc.get("ns", NS),
+                               rc.get("train_per_cell", TRAIN_PER_CELL))
     if rc.get("hard_neg_train"):
         allrec = {int(x) for x in np.unique(r["record_ids"])}
         seen = {(w["n"], w["start"]) for w in train + val}
@@ -237,6 +242,15 @@ def main():
                                        rc["ns"], rc["hard_neg_conf"], exclude=seen)
         val += hard_negative_windows(r, VAL_RECORDS, rc["hard_neg_val"], np.random.default_rng(3),
                                      rc["ns"], rc["hard_neg_conf"], exclude=seen)
+    if rc.get("train_frac"):  # Deviation 29: nested subset, same fraction of every cell, in sampled order
+        import math
+        cells = {}
+        for w in train:
+            cells.setdefault((w["n"], w.get("tier"), bool(w.get("hard_negative"))), []).append(w)
+        train = [w for ws in cells.values() for w in ws[:math.ceil(rc["train_frac"] * len(ws))]]
+    if rc.get("scale_schedule"):  # Deviation 29: as r4 relates to its 447 windows (accum 1)
+        epoch = len(train) // rc["accum"]
+        rc = dict(rc, eval_every=max(1, epoch // 4), min_updates=2 * epoch)
     from p1_item7_common import ENCODER_TAG
     prefix = "" if args.recipe == "r1" else f"{args.recipe}{ENCODER_TAG}_"  # r1 keeps its original file names; tag = Deviation 22 sender
     tag = f"{prefix}smoke" if args.smoke else f"{prefix}seed{args.seed}"

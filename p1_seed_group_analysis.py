@@ -24,7 +24,8 @@ from p1_io import save_json_atomic
 
 SEEDS = (101, 202, 303)
 FILES = ("results/p1_item7_eval_ds2v2.json", "results/p1_item7_eval_ds2v2_r4.json",
-         "results/p1_item7_eval_ds2v2_sweep.json", "results/p1_item7_eval_ds2v2_ablation.json")
+         "results/p1_item7_eval_ds2v2_sweep.json", "results/p1_item7_eval_ds2v2_ablation.json",
+         "results/p1_item7_eval_ds2v2_scaling.json")
 NS = (5, 10, 20, 50)
 MARGIN = -0.05
 
@@ -119,7 +120,11 @@ def main(dev):
     rows = load_rows()
     wins = t1.windows_by_n(rows)
     record_of = {s: int(rec[s]) for w in wins.values() for s in w}
-    if dev == 27:
+    if dev == 29:
+        groups = {"d25": group("r4d25"), "d50": group("r4d50"), "r4": group("r4"), "dmax": group("r4dmax")}
+        contrasts = {"d25_minus_r4": ("d25", "r4"), "d50_minus_r4": ("d50", "r4"), "dmax_minus_r4": ("dmax", "r4")}
+        out_path = Path("results/p1_dev29_scaling.json")
+    elif dev == 27:
         groups = {"k1": group("r4k1"), "k2": group("r4k2"), "k4": group("r4")}
         contrasts = {"k1_minus_k4": ("k1", "k4"), "k2_minus_k4": ("k2", "k4")}
         out_path = Path("results/p1_dev27_kseeds.json")
@@ -137,7 +142,8 @@ def main(dev):
         out["contrasts"][name] = {str(n): group_ci(wins[n], groups[a], groups[b], record_of) for n in NS if n in wins}
     if dev == 27:
         out["no_accuracy_cost"] = {name: all(v["non_inferior"] for v in c.values()) for name, c in out["contrasts"].items()}
-    out["decodability"] = decodability([a for g in groups.values() for a in g if not (dev == 26 and g == groups["r3"])])
+    if dev != 29:
+        out["decodability"] = decodability([a for g in groups.values() for a in g if not (dev == 26 and g == groups["r3"])])
     save_json_atomic(out_path, out)
     for name, c in out["contrasts"].items():
         print(name, {n: f"{v['difference']:+.3f} [{v['cluster_ci95'][0]:+.3f}, {v['cluster_ci95'][1]:+.3f}]" for n, v in c.items()})
@@ -150,5 +156,5 @@ def main(dev):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dev", type=int, choices=(26, 27), required=True)
+    ap.add_argument("--dev", type=int, choices=(26, 27, 29), required=True)
     main(ap.parse_args().dev)
