@@ -50,18 +50,26 @@ The standing objection to a latent channel is that no one can read it. Much can 
 \item \textbf{Perception quality.} Specificity of the encoder's rule against the annotations is 0.46 to 0.52, and fusion beats are almost never detected. The ceiling on usefulness is set upstream of the interface.
 \item \textbf{Zero-shot text baseline.} The adapter was trained on the task while the text arms are zero-shot under a frozen-model constraint. A trained text baseline would narrow the accuracy gap and was not run.
 \item \textbf{Fairness of calibration.} Calibration chose a single bias on the routine score. A richer calibration could further improve text with every event listed.
-\item \textbf{Hardware and software.} Timing was measured on one consumer GPU through a general-purpose framework, because production engines do not accept continuous embeddings; only relative results are meaningful. Network transfer between agents was not measured, because both agents ran on one machine.
+\item \textbf{Hardware and software.} Timing was measured on one consumer GPU through a general-purpose framework, because production engines do not accept continuous embeddings; only relative results are meaningful. Both agents ran on one machine: message sizes between devices were computed (Table~ef{tab:bandwidth}), but transfer over a real link was not measured.
 \item \textbf{Clinical use.} The system is a research prototype. No clinician rated its outputs, and nothing here supports clinical deployment.
 \end{itemize}
 
 \subsection{Implications for System Design}
 Three practical points follow. First, the value of a latent channel is a property of the workload and not of the channel: report cost against the number of events and under batching, and include a filtered text baseline, or the comparison says little. Second, a fixed per-event footprint changes how a system is provisioned even where accuracy is equal, because batch size no longer depends on what the sender has to say. Third, inspectability can be measured and not merely asserted: train decoders on the message and report what they recover, per slot and per field.
 
+\begin{table}[t]
+\caption{Bytes a sensor would transmit per window (median over the test windows, 8-byte header included) and time at 10~kbit/s for 50 events. Latent: the 35-dimensional per-event input of the adapter. Binary fields: label, confidence (16-bit), run length and signal quality, 5 bytes per event, rendered as text at the hub. Protocol overhead and radio energy are not modelled.}
+\label{tab:bandwidth}
+\centering
+\footnotesize
+\input{tables/bandwidth}
+\end{table}
+
 \subsection{Future Work: When a Single Event Might Benefit}
-For a single event the latent channel offered no measurable advantage on this task: the event's content fits a short text message that the receiver reads accurately (balanced accuracy about 0.97 for text against 0.75 to 0.80 for the adapter), and replacing about 50 tokens of event data in a prompt of about 540 saves under 10\% of the prompt. The single-event case may still favour a latent message where these conditions do not hold, and we list the settings as hypotheses, none tested here.
+For a single event the latent channel offered no measurable advantage on this task: the event's content fits a short text message that the receiver reads accurately (balanced accuracy about 0.97 for text against 0.75 to 0.80 for the adapter), and replacing about 50 tokens of event data in a prompt of about 540 saves under 10\% of the prompt. The single-event case may still favour a latent message where these conditions do not hold. We list the settings as hypotheses, none tested here, together with one that we tested and rejected.
 \begin{itemize}
 \item \textbf{Information that the text fields omit.} The task needed only the label, the confidence and the run length, which compact text carries exactly. Questions that depend on what a structured summary drops, such as beat morphology or the shape of the classifier's uncertainty, could favour the context vector, which holds more than its label.
-\item \textbf{Bandwidth rather than prompt processing as the constraint.} Both agents ran on one machine, so only computation was measured. Between a wearable sensor and a hub over a low-power radio link, one event as 32 floating-point values (about 128 bytes) is smaller than the same event as text, and transmission cost may dominate.
+\item \textbf{Not bandwidth.} A latent channel is sometimes expected to save transmission between devices. We measured the bytes a sensor would send for every test window and found the opposite (Table~\ref{tab:bandwidth}): the adapter's input, 35 numbers per event, is larger than the event as JSON text at full precision and 4 to 10 times larger than compressed text or a binary encoding of the same fields even when quantised to 8 bits, because it carries the whole state of each event rather than the four fields the task needs. The channel's advantage is in the receiver's computation, not on the link, and we do not claim a bandwidth benefit.
 \item \textbf{Streaming into a running session.} An agent that receives each event as it occurs, appended to a cached context, pays four tokens per event instead of about sixty. Over a session this is the multi-event regime spread over time, where the advantage was observed.
 \item \textbf{Senders without a natural text form.} Our sender has an obvious text message, a class label and a confidence. Embedding models, anomaly detectors or fused multi-sensor states do not, and a text interface for them requires designing a lossy summary that a learned channel avoids.
 \end{itemize}

@@ -329,6 +329,18 @@ if inc_path.exists():
     write("incart_fa.tex", rows, ["Arm", "All routine windows", "Natural prevalence"], "lrr")
     audit["incart_status"] = {h: inc["hypotheses"][h]["status"] for h in inc["hypotheses"]}
 
+# ---- Bandwidth (Deviation 28) ----------------------------------------------------------------------------------
+bw_path = RES / "p1_bandwidth.json"
+if bw_path.exists():
+    bw = load("p1_bandwidth.json")["summary"]
+    arms = [("compact_json", "Compact JSON text"), ("filtered_json", "Filtered JSON text"),
+            ("compact_json_zlib", "Compact JSON, zlib"), ("filtered_json_zlib", "Filtered JSON, zlib"),
+            ("latent_f32", "Latent, float32"), ("latent_f16", "Latent, float16"), ("latent_i8", "Latent, int8"),
+            ("binary_fields", "Binary fields")]
+    rows = [[name] + [f"{bw[n]['median_bytes'][a]:,.0f}" for n in ("10", "20", "50")]
+            + [f"{bw['50']['time_ms']['10 kbit/s'][a]:,.0f}"] for a, name in arms]
+    write("bandwidth.tex", rows, ["Interface", "$N$=10", "$N$=20", "$N$=50", "ms at 10 kbit/s, $N$=50"], "lrrrr")
+
 # ---- Audit of prose numbers ---------------------------------------------------------------------------------------
 print("AUDIT (computed from result files):")
 for k, v in audit.items():
