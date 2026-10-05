@@ -23,13 +23,13 @@ X = [int(n) for n in NS]
 
 INK, MUTED, GRID = "#0b0b0b", "#52514e", "#e1e0d9"
 STYLE = {  # arm -> (colour, marker, linestyle, label)
-    "adapter": ("#2a78d6", "o", "-", "Adapter r4 (latent)"),
+    "adapter": ("#2a78d6", "o", "-", "Adapter (latent)"),
     "compact": ("#eb6834", "s", "--", "Text, every event"),
     "compact_cal": ("#1baf7a", "^", "-.", "Text, every event, calibrated"),
     "filtered": ("#4a3aa7", "D", ":", "Filtered text"),
 }
 plt.rcParams.update({
-    "font.family": "serif", "font.size": 9, "axes.edgecolor": MUTED, "axes.labelcolor": INK,
+    "font.family": "Times New Roman", "mathtext.fontset": "stix", "font.size": 10, "axes.edgecolor": MUTED, "axes.labelcolor": INK,
     "xtick.color": MUTED, "ytick.color": MUTED, "axes.spines.top": False, "axes.spines.right": False,
     "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.6, "axes.axisbelow": True,
     "legend.frameon": False, "pdf.fonttype": 42,
@@ -140,7 +140,7 @@ for i, (rk, rl) in enumerate(reasons):
     tx = urg["A-compact"][rk]["recall"]
     ad = [urg[f"MEA:r4_seed{s}"][rk]["recall"] for s in (101, 202, 303)]
     ax.bar(i - w / 2, tx, width=w, color=STYLE["compact"][0], edgecolor="#fcfcfb", linewidth=1.5, label="Text, every event" if i == 0 else None)
-    ax.bar(i + w / 2, sum(ad) / 3, width=w, color=STYLE["adapter"][0], edgecolor="#fcfcfb", linewidth=1.5, label="Adapter r4 (mean of 3 seeds)" if i == 0 else None)
+    ax.bar(i + w / 2, sum(ad) / 3, width=w, color=STYLE["adapter"][0], edgecolor="#fcfcfb", linewidth=1.5, label="Adapter (mean of 3 seeds)" if i == 0 else None)
     ax.plot([i + w / 2] * 3, ad, linestyle="none", marker="_", color=INK, markersize=9)
     ax.text(i - w / 2, tx + 0.02, f"{tx:.2f}", ha="center", fontsize=8, color=INK)
     ax.text(i + w / 2, max(ad) + 0.02, f"{sum(ad) / 3:.2f}", ha="center", fontsize=8, color=INK)
@@ -204,5 +204,34 @@ ax.legend(loc="lower center", fontsize=7, ncol=2, columnspacing=1.0, handlelengt
 fig.tight_layout()
 fig.savefig(OUT / "fig_sweep.pdf")
 plt.close(fig)
+
+# ---- Figure: validation curves over passes through the training set (exploratory) ----------------------------------
+lc_path = RES / "p1_learning_curves.json"
+if lc_path.exists():
+    lc = load("p1_learning_curves.json")
+    fig, ax = plt.subplots(figsize=(4.8, 2.9))
+    first = True
+    for k, r in lc["runs"].items():
+        if r["recipe"] == "r4":
+            continue
+        ax.plot([u / lc["epoch_windows"] for u in r["updates"]], r["val"], color="#b8b6b0", linewidth=0.9, zorder=1,
+                label="Variants trained on the same windows" if first else None)
+        first = False
+    shades = {101: ("#9ec5f4", "o"), 202: ("#3987e5", "s"), 303: ("#1c4f8f", "^")}
+    for i, s in enumerate((101, 202, 303), 1):
+        r = lc["runs"][f"r4_seed{s}"]
+        c, m = shades[s]
+        ax.plot([u / lc["epoch_windows"] for u in r["updates"]], r["val"], color=c, marker=m, linewidth=1.6, markersize=4,
+                markeredgecolor="#fcfcfb", markeredgewidth=0.6, zorder=3, label=f"Final adapter, run {i}")
+    for e in (1, 2):
+        ax.axvline(e, color=MUTED, linewidth=0.6, linestyle=":")
+    ax.set_xlabel("Passes through the 447 training windows")
+    ax.set_ylabel("Validation balanced accuracy")
+    ax.set_xlim(0, 3.05)
+    ax.set_ylim(0, 1)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=2, fontsize=7)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_learning.pdf", bbox_inches="tight")
+    plt.close(fig)
 
 print("figures written to", OUT)

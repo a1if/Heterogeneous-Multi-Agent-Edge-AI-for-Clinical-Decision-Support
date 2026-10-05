@@ -24,7 +24,7 @@ The contributions are as follows.
 \item A latent channel from such a sender into a frozen language model, extended from one event per call to fifty, in which the language model is untouched and only 0.88 million adapter parameters are trained.
 \item A controlled evaluation of cost, accuracy and recoverability against a pre-specified analysis plan, including serving under batching and prefix caching, replication on a second sender architecture, and an external confirmatory test that confirmed both the adapter's advantage over calibrated text and the filter's advantage over the adapter (Section~\ref{sec:incart}).
 \item A recoverability protocol that decodes each event's label, tier, heart rate, interval and abnormal-run status from its slot of virtual tokens, separating what the channel carries from what the receiver uses.
-\item A rule for choosing between a filtered text interface and a latent one, with the analysis plan, the deviation log and code to reproduce every table.
+\item A rule for choosing between a filtered text interface and a latent one, with the analysis plan, its change log and code to reproduce every table.
 \end{enumerate}
 
 Section~\ref{sec:related} places the work among the three levers and the literature on heterogeneous senders. Section~\ref{sec:system} describes the sender, the adapter and the decoding scheme, and Section~\ref{sec:protocol} the evaluation protocol. Sections~\ref{sec:results} and~\ref{sec:discussion} report and discuss the results, with limitations.
