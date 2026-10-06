@@ -1,0 +1,285 @@
+{
+  "design": "Escalation scored against the database annotations instead of the sender's own rule (primary DS2 test set). CPU.\n\nSame definition as p1_item7_tier1.py, applied to the 1,195 primary windows: a window is truly abnormal if any of its\nbeats carries a non-normal annotation (S, V, F or Q). An answer escalates if its tier is not routine. Reported per\nnumber of events N, for the reference rule (the tier the rule gives on the sender's own outputs), compact text under\ndefault decoding, filtered text, the final adapter (three seeds) and the earlier adapter (three seeds).\n\nRun (from repo root):  python p1_annotation_check.py   -> results/p1_annotation_check.json\n",
+  "by_n": {
+    "1": {
+      "reference_rule": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.4596774193548387,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "A-compact": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.4596774193548387,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "A-filtered": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.4596774193548387,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "MEA:r3_seed101": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.45161290322580644,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "MEA:r3_seed202": {
+        "sensitivity": 0.9245283018867925,
+        "specificity": 0.45161290322580644,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "MEA:r3_seed303": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.4032258064516129,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "MEA:r4_seed101": {
+        "sensitivity": 0.9056603773584906,
+        "specificity": 0.4435483870967742,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "MEA:r4_seed202": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.45161290322580644,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      },
+      "MEA:r4_seed303": {
+        "sensitivity": 0.9433962264150944,
+        "specificity": 0.4838709677419355,
+        "n_truly_abnormal": 53,
+        "n_truly_normal": 124
+      }
+    },
+    "5": {
+      "reference_rule": {
+        "sensitivity": 0.9550561797752809,
+        "specificity": 0.6344086021505376,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "A-compact": {
+        "sensitivity": 0.8876404494382022,
+        "specificity": 0.6720430107526881,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "A-filtered": {
+        "sensitivity": 0.9550561797752809,
+        "specificity": 0.6344086021505376,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "MEA:r3_seed101": {
+        "sensitivity": 0.9550561797752809,
+        "specificity": 0.5752688172043011,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "MEA:r3_seed202": {
+        "sensitivity": 0.9550561797752809,
+        "specificity": 0.6129032258064516,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "MEA:r3_seed303": {
+        "sensitivity": 0.9101123595505618,
+        "specificity": 0.6182795698924731,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "MEA:r4_seed101": {
+        "sensitivity": 0.898876404494382,
+        "specificity": 0.6827956989247311,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "MEA:r4_seed202": {
+        "sensitivity": 0.9550561797752809,
+        "specificity": 0.6290322580645161,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      },
+      "MEA:r4_seed303": {
+        "sensitivity": 0.9325842696629213,
+        "specificity": 0.6290322580645161,
+        "n_truly_abnormal": 89,
+        "n_truly_normal": 186
+      }
+    },
+    "10": {
+      "reference_rule": {
+        "sensitivity": 0.95,
+        "specificity": 0.6331360946745562,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "A-compact": {
+        "sensitivity": 0.79,
+        "specificity": 0.7692307692307693,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "A-filtered": {
+        "sensitivity": 0.95,
+        "specificity": 0.6331360946745562,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "MEA:r3_seed101": {
+        "sensitivity": 0.97,
+        "specificity": 0.5325443786982249,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "MEA:r3_seed202": {
+        "sensitivity": 0.95,
+        "specificity": 0.591715976331361,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "MEA:r3_seed303": {
+        "sensitivity": 0.92,
+        "specificity": 0.5976331360946746,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "MEA:r4_seed101": {
+        "sensitivity": 0.9,
+        "specificity": 0.6863905325443787,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "MEA:r4_seed202": {
+        "sensitivity": 0.91,
+        "specificity": 0.6272189349112426,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      },
+      "MEA:r4_seed303": {
+        "sensitivity": 0.95,
+        "specificity": 0.6272189349112426,
+        "n_truly_abnormal": 100,
+        "n_truly_normal": 169
+      }
+    },
+    "20": {
+      "reference_rule": {
+        "sensitivity": 0.9591836734693877,
+        "specificity": 0.6352201257861635,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "A-compact": {
+        "sensitivity": 0.7755102040816326,
+        "specificity": 0.8364779874213837,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "A-filtered": {
+        "sensitivity": 0.9591836734693877,
+        "specificity": 0.6352201257861635,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "MEA:r3_seed101": {
+        "sensitivity": 0.9795918367346939,
+        "specificity": 0.559748427672956,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "MEA:r3_seed202": {
+        "sensitivity": 0.9591836734693877,
+        "specificity": 0.6037735849056604,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "MEA:r3_seed303": {
+        "sensitivity": 0.9795918367346939,
+        "specificity": 0.5723270440251572,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "MEA:r4_seed101": {
+        "sensitivity": 0.9285714285714286,
+        "specificity": 0.6855345911949685,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "MEA:r4_seed202": {
+        "sensitivity": 0.9591836734693877,
+        "specificity": 0.6037735849056604,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      },
+      "MEA:r4_seed303": {
+        "sensitivity": 0.9387755102040817,
+        "specificity": 0.6289308176100629,
+        "n_truly_abnormal": 98,
+        "n_truly_normal": 159
+      }
+    },
+    "50": {
+      "reference_rule": {
+        "sensitivity": 0.9375,
+        "specificity": 0.6166666666666667,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "A-compact": {
+        "sensitivity": 0.7708333333333334,
+        "specificity": 0.775,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "A-filtered": {
+        "sensitivity": 0.9375,
+        "specificity": 0.6166666666666667,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "MEA:r3_seed101": {
+        "sensitivity": 0.9895833333333334,
+        "specificity": 0.55,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "MEA:r3_seed202": {
+        "sensitivity": 0.9270833333333334,
+        "specificity": 0.625,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "MEA:r3_seed303": {
+        "sensitivity": 0.9583333333333334,
+        "specificity": 0.5583333333333333,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "MEA:r4_seed101": {
+        "sensitivity": 0.90625,
+        "specificity": 0.675,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "MEA:r4_seed202": {
+        "sensitivity": 0.9375,
+        "specificity": 0.6083333333333333,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      },
+      "MEA:r4_seed303": {
+        "sensitivity": 0.9375,
+        "specificity": 0.6083333333333333,
+        "n_truly_abnormal": 96,
+        "n_truly_normal": 120
+      }
+    }
+  }
+}

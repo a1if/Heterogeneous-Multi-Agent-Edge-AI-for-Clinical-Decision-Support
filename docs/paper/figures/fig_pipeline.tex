@@ -1,0 +1,79 @@
+% Figure 1: system overview, included from sections/system.tex.
+% Palette matches the data figures: orange = text with every event, violet = filtered text, blue = latent adapter.
+% Grey fill = frozen component; thick coloured border + "TRAINED" badge = the one trained part.
+\definecolor{cA}{HTML}{EB6834}
+\definecolor{cF}{HTML}{4A3AA7}
+\definecolor{cL}{HTML}{2A78D6}
+\definecolor{cX}{HTML}{C0392B}
+{\renewcommand{\baselinestretch}{1}\selectfont
+\begin{tikzpicture}[font=\normalsize,
+  frozen/.style={draw=black!55, rounded corners=3pt, align=center, inner sep=6pt, fill=black!6, text width=#1},
+  lane/.style={draw=#1, line width=1pt, rounded corners=4pt, fill=#1!6, inner sep=0pt},
+  tok/.style={draw=#1!80!black, fill=#1!35, minimum width=2.1mm, minimum height=4.2mm, inner sep=0pt, line width=0.4pt},
+  arr/.style={-{Stealth[length=2.4mm]}, line width=0.9pt, black!60},
+  lab/.style={font=\small, text=black!75, align=center, inner sep=1.5pt},
+  badge/.style={font=\scriptsize\bfseries, text=white, fill=cL, rounded corners=2pt, inner sep=2.5pt}]
+
+% ---- ECG strip with beat labels ------------------------------------------------------------------------
+\def\qrs#1#2{\draw[line width=1pt,#2] (#1-0.45,0)--(#1-0.2,0)--(#1-0.1,0.18)--(#1,1.1)--(#1+0.12,-0.4)--(#1+0.24,0)--(#1+0.55,0);}
+\node[font=\small\bfseries, anchor=south west] at (-0.2,1.9) {1. Sense};
+\draw[black!35, line width=0.5pt] (-0.2,0)--(5.4,0);
+\qrs{0.5}{black!80} \qrs{1.6}{black!80} \qrs{2.7}{cX} \qrs{3.8}{black!80} \qrs{4.9}{cX}
+\foreach \x/\t/\c in {0.5/N/black!70,1.6/N/black!70,2.7/V/cX,3.8/N/black!70,4.9/S/cX}{\node[font=\small\bfseries,text=\c] at (\x,-0.75) {\t};}
+\node[lab, anchor=north] at (2.6,-1.25) {$N$ consecutive heartbeats\\(here $N=5$)};
+
+% ---- perception agent and events -------------------------------------------------------------------------
+\node[font=\small\bfseries, anchor=south west] at (6.4,1.9) {2. Classify (frozen)};
+\node[frozen=38mm] (per) at (8.3,0) {\textbf{Perception agent}\\CNN--LSTM + RR branch\\\emph{not a transformer}};
+\draw[arr] (5.55,0)--(per.west);
+
+\node[font=\small\bfseries, anchor=south west] at (11.9,1.9) {3. Report $N$ events};
+\node[frozen=40mm] (ev) at (14.0,0) {context vector $\mathbf{z}_i\in\mathbb{R}^{32}$\\[1pt]label, confidence,\\heart rate, RR, run length};
+\draw[arr] (per.east)--(ev.west);
+
+% ---- three interfaces -------------------------------------------------------------------------------------
+\node[font=\small\bfseries, anchor=south west] at (17.9,5.6) {4. Cross one of three interfaces};
+
+% lane A: text, every event
+\node[lane=cA, minimum width=74mm, minimum height=21mm] (la) at (22.0,3.6) {};
+\node[font=\small\bfseries, text=cA!70!black, anchor=north west] at (18.3,4.6) {A-compact (baseline)};
+\foreach \i in {0,...,17}{\node[tok=cA] at (18.65+0.27*\i,3.55) {};}
+\node[lab, anchor=west] at (23.55,3.55) {$\ldots$};
+\node[lab, anchor=north west] at (18.3,3.05) {every event as text: $\approx$60 tokens per event};
+
+% lane B: filtered text
+\node[lane=cF, minimum width=74mm, minimum height=21mm] (lb) at (22.0,0) {};
+\node[font=\small\bfseries, text=cF!80!black, anchor=north west] at (18.3,1.0) {A-filtered (lever: say less)};
+\foreach \i in {0,...,5}{\node[tok=cF] at (18.65+0.27*\i,-0.05) {};}
+\node[lab, anchor=west, text=cX] at (20.35,-0.05) {V};
+\foreach \i in {0,...,5}{\node[tok=cF] at (20.9+0.27*\i,-0.05) {};}
+\node[lab, anchor=west, text=cX] at (22.65,-0.05) {S};
+\node[draw=cF!80!black, fill=white, font=\scriptsize, inner sep=2pt, rounded corners=1pt] at (24.1,-0.05) {3 normal};
+\node[lab, anchor=north west] at (18.3,-0.55) {abnormal events as text, normals as a count};
+
+% lane C: latent adapter
+\node[lane=cL, line width=2pt, minimum width=74mm, minimum height=21mm] (lc) at (22.0,-3.6) {};
+\node[font=\small\bfseries, text=cL!80!black, anchor=north west] at (18.3,-2.6) {Adapter (lever: send latent)};
+\node[badge, anchor=north east] at (25.5,-2.58) {TRAINED};
+\foreach \g in {0,...,4}{\foreach \i in {0,...,3}{\node[tok=cL] at (18.65+1.3*\g+0.26*\i,-3.65) {};}}
+\node[lab, anchor=north west] at (18.3,-4.15) {every event as 4 virtual tokens: $\mathbf{W}[\mathbf{z}_i;\mathbf{s}_i]+\mathbf{P}_i$};
+
+\draw[arr] (ev.east)--++(0.9,0) |- (la.west);
+\draw[arr] (ev.east)--(lb.west |- ev.east);
+\draw[arr] (ev.east)--++(0.9,0) |- (lc.west);
+
+% ---- reasoning agent -------------------------------------------------------------------------------------
+\node[font=\small\bfseries, anchor=south west] at (26.9,5.6) {5. Decide (frozen)};
+\node[frozen=36mm, minimum height=118mm] (llm) at (29.3,0) {\textbf{Reasoning agent}\\Gemma 4 E4B\\frozen, 4-bit\\[6pt]scaffold +\\schema-constrained\\decoding\\[8pt]$\downarrow$\\[2pt]\texttt{\{"tier": "urgent",}\\\texttt{ "beat": 3\}}};
+\draw[arr] (la.east)--(llm.west |- la.east);
+\draw[arr] (lb.east)--(llm.west |- lb.east);
+\draw[arr] (lc.east)--(llm.west |- lc.east);
+
+% ---- legend ----------------------------------------------------------------------------------------------
+\node[frozen=0mm, minimum width=5mm, minimum height=4mm, inner sep=0pt] at (18.3,-6.2) {};
+\node[lab, anchor=west] at (18.75,-6.2) {frozen (never updated)};
+\node[draw=cL, line width=2pt, minimum width=5mm, minimum height=4mm, inner sep=0pt, fill=cL!6] at (22.4,-6.2) {};
+\node[lab, anchor=west] at (22.85,-6.2) {the only trained part};
+\node[draw=black!60, fill=black!25, minimum width=2.1mm, minimum height=4.2mm, inner sep=0pt, line width=0.4pt] at (26.4,-6.2) {};
+\node[lab, anchor=west] at (26.75,-6.2) {= one token};
+\end{tikzpicture}}

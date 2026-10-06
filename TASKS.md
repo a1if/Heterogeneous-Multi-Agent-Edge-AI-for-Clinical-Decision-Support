@@ -299,6 +299,7 @@ It continues the eval (A-compact from window 16, then A-filtered), then calibrat
 - [x] 120 supporting files moved with git mv to archive/phase1_support/ and archive/dissertation/docs/
 - [x] Committed untracked paper inputs: scripts/position_effect.py, p1_position_effect.json, variant training logs (learning-curve figure), second-sender filtered/compact logs, stop-at-tier eval
 - [x] Verified: paper tables rebuild identically, paper compiles, 49 CPU tests pass (Gemma GPU tests day2/day3 not run)
-- [ ] Rewrite README.md for the paper (still describes the dissertation)
-- [ ] Merge cleanup into phase1-step1 after review
+- [x] Rewrite README.md for the paper (portfolio highlights, figures, docs/REPRODUCE.md, MIT licence; PR #4)
+- [ ] Merge PR #4 (cleanup -> main) after review; repo is public, so the paper draft becomes public on merge
 - [x] Size cleanup: deleted 25 resume + smoke checkpoints (225 MB), cache/item7 replay cache, _local scratch, __pycache__; git gc (.git 200 MB -> 56 MB); 16 dissertation-only checkpoints untracked and moved to D:\Dissertationrchived_checkpoints
+- [x] Number audit (2026-10-06): ~160 prose numbers checked against results; 13 corrected (serving fit at N=50, bandwidth ratio scope, per-seed false-alarm cut, single-event token saving, change-log count 29, annotation-scored metrics recomputed on the primary set via p1_annotation_check.py, plus 7 wording fixes); make_paper_tables.py now checks 21 prose numbers on every build

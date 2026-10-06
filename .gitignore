@@ -9,6 +9,9 @@ data/
 docs/*
 !docs/REPRODUCE.md
 !docs/figures/
+!docs/paper/
+!docs/analysis_plan.md
+!docs/confirmatory_plan.md
 *.log
 *.bak_*
 
