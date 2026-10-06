@@ -1,0 +1,275 @@
+{
+  "source": "results/p1_e3_multi_event.json",
+  "by_n": {
+    "1": {
+      "A-full": {
+        "tokens": 627.5,
+        "decode_ms_per_token": 158.24787666679185,
+        "context_mem_mb": 0.0,
+        "energy_j_16": 223.16538497443395,
+        "peak_mem_mb": 9254.090576171875,
+        "n_windows": 20
+      },
+      "A-compact": {
+        "tokens": 442.0,
+        "decode_ms_per_token": 166.81631666676063,
+        "context_mem_mb": 0.0,
+        "energy_j_16": 217.20756288175315,
+        "peak_mem_mb": 9222.0595703125,
+        "n_windows": 20
+      },
+      "B-4": {
+        "tokens": 486.0,
+        "decode_ms_per_token": 167.42063666655062,
+        "context_mem_mb": 0.0,
+        "energy_j_16": 223.79218420162817,
+        "peak_mem_mb": 9229.20947265625,
+        "n_windows": 20
+      }
+    },
+    "5": {
+      "A-full": {
+        "tokens": 1604.5,
+        "decode_ms_per_token": 159.71669333327253,
+        "context_mem_mb": 164.794189453125,
+        "energy_j_16": 304.27564711672255,
+        "peak_mem_mb": 9418.947509765625,
+        "n_windows": 20
+      },
+      "A-compact": {
+        "tokens": 677.0,
+        "decode_ms_per_token": 159.27563666652227,
+        "context_mem_mb": 39.4619140625,
+        "energy_j_16": 230.06264518271865,
+        "peak_mem_mb": 9261.521484375,
+        "n_windows": 20
+      },
+      "B-4": {
+        "tokens": 502.0,
+        "decode_ms_per_token": 163.21640333323256,
+        "context_mem_mb": 2.80712890625,
+        "energy_j_16": 221.34887267571924,
+        "peak_mem_mb": 9232.0166015625,
+        "n_windows": 20
+      }
+    },
+    "10": {
+      "A-full": {
+        "tokens": 2826.0,
+        "decode_ms_per_token": 158.1932600000679,
+        "context_mem_mb": 368.622802734375,
+        "energy_j_16": 366.63704152330297,
+        "peak_mem_mb": 9622.641845703125,
+        "n_windows": 20
+      },
+      "A-compact": {
+        "tokens": 971.0,
+        "decode_ms_per_token": 161.83855333341245,
+        "context_mem_mb": 87.55908203125,
+        "energy_j_16": 254.00984014199383,
+        "peak_mem_mb": 9309.61865234375,
+        "n_windows": 20
+      },
+      "B-4": {
+        "tokens": 522.0,
+        "decode_ms_per_token": 158.4688300000077,
+        "context_mem_mb": 8.4892578125,
+        "energy_j_16": 218.38113189641757,
+        "peak_mem_mb": 9237.69873046875,
+        "n_windows": 20
+      }
+    },
+    "20": {
+      "A-full": {
+        "tokens": 5273.0,
+        "decode_ms_per_token": 156.51740333317622,
+        "context_mem_mb": 831.54931640625,
+        "energy_j_16": 508.31345915430427,
+        "peak_mem_mb": 10085.78271484375,
+        "n_windows": 20
+      },
+      "A-compact": {
+        "tokens": 1557.0,
+        "decode_ms_per_token": 156.576053333265,
+        "context_mem_mb": 190.33642578125,
+        "energy_j_16": 300.72818933904296,
+        "peak_mem_mb": 9412.345703125,
+        "n_windows": 20
+      },
+      "B-4": {
+        "tokens": 562.0,
+        "decode_ms_per_token": 158.21483999995206,
+        "context_mem_mb": 14.26171875,
+        "energy_j_16": 220.37636015032763,
+        "peak_mem_mb": 9243.47119140625,
+        "n_windows": 20
+      }
+    },
+    "50": {
+      "A-full": {
+        "tokens": 12601.0,
+        "decode_ms_per_token": 139.15040666658265,
+        "context_mem_mb": 2287.662109375,
+        "energy_j_16": 5150.482794217267,
+        "peak_mem_mb": 11541.823974609375,
+        "n_windows": 8
+      },
+      "A-compact": {
+        "tokens": 3320.5,
+        "decode_ms_per_token": 157.3115633332539,
+        "context_mem_mb": 491.9736328125,
+        "energy_j_16": 391.06967993307524,
+        "peak_mem_mb": 9714.033203125,
+        "n_windows": 20
+      },
+      "B-4": {
+        "tokens": 682.0,
+        "decode_ms_per_token": 158.8531099998363,
+        "context_mem_mb": 32.9345703125,
+        "energy_j_16": 230.0415213706229,
+        "peak_mem_mb": 9262.14404296875,
+        "n_windows": 20
+      }
+    }
+  },
+  "b4_vs_acompact": {
+    "1": {
+      "decode_ms_per_token": {
+        "mean_rel_pct": 0.08341695085734317,
+        "ci95_pct": [
+          -1.3773358274809577,
+          1.357243576727131
+        ]
+      },
+      "energy_j_16": {
+        "mean_rel_pct": 3.3202155797469546,
+        "ci95_pct": [
+          2.1279364574481496,
+          4.424838275692886
+        ]
+      },
+      "context_mem_mb": {
+        "mean_diff_mb": 0.0,
+        "ci95_mb": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "5": {
+      "decode_ms_per_token": {
+        "mean_rel_pct": 4.482636208861264,
+        "ci95_pct": [
+          2.1828258079026592,
+          7.607253685432664
+        ]
+      },
+      "energy_j_16": {
+        "mean_rel_pct": -3.4871557854502755,
+        "ci95_pct": [
+          -5.019241699238217,
+          -1.4072710381152909
+        ]
+      },
+      "context_mem_mb": {
+        "mean_diff_mb": -36.4150390625,
+        "ci95_mb": [
+          -36.6045166015625,
+          -36.18703247070313
+        ]
+      }
+    },
+    "10": {
+      "decode_ms_per_token": {
+        "mean_rel_pct": -0.301861185120308,
+        "ci95_pct": [
+          -1.6381846447185984,
+          1.0411557265631182
+        ]
+      },
+      "energy_j_16": {
+        "mean_rel_pct": -13.562399253975837,
+        "ci95_pct": [
+          -14.631859046995572,
+          -12.525744249977238
+        ]
+      },
+      "context_mem_mb": {
+        "mean_diff_mb": -78.9375,
+        "ci95_mb": [
+          -79.50251892089844,
+          -78.52640991210937
+        ]
+      }
+    },
+    "20": {
+      "decode_ms_per_token": {
+        "mean_rel_pct": 1.4583374269129479,
+        "ci95_pct": [
+          0.19238133373347946,
+          2.885749895073089
+        ]
+      },
+      "energy_j_16": {
+        "mean_rel_pct": -26.049447875851513,
+        "ci95_pct": [
+          -26.806671265273444,
+          -25.252383324075932
+        ]
+      },
+      "context_mem_mb": {
+        "mean_diff_mb": -177.019775390625,
+        "ci95_mb": [
+          -178.1207116699219,
+          -176.07646240234374
+        ]
+      }
+    },
+    "50": {
+      "decode_ms_per_token": {
+        "mean_rel_pct": 1.7954855379502206,
+        "ci95_pct": [
+          0.30600059677885105,
+          3.363489502751739
+        ]
+      },
+      "energy_j_16": {
+        "mean_rel_pct": -40.09581760052744,
+        "ci95_pct": [
+          -40.73221089818096,
+          -39.43980547097179
+        ]
+      },
+      "context_mem_mb": {
+        "mean_diff_mb": -459.9177734375,
+        "ci95_mb": [
+          -461.79317443847657,
+          -458.5898114013672
+        ]
+      }
+    }
+  },
+  "memory_fit": {
+    "A-full": {
+      "mb_per_context_token": 0.19061252454166164,
+      "intercept_mb": 9106.158170971497,
+      "tokens_per_extra_event": 244.3469387755102,
+      "extrapolated_max_events_in_12gb": 65.43788842941332,
+      "note": "linear extrapolation of allocated memory; ignores fragmentation and Windows memory paging, which A-full already hit near 11.5 GB"
+    },
+    "A-compact": {
+      "mb_per_context_token": 0.17129429119956377,
+      "intercept_mb": 9145.284972933296,
+      "tokens_per_extra_event": 58.744897959183675,
+      "extrapolated_max_events_in_12gb": 299.72829453628185,
+      "note": "linear extrapolation of allocated memory; ignores fragmentation and Windows memory paging, which A-full already hit near 11.5 GB"
+    },
+    "B-4": {
+      "mb_per_context_token": 0.16605539649902049,
+      "intercept_mb": 9149.412586045835,
+      "tokens_per_extra_event": 4.0,
+      "extrapolated_max_events_in_12gb": 4512.874582879513,
+      "note": "linear extrapolation of allocated memory; ignores fragmentation and Windows memory paging, which A-full already hit near 11.5 GB"
+    }
+  }
+}

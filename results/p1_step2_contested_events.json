@@ -1,0 +1,3253 @@
+{
+  "threshold": 0.85,
+  "near_window": 0.1,
+  "checkpoints": {
+    "headline": {
+      "n_wrong": 4,
+      "n_generation_failed": 0,
+      "wrong_events": [
+        {
+          "idx": 1,
+          "record_id": 100,
+          "true_class": "N",
+          "predicted_class": "S",
+          "upstream_correct": false,
+          "confidence": 0.589865,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.634539
+            },
+            {
+              "label": "N",
+              "confidence": 0.309919
+            },
+            {
+              "label": "V",
+              "confidence": 0.055542
+            }
+          ],
+          "top3_margin": 0.32461999999999996,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 1905,
+          "record_id": 100,
+          "true_class": "V",
+          "predicted_class": "V",
+          "upstream_correct": true,
+          "confidence": 0.533143,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.558176
+            },
+            {
+              "label": "N",
+              "confidence": 0.410005
+            },
+            {
+              "label": "S",
+              "confidence": 0.031819
+            }
+          ],
+          "top3_margin": 0.148171,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 6921,
+          "record_id": 111,
+          "true_class": "N",
+          "predicted_class": "N",
+          "upstream_correct": true,
+          "confidence": 0.461622,
+          "top_3": [
+            {
+              "label": "N",
+              "confidence": 0.486566
+            },
+            {
+              "label": "S",
+              "confidence": 0.411799
+            },
+            {
+              "label": "F",
+              "confidence": 0.101635
+            }
+          ],
+          "top3_margin": 0.07476699999999997,
+          "consecutive_abnormal_beats": 0,
+          "reference_tier": "routine",
+          "rule_path": "routine_N",
+          "near_threshold": false,
+          "arm_b_tier": "priority"
+        },
+        {
+          "idx": 26100,
+          "record_id": 213,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.826146,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.84338
+            },
+            {
+              "label": "N",
+              "confidence": 0.137808
+            },
+            {
+              "label": "S",
+              "confidence": 0.018813
+            }
+          ],
+          "top3_margin": 0.705572,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "urgent"
+        }
+      ],
+      "wrong_by_rule_path": {
+        "priority": 3,
+        "routine_N": 1
+      },
+      "right_by_rule_path": {
+        "routine_N": 49,
+        "priority": 15,
+        "urgent_confidence": 10,
+        "urgent_run": 2
+      },
+      "wrong_upstream_correct": 2,
+      "confidence_median_wrong_vs_right": [
+        0.561504,
+        0.8396794999999999
+      ],
+      "mannwhitney_confidence_p": 0.00934002706154605,
+      "near_threshold_2x2_[[near_wrong,near_right],[other_wrong,other_right]]": [
+        [
+          1,
+          15
+        ],
+        [
+          3,
+          61
+        ]
+      ],
+      "fisher_near_threshold_p": 1.0,
+      "tier_confusions": {
+        "ref=priority->B=routine": 2,
+        "ref=routine->B=priority": 1,
+        "ref=priority->B=urgent": 1
+      }
+    },
+    "seed101": {
+      "n_wrong": 13,
+      "n_generation_failed": 2,
+      "wrong_events": [
+        {
+          "idx": 1,
+          "record_id": 100,
+          "true_class": "N",
+          "predicted_class": "S",
+          "upstream_correct": false,
+          "confidence": 0.589865,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.634539
+            },
+            {
+              "label": "N",
+              "confidence": 0.309919
+            },
+            {
+              "label": "V",
+              "confidence": 0.055542
+            }
+          ],
+          "top3_margin": 0.32461999999999996,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 1905,
+          "record_id": 100,
+          "true_class": "V",
+          "predicted_class": "V",
+          "upstream_correct": true,
+          "confidence": 0.533143,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.558176
+            },
+            {
+              "label": "N",
+              "confidence": 0.410005
+            },
+            {
+              "label": "S",
+              "confidence": 0.031819
+            }
+          ],
+          "top3_margin": 0.148171,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 6924,
+          "record_id": 111,
+          "true_class": "N",
+          "predicted_class": "S",
+          "upstream_correct": false,
+          "confidence": 0.525508,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.555056
+            },
+            {
+              "label": "N",
+              "confidence": 0.339186
+            },
+            {
+              "label": "F",
+              "confidence": 0.105758
+            }
+          ],
+          "top3_margin": 0.21587,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9067,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.714966,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.755796
+            },
+            {
+              "label": "N",
+              "confidence": 0.172049
+            },
+            {
+              "label": "F",
+              "confidence": 0.072155
+            }
+          ],
+          "top3_margin": 0.583747,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9437,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.765531,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.803648
+            },
+            {
+              "label": "N",
+              "confidence": 0.137932
+            },
+            {
+              "label": "F",
+              "confidence": 0.05842
+            }
+          ],
+          "top3_margin": 0.665716,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9535,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.714006,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.754682
+            },
+            {
+              "label": "N",
+              "confidence": 0.16996
+            },
+            {
+              "label": "F",
+              "confidence": 0.075358
+            }
+          ],
+          "top3_margin": 0.584722,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 15752,
+          "record_id": 200,
+          "true_class": "V",
+          "predicted_class": "V",
+          "upstream_correct": true,
+          "confidence": 0.933177,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.943535
+            },
+            {
+              "label": "N",
+              "confidence": 0.045891
+            },
+            {
+              "label": "S",
+              "confidence": 0.010574
+            }
+          ],
+          "top3_margin": 0.897644,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "urgent",
+          "rule_path": "urgent_confidence",
+          "near_threshold": true,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 20519,
+          "record_id": 210,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.800036,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.82083
+            },
+            {
+              "label": "N",
+              "confidence": 0.160676
+            },
+            {
+              "label": "S",
+              "confidence": 0.018493
+            }
+          ],
+          "top3_margin": 0.6601539999999999,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 21292,
+          "record_id": 210,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.700739,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.722691
+            },
+            {
+              "label": "N",
+              "confidence": 0.252547
+            },
+            {
+              "label": "S",
+              "confidence": 0.024763
+            }
+          ],
+          "top3_margin": 0.47014399999999995,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 22040,
+          "record_id": 210,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.588846,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.61948
+            },
+            {
+              "label": "N",
+              "confidence": 0.329822
+            },
+            {
+              "label": "S",
+              "confidence": 0.050698
+            }
+          ],
+          "top3_margin": 0.289658,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 26098,
+          "record_id": 213,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.75544,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.777093
+            },
+            {
+              "label": "N",
+              "confidence": 0.198566
+            },
+            {
+              "label": "S",
+              "confidence": 0.024342
+            }
+          ],
+          "top3_margin": 0.578527,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 26100,
+          "record_id": 213,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.826146,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.84338
+            },
+            {
+              "label": "N",
+              "confidence": 0.137808
+            },
+            {
+              "label": "S",
+              "confidence": 0.018813
+            }
+          ],
+          "top3_margin": 0.705572,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "urgent"
+        },
+        {
+          "idx": 44242,
+          "record_id": 233,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.775223,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.796745
+            },
+            {
+              "label": "N",
+              "confidence": 0.183814
+            },
+            {
+              "label": "F",
+              "confidence": 0.019442
+            }
+          ],
+          "top3_margin": 0.612931,
+          "consecutive_abnormal_beats": 2,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "routine"
+        }
+      ],
+      "wrong_by_rule_path": {
+        "priority": 12,
+        "urgent_confidence": 1
+      },
+      "right_by_rule_path": {
+        "routine_N": 50,
+        "priority": 4,
+        "urgent_confidence": 9,
+        "urgent_run": 2
+      },
+      "wrong_upstream_correct": 5,
+      "confidence_median_wrong_vs_right": [
+        0.714966,
+        0.848931
+      ],
+      "mannwhitney_confidence_p": 0.002555477451813626,
+      "near_threshold_2x2_[[near_wrong,near_right],[other_wrong,other_right]]": [
+        [
+          5,
+          11
+        ],
+        [
+          8,
+          54
+        ]
+      ],
+      "fisher_near_threshold_p": 0.12611796869876718,
+      "tier_confusions": {
+        "ref=priority->B=routine": 11,
+        "ref=urgent->B=routine": 1,
+        "ref=priority->B=urgent": 1
+      }
+    },
+    "seed202": {
+      "n_wrong": 17,
+      "n_generation_failed": 0,
+      "wrong_events": [
+        {
+          "idx": 1,
+          "record_id": 100,
+          "true_class": "N",
+          "predicted_class": "S",
+          "upstream_correct": false,
+          "confidence": 0.589865,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.634539
+            },
+            {
+              "label": "N",
+              "confidence": 0.309919
+            },
+            {
+              "label": "V",
+              "confidence": 0.055542
+            }
+          ],
+          "top3_margin": 0.32461999999999996,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 257,
+          "record_id": 100,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.87397,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.912021
+            },
+            {
+              "label": "N",
+              "confidence": 0.061391
+            },
+            {
+              "label": "V",
+              "confidence": 0.026588
+            }
+          ],
+          "top3_margin": 0.85063,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 1905,
+          "record_id": 100,
+          "true_class": "V",
+          "predicted_class": "V",
+          "upstream_correct": true,
+          "confidence": 0.533143,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.558176
+            },
+            {
+              "label": "N",
+              "confidence": 0.410005
+            },
+            {
+              "label": "S",
+              "confidence": 0.031819
+            }
+          ],
+          "top3_margin": 0.148171,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 6924,
+          "record_id": 111,
+          "true_class": "N",
+          "predicted_class": "S",
+          "upstream_correct": false,
+          "confidence": 0.525508,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.555056
+            },
+            {
+              "label": "N",
+              "confidence": 0.339186
+            },
+            {
+              "label": "F",
+              "confidence": 0.105758
+            }
+          ],
+          "top3_margin": 0.21587,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9067,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.714966,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.755796
+            },
+            {
+              "label": "N",
+              "confidence": 0.172049
+            },
+            {
+              "label": "F",
+              "confidence": 0.072155
+            }
+          ],
+          "top3_margin": 0.583747,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9424,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.763563,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.813938
+            },
+            {
+              "label": "N",
+              "confidence": 0.115222
+            },
+            {
+              "label": "F",
+              "confidence": 0.07084
+            }
+          ],
+          "top3_margin": 0.698716,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9437,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.765531,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.803648
+            },
+            {
+              "label": "N",
+              "confidence": 0.137932
+            },
+            {
+              "label": "F",
+              "confidence": 0.05842
+            }
+          ],
+          "top3_margin": 0.665716,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 9535,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.714006,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.754682
+            },
+            {
+              "label": "N",
+              "confidence": 0.16996
+            },
+            {
+              "label": "F",
+              "confidence": 0.075358
+            }
+          ],
+          "top3_margin": 0.584722,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 10289,
+          "record_id": 113,
+          "true_class": "S",
+          "predicted_class": "S",
+          "upstream_correct": true,
+          "confidence": 0.801712,
+          "top_3": [
+            {
+              "label": "S",
+              "confidence": 0.861581
+            },
+            {
+              "label": "N",
+              "confidence": 0.076347
+            },
+            {
+              "label": "F",
+              "confidence": 0.062072
+            }
+          ],
+          "top3_margin": 0.785234,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 14584,
+          "record_id": 123,
+          "true_class": "V",
+          "predicted_class": "V",
+          "upstream_correct": true,
+          "confidence": 0.647822,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.671463
+            },
+            {
+              "label": "N",
+              "confidence": 0.296147
+            },
+            {
+              "label": "S",
+              "confidence": 0.032391
+            }
+          ],
+          "top3_margin": 0.37531600000000004,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 20519,
+          "record_id": 210,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.800036,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.82083
+            },
+            {
+              "label": "N",
+              "confidence": 0.160676
+            },
+            {
+              "label": "S",
+              "confidence": 0.018493
+            }
+          ],
+          "top3_margin": 0.6601539999999999,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "urgent"
+        },
+        {
+          "idx": 21292,
+          "record_id": 210,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.700739,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.722691
+            },
+            {
+              "label": "N",
+              "confidence": 0.252547
+            },
+            {
+              "label": "S",
+              "confidence": 0.024763
+            }
+          ],
+          "top3_margin": 0.47014399999999995,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 22040,
+          "record_id": 210,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.588846,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.61948
+            },
+            {
+              "label": "N",
+              "confidence": 0.329822
+            },
+            {
+              "label": "S",
+              "confidence": 0.050698
+            }
+          ],
+          "top3_margin": 0.289658,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 26098,
+          "record_id": 213,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.75544,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.777093
+            },
+            {
+              "label": "N",
+              "confidence": 0.198566
+            },
+            {
+              "label": "S",
+              "confidence": 0.024342
+            }
+          ],
+          "top3_margin": 0.578527,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 26100,
+          "record_id": 213,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.826146,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.84338
+            },
+            {
+              "label": "N",
+              "confidence": 0.137808
+            },
+            {
+              "label": "S",
+              "confidence": 0.018813
+            }
+          ],
+          "top3_margin": 0.705572,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "urgent"
+        },
+        {
+          "idx": 44143,
+          "record_id": 233,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.567712,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.615025
+            },
+            {
+              "label": "N",
+              "confidence": 0.288969
+            },
+            {
+              "label": "S",
+              "confidence": 0.096006
+            }
+          ],
+          "top3_margin": 0.32605600000000007,
+          "consecutive_abnormal_beats": 1,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": false,
+          "arm_b_tier": "routine"
+        },
+        {
+          "idx": 44242,
+          "record_id": 233,
+          "true_class": "F",
+          "predicted_class": "V",
+          "upstream_correct": false,
+          "confidence": 0.775223,
+          "top_3": [
+            {
+              "label": "V",
+              "confidence": 0.796745
+            },
+            {
+              "label": "N",
+              "confidence": 0.183814
+            },
+            {
+              "label": "F",
+              "confidence": 0.019442
+            }
+          ],
+          "top3_margin": 0.612931,
+          "consecutive_abnormal_beats": 2,
+          "reference_tier": "priority",
+          "rule_path": "priority",
+          "near_threshold": true,
+          "arm_b_tier": "routine"
+        }
+      ],
+      "wrong_by_rule_path": {
+        "priority": 17
+      },
+      "right_by_rule_path": {
+        "routine_N": 50,
+        "urgent_confidence": 10,
+        "urgent_run": 2,
+        "priority": 1
+      },
+      "wrong_upstream_correct": 8,
+      "confidence_median_wrong_vs_right": [
+        0.714966,
+        0.849671
+      ],
+      "mannwhitney_confidence_p": 0.00022159645657821885,
+      "near_threshold_2x2_[[near_wrong,near_right],[other_wrong,other_right]]": [
+        [
+          4,
+          12
+        ],
+        [
+          13,
+          51
+        ]
+      ],
+      "fisher_near_threshold_p": 0.735941947563526,
+      "tier_confusions": {
+        "ref=priority->B=routine": 15,
+        "ref=priority->B=urgent": 2
+      }
+    }
+  },
+  "adapter_training_set": {
+    "tiers": {
+      "routine": 42,
+      "priority": 5,
+      "urgent": 17
+    },
+    "predicted_labels": {
+      "N": 42,
+      "S": 1,
+      "V": 19,
+      "F": 2
+    }
+  },
+  "priority_path": {
+    "n_events": 18,
+    "wrong_by_checkpoint": {
+      "headline": 3,
+      "seed101": 12,
+      "seed202": 17
+    }
+  },
+  "events": [
+    {
+      "idx": 0,
+      "record_id": 100,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.85226,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.896336
+        },
+        {
+          "label": "S",
+          "confidence": 0.062539
+        },
+        {
+          "label": "F",
+          "confidence": 0.041125
+        }
+      ],
+      "top3_margin": 0.833797,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 1,
+      "record_id": 100,
+      "true_class": "N",
+      "predicted_class": "S",
+      "upstream_correct": false,
+      "confidence": 0.589865,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.634539
+        },
+        {
+          "label": "N",
+          "confidence": 0.309919
+        },
+        {
+          "label": "V",
+          "confidence": 0.055542
+        }
+      ],
+      "top3_margin": 0.32461999999999996,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 2,
+      "record_id": 100,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.665253,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.709476
+        },
+        {
+          "label": "S",
+          "confidence": 0.239915
+        },
+        {
+          "label": "F",
+          "confidence": 0.050609
+        }
+      ],
+      "top3_margin": 0.469561,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 3,
+      "record_id": 100,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.744631,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.789475
+        },
+        {
+          "label": "S",
+          "confidence": 0.161475
+        },
+        {
+          "label": "F",
+          "confidence": 0.04905
+        }
+      ],
+      "top3_margin": 0.628,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4,
+      "record_id": 100,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.581107,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.627427
+        },
+        {
+          "label": "S",
+          "confidence": 0.313666
+        },
+        {
+          "label": "F",
+          "confidence": 0.058907
+        }
+      ],
+      "top3_margin": 0.31376099999999996,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 6,
+      "record_id": 100,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.69404,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.735172
+        },
+        {
+          "label": "S",
+          "confidence": 0.215663
+        },
+        {
+          "label": "F",
+          "confidence": 0.049165
+        }
+      ],
+      "top3_margin": 0.519509,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 229,
+      "record_id": 100,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.857654,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.903827
+        },
+        {
+          "label": "S",
+          "confidence": 0.053478
+        },
+        {
+          "label": "V",
+          "confidence": 0.042696
+        }
+      ],
+      "top3_margin": 0.850349,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 257,
+      "record_id": 100,
+      "true_class": "S",
+      "predicted_class": "S",
+      "upstream_correct": true,
+      "confidence": 0.87397,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.912021
+        },
+        {
+          "label": "N",
+          "confidence": 0.061391
+        },
+        {
+          "label": "V",
+          "confidence": 0.026588
+        }
+      ],
+      "top3_margin": 0.85063,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 341,
+      "record_id": 100,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.822693,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.864177
+        },
+        {
+          "label": "S",
+          "confidence": 0.089223
+        },
+        {
+          "label": "F",
+          "confidence": 0.0466
+        }
+      ],
+      "top3_margin": 0.7749539999999999,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 440,
+      "record_id": 100,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.83158,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.87084
+        },
+        {
+          "label": "S",
+          "confidence": 0.086942
+        },
+        {
+          "label": "F",
+          "confidence": 0.042218
+        }
+      ],
+      "top3_margin": 0.783898,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 1905,
+      "record_id": 100,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.533143,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.558176
+        },
+        {
+          "label": "N",
+          "confidence": 0.410005
+        },
+        {
+          "label": "S",
+          "confidence": 0.031819
+        }
+      ],
+      "top3_margin": 0.148171,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 2271,
+      "record_id": 103,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.862332,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.905825
+        },
+        {
+          "label": "S",
+          "confidence": 0.054202
+        },
+        {
+          "label": "V",
+          "confidence": 0.039974
+        }
+      ],
+      "top3_margin": 0.851623,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 2272,
+      "record_id": 103,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.86042,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.904855
+        },
+        {
+          "label": "S",
+          "confidence": 0.04909
+        },
+        {
+          "label": "V",
+          "confidence": 0.046054
+        }
+      ],
+      "top3_margin": 0.855765,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 2273,
+      "record_id": 103,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.855397,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.901934
+        },
+        {
+          "label": "S",
+          "confidence": 0.051876
+        },
+        {
+          "label": "V",
+          "confidence": 0.04619
+        }
+      ],
+      "top3_margin": 0.850058,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 2274,
+      "record_id": 103,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.860963,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.90579
+        },
+        {
+          "label": "S",
+          "confidence": 0.048886
+        },
+        {
+          "label": "V",
+          "confidence": 0.045324
+        }
+      ],
+      "top3_margin": 0.856904,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 2275,
+      "record_id": 103,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.861755,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.906423
+        },
+        {
+          "label": "S",
+          "confidence": 0.048669
+        },
+        {
+          "label": "V",
+          "confidence": 0.044908
+        }
+      ],
+      "top3_margin": 0.857754,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 3624,
+      "record_id": 103,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.848931,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.886784
+        },
+        {
+          "label": "S",
+          "confidence": 0.078778
+        },
+        {
+          "label": "F",
+          "confidence": 0.034438
+        }
+      ],
+      "top3_margin": 0.808006,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 3853,
+      "record_id": 103,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.861678,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.905056
+        },
+        {
+          "label": "S",
+          "confidence": 0.055755
+        },
+        {
+          "label": "V",
+          "confidence": 0.039189
+        }
+      ],
+      "top3_margin": 0.849301,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4354,
+      "record_id": 105,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.86233,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.906927
+        },
+        {
+          "label": "S",
+          "confidence": 0.051013
+        },
+        {
+          "label": "V",
+          "confidence": 0.04206
+        }
+      ],
+      "top3_margin": 0.8559140000000001,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4355,
+      "record_id": 105,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.859147,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.903666
+        },
+        {
+          "label": "S",
+          "confidence": 0.053865
+        },
+        {
+          "label": "F",
+          "confidence": 0.042469
+        }
+      ],
+      "top3_margin": 0.8498009999999999,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4356,
+      "record_id": 105,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.860263,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.905658
+        },
+        {
+          "label": "S",
+          "confidence": 0.051082
+        },
+        {
+          "label": "V",
+          "confidence": 0.04326
+        }
+      ],
+      "top3_margin": 0.854576,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4357,
+      "record_id": 105,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.858681,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.904897
+        },
+        {
+          "label": "S",
+          "confidence": 0.050248
+        },
+        {
+          "label": "V",
+          "confidence": 0.044854
+        }
+      ],
+      "top3_margin": 0.854649,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4358,
+      "record_id": 105,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.860687,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.906147
+        },
+        {
+          "label": "S",
+          "confidence": 0.049414
+        },
+        {
+          "label": "V",
+          "confidence": 0.04444
+        }
+      ],
+      "top3_margin": 0.8567330000000001,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4375,
+      "record_id": 105,
+      "true_class": "V",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.839139,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.893699
+        },
+        {
+          "label": "V",
+          "confidence": 0.053963
+        },
+        {
+          "label": "S",
+          "confidence": 0.052338
+        }
+      ],
+      "top3_margin": 0.839736,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4384,
+      "record_id": 105,
+      "true_class": "V",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.832549,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.890443
+        },
+        {
+          "label": "S",
+          "confidence": 0.055172
+        },
+        {
+          "label": "V",
+          "confidence": 0.054385
+        }
+      ],
+      "top3_margin": 0.835271,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4402,
+      "record_id": 105,
+      "true_class": "V",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.764993,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.82463
+        },
+        {
+          "label": "V",
+          "confidence": 0.089179
+        },
+        {
+          "label": "F",
+          "confidence": 0.086191
+        }
+      ],
+      "top3_margin": 0.735451,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4435,
+      "record_id": 105,
+      "true_class": "V",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.817696,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.866827
+        },
+        {
+          "label": "S",
+          "confidence": 0.080887
+        },
+        {
+          "label": "F",
+          "confidence": 0.052286
+        }
+      ],
+      "top3_margin": 0.78594,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 4449,
+      "record_id": 105,
+      "true_class": "V",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.829134,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.888006
+        },
+        {
+          "label": "F",
+          "confidence": 0.056562
+        },
+        {
+          "label": "S",
+          "confidence": 0.055432
+        }
+      ],
+      "top3_margin": 0.831444,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 6921,
+      "record_id": 111,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.461622,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.486566
+        },
+        {
+          "label": "S",
+          "confidence": 0.411799
+        },
+        {
+          "label": "F",
+          "confidence": 0.101635
+        }
+      ],
+      "top3_margin": 0.07476699999999997,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 6922,
+      "record_id": 111,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.859672,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.90601
+        },
+        {
+          "label": "V",
+          "confidence": 0.047502
+        },
+        {
+          "label": "S",
+          "confidence": 0.046488
+        }
+      ],
+      "top3_margin": 0.8585079999999999,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 6923,
+      "record_id": 111,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.858285,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.903923
+        },
+        {
+          "label": "V",
+          "confidence": 0.049547
+        },
+        {
+          "label": "S",
+          "confidence": 0.046529
+        }
+      ],
+      "top3_margin": 0.854376,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 6924,
+      "record_id": 111,
+      "true_class": "N",
+      "predicted_class": "S",
+      "upstream_correct": false,
+      "confidence": 0.525508,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.555056
+        },
+        {
+          "label": "N",
+          "confidence": 0.339186
+        },
+        {
+          "label": "F",
+          "confidence": 0.105758
+        }
+      ],
+      "top3_margin": 0.21587,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 6925,
+      "record_id": 111,
+      "true_class": "N",
+      "predicted_class": "N",
+      "upstream_correct": true,
+      "confidence": 0.84022,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.88724
+        },
+        {
+          "label": "S",
+          "confidence": 0.069666
+        },
+        {
+          "label": "F",
+          "confidence": 0.043094
+        }
+      ],
+      "top3_margin": 0.817574,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 7521,
+      "record_id": 111,
+      "true_class": "V",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.644078,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.686341
+        },
+        {
+          "label": "V",
+          "confidence": 0.196139
+        },
+        {
+          "label": "S",
+          "confidence": 0.11752
+        }
+      ],
+      "top3_margin": 0.49020199999999997,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 9067,
+      "record_id": 113,
+      "true_class": "S",
+      "predicted_class": "S",
+      "upstream_correct": true,
+      "confidence": 0.714966,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.755796
+        },
+        {
+          "label": "N",
+          "confidence": 0.172049
+        },
+        {
+          "label": "F",
+          "confidence": 0.072155
+        }
+      ],
+      "top3_margin": 0.583747,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 9424,
+      "record_id": 113,
+      "true_class": "S",
+      "predicted_class": "S",
+      "upstream_correct": true,
+      "confidence": 0.763563,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.813938
+        },
+        {
+          "label": "N",
+          "confidence": 0.115222
+        },
+        {
+          "label": "F",
+          "confidence": 0.07084
+        }
+      ],
+      "top3_margin": 0.698716,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 9437,
+      "record_id": 113,
+      "true_class": "S",
+      "predicted_class": "S",
+      "upstream_correct": true,
+      "confidence": 0.765531,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.803648
+        },
+        {
+          "label": "N",
+          "confidence": 0.137932
+        },
+        {
+          "label": "F",
+          "confidence": 0.05842
+        }
+      ],
+      "top3_margin": 0.665716,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 9535,
+      "record_id": 113,
+      "true_class": "S",
+      "predicted_class": "S",
+      "upstream_correct": true,
+      "confidence": 0.714006,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.754682
+        },
+        {
+          "label": "N",
+          "confidence": 0.16996
+        },
+        {
+          "label": "F",
+          "confidence": 0.075358
+        }
+      ],
+      "top3_margin": 0.584722,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 10289,
+      "record_id": 113,
+      "true_class": "S",
+      "predicted_class": "S",
+      "upstream_correct": true,
+      "confidence": 0.801712,
+      "top_3": [
+        {
+          "label": "S",
+          "confidence": 0.861581
+        },
+        {
+          "label": "N",
+          "confidence": 0.076347
+        },
+        {
+          "label": "F",
+          "confidence": 0.062072
+        }
+      ],
+      "top3_margin": 0.785234,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 11452,
+      "record_id": 117,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.465239,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.50228
+        },
+        {
+          "label": "S",
+          "confidence": 0.249609
+        },
+        {
+          "label": "V",
+          "confidence": 0.248111
+        }
+      ],
+      "top3_margin": 0.252671,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 13387,
+      "record_id": 121,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.767255,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.800504
+        },
+        {
+          "label": "S",
+          "confidence": 0.154095
+        },
+        {
+          "label": "F",
+          "confidence": 0.045401
+        }
+      ],
+      "top3_margin": 0.646409,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 13389,
+      "record_id": 121,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.932758,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.943032
+        },
+        {
+          "label": "N",
+          "confidence": 0.046482
+        },
+        {
+          "label": "S",
+          "confidence": 0.010486
+        }
+      ],
+      "top3_margin": 0.89655,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 14584,
+      "record_id": 123,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.647822,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.671463
+        },
+        {
+          "label": "N",
+          "confidence": 0.296147
+        },
+        {
+          "label": "S",
+          "confidence": 0.032391
+        }
+      ],
+      "top3_margin": 0.37531600000000004,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 15504,
+      "record_id": 123,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.897517,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.911147
+        },
+        {
+          "label": "N",
+          "confidence": 0.073048
+        },
+        {
+          "label": "S",
+          "confidence": 0.015805
+        }
+      ],
+      "top3_margin": 0.838099,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 15630,
+      "record_id": 123,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.917555,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.92929
+        },
+        {
+          "label": "N",
+          "confidence": 0.057965
+        },
+        {
+          "label": "S",
+          "confidence": 0.012744
+        }
+      ],
+      "top3_margin": 0.8713249999999999,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 15750,
+      "record_id": 200,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.934398,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.944512
+        },
+        {
+          "label": "N",
+          "confidence": 0.045188
+        },
+        {
+          "label": "S",
+          "confidence": 0.0103
+        }
+      ],
+      "top3_margin": 0.899324,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 15752,
+      "record_id": 200,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.933177,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.943535
+        },
+        {
+          "label": "N",
+          "confidence": 0.045891
+        },
+        {
+          "label": "S",
+          "confidence": 0.010574
+        }
+      ],
+      "top3_margin": 0.897644,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 15754,
+      "record_id": 200,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.931029,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.941832
+        },
+        {
+          "label": "N",
+          "confidence": 0.047147
+        },
+        {
+          "label": "S",
+          "confidence": 0.011021
+        }
+      ],
+      "top3_margin": 0.894685,
+      "consecutive_abnormal_beats": 3,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_run",
+      "near_threshold": true
+    },
+    {
+      "idx": 15756,
+      "record_id": 200,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.932843,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.943275
+        },
+        {
+          "label": "N",
+          "confidence": 0.04608
+        },
+        {
+          "label": "S",
+          "confidence": 0.010644
+        }
+      ],
+      "top3_margin": 0.897195,
+      "consecutive_abnormal_beats": 5,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_run",
+      "near_threshold": true
+    },
+    {
+      "idx": 15758,
+      "record_id": 200,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.929225,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.940209
+        },
+        {
+          "label": "N",
+          "confidence": 0.048579
+        },
+        {
+          "label": "S",
+          "confidence": 0.011212
+        }
+      ],
+      "top3_margin": 0.8916299999999999,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 16045,
+      "record_id": 200,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.847831,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.888826
+        },
+        {
+          "label": "S",
+          "confidence": 0.070874
+        },
+        {
+          "label": "F",
+          "confidence": 0.0403
+        }
+      ],
+      "top3_margin": 0.817952,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 16087,
+      "record_id": 200,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.603645,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.64641
+        },
+        {
+          "label": "S",
+          "confidence": 0.257599
+        },
+        {
+          "label": "F",
+          "confidence": 0.095991
+        }
+      ],
+      "top3_margin": 0.388811,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 16376,
+      "record_id": 200,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.814204,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.861011
+        },
+        {
+          "label": "V",
+          "confidence": 0.07669
+        },
+        {
+          "label": "S",
+          "confidence": 0.062299
+        }
+      ],
+      "top3_margin": 0.7843209999999999,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 16405,
+      "record_id": 200,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.699328,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.735764
+        },
+        {
+          "label": "S",
+          "confidence": 0.188055
+        },
+        {
+          "label": "F",
+          "confidence": 0.076181
+        }
+      ],
+      "top3_margin": 0.547709,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 16507,
+      "record_id": 200,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.865811,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.906624
+        },
+        {
+          "label": "S",
+          "confidence": 0.05674
+        },
+        {
+          "label": "F",
+          "confidence": 0.036636
+        }
+      ],
+      "top3_margin": 0.849884,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 16630,
+      "record_id": 200,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.834505,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.886432
+        },
+        {
+          "label": "S",
+          "confidence": 0.061834
+        },
+        {
+          "label": "F",
+          "confidence": 0.051734
+        }
+      ],
+      "top3_margin": 0.8245979999999999,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 17329,
+      "record_id": 200,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.567039,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.622884
+        },
+        {
+          "label": "S",
+          "confidence": 0.209078
+        },
+        {
+          "label": "V",
+          "confidence": 0.168038
+        }
+      ],
+      "top3_margin": 0.413806,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 18375,
+      "record_id": 202,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.93225,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.943229
+        },
+        {
+          "label": "N",
+          "confidence": 0.045898
+        },
+        {
+          "label": "S",
+          "confidence": 0.010873
+        }
+      ],
+      "top3_margin": 0.897331,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 18551,
+      "record_id": 202,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.930136,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.941457
+        },
+        {
+          "label": "N",
+          "confidence": 0.04758
+        },
+        {
+          "label": "S",
+          "confidence": 0.010964
+        }
+      ],
+      "top3_margin": 0.893877,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 18566,
+      "record_id": 202,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.932723,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.943611
+        },
+        {
+          "label": "N",
+          "confidence": 0.045711
+        },
+        {
+          "label": "S",
+          "confidence": 0.010678
+        }
+      ],
+      "top3_margin": 0.8978999999999999,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 18585,
+      "record_id": 202,
+      "true_class": "V",
+      "predicted_class": "V",
+      "upstream_correct": true,
+      "confidence": 0.9342,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.944496
+        },
+        {
+          "label": "N",
+          "confidence": 0.045129
+        },
+        {
+          "label": "S",
+          "confidence": 0.010375
+        }
+      ],
+      "top3_margin": 0.899367,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "urgent",
+      "rule_path": "urgent_confidence",
+      "near_threshold": true
+    },
+    {
+      "idx": 18705,
+      "record_id": 202,
+      "true_class": "S",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.763437,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.798657
+        },
+        {
+          "label": "S",
+          "confidence": 0.154088
+        },
+        {
+          "label": "F",
+          "confidence": 0.047256
+        }
+      ],
+      "top3_margin": 0.644569,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 19690,
+      "record_id": 202,
+      "true_class": "F",
+      "predicted_class": "F",
+      "upstream_correct": true,
+      "confidence": 0.601184,
+      "top_3": [
+        {
+          "label": "F",
+          "confidence": 0.682265
+        },
+        {
+          "label": "N",
+          "confidence": 0.184907
+        },
+        {
+          "label": "S",
+          "confidence": 0.132828
+        }
+      ],
+      "top3_margin": 0.497358,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 20519,
+      "record_id": 210,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.800036,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.82083
+        },
+        {
+          "label": "N",
+          "confidence": 0.160676
+        },
+        {
+          "label": "S",
+          "confidence": 0.018493
+        }
+      ],
+      "top3_margin": 0.6601539999999999,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": true
+    },
+    {
+      "idx": 21279,
+      "record_id": 210,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.829949,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.87605
+        },
+        {
+          "label": "V",
+          "confidence": 0.065592
+        },
+        {
+          "label": "S",
+          "confidence": 0.058358
+        }
+      ],
+      "top3_margin": 0.810458,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 21292,
+      "record_id": 210,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.700739,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.722691
+        },
+        {
+          "label": "N",
+          "confidence": 0.252547
+        },
+        {
+          "label": "S",
+          "confidence": 0.024763
+        }
+      ],
+      "top3_margin": 0.47014399999999995,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 21821,
+      "record_id": 210,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.851469,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.896888
+        },
+        {
+          "label": "S",
+          "confidence": 0.061626
+        },
+        {
+          "label": "F",
+          "confidence": 0.041486
+        }
+      ],
+      "top3_margin": 0.8352620000000001,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 22040,
+      "record_id": 210,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.588846,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.61948
+        },
+        {
+          "label": "N",
+          "confidence": 0.329822
+        },
+        {
+          "label": "S",
+          "confidence": 0.050698
+        }
+      ],
+      "top3_margin": 0.289658,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 25990,
+      "record_id": 213,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.853662,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.89774
+        },
+        {
+          "label": "S",
+          "confidence": 0.062043
+        },
+        {
+          "label": "F",
+          "confidence": 0.040217
+        }
+      ],
+      "top3_margin": 0.835697,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 26082,
+      "record_id": 213,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.858851,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.899658
+        },
+        {
+          "label": "S",
+          "confidence": 0.061274
+        },
+        {
+          "label": "F",
+          "confidence": 0.039069
+        }
+      ],
+      "top3_margin": 0.8383839999999999,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 26096,
+      "record_id": 213,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.849671,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.88873
+        },
+        {
+          "label": "S",
+          "confidence": 0.06996
+        },
+        {
+          "label": "F",
+          "confidence": 0.04131
+        }
+      ],
+      "top3_margin": 0.81877,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 26098,
+      "record_id": 213,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.75544,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.777093
+        },
+        {
+          "label": "N",
+          "confidence": 0.198566
+        },
+        {
+          "label": "S",
+          "confidence": 0.024342
+        }
+      ],
+      "top3_margin": 0.578527,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": true
+    },
+    {
+      "idx": 26100,
+      "record_id": 213,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.826146,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.84338
+        },
+        {
+          "label": "N",
+          "confidence": 0.137808
+        },
+        {
+          "label": "S",
+          "confidence": 0.018813
+        }
+      ],
+      "top3_margin": 0.705572,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": true
+    },
+    {
+      "idx": 31219,
+      "record_id": 214,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.697692,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.741448
+        },
+        {
+          "label": "V",
+          "confidence": 0.196183
+        },
+        {
+          "label": "S",
+          "confidence": 0.06237
+        }
+      ],
+      "top3_margin": 0.545265,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 31609,
+      "record_id": 219,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.79846,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.85657
+        },
+        {
+          "label": "S",
+          "confidence": 0.072969
+        },
+        {
+          "label": "F",
+          "confidence": 0.070461
+        }
+      ],
+      "top3_margin": 0.783601,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 44143,
+      "record_id": 233,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.567712,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.615025
+        },
+        {
+          "label": "N",
+          "confidence": 0.288969
+        },
+        {
+          "label": "S",
+          "confidence": 0.096006
+        }
+      ],
+      "top3_margin": 0.32605600000000007,
+      "consecutive_abnormal_beats": 1,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": false
+    },
+    {
+      "idx": 44239,
+      "record_id": 233,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.651471,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.70562
+        },
+        {
+          "label": "S",
+          "confidence": 0.18671
+        },
+        {
+          "label": "V",
+          "confidence": 0.10767
+        }
+      ],
+      "top3_margin": 0.51891,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 44242,
+      "record_id": 233,
+      "true_class": "F",
+      "predicted_class": "V",
+      "upstream_correct": false,
+      "confidence": 0.775223,
+      "top_3": [
+        {
+          "label": "V",
+          "confidence": 0.796745
+        },
+        {
+          "label": "N",
+          "confidence": 0.183814
+        },
+        {
+          "label": "F",
+          "confidence": 0.019442
+        }
+      ],
+      "top3_margin": 0.612931,
+      "consecutive_abnormal_beats": 2,
+      "reference_tier": "priority",
+      "rule_path": "priority",
+      "near_threshold": true
+    },
+    {
+      "idx": 44295,
+      "record_id": 233,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.844869,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.892495
+        },
+        {
+          "label": "S",
+          "confidence": 0.062672
+        },
+        {
+          "label": "V",
+          "confidence": 0.044833
+        }
+      ],
+      "top3_margin": 0.829823,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    },
+    {
+      "idx": 44340,
+      "record_id": 233,
+      "true_class": "F",
+      "predicted_class": "N",
+      "upstream_correct": false,
+      "confidence": 0.847244,
+      "top_3": [
+        {
+          "label": "N",
+          "confidence": 0.892462
+        },
+        {
+          "label": "S",
+          "confidence": 0.065133
+        },
+        {
+          "label": "F",
+          "confidence": 0.042405
+        }
+      ],
+      "top3_margin": 0.827329,
+      "consecutive_abnormal_beats": 0,
+      "reference_tier": "routine",
+      "rule_path": "routine_N",
+      "near_threshold": false
+    }
+  ]
+}

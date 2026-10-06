@@ -1,0 +1,11 @@
+\begin{abstract}
+Messages between language-model agents cost time and energy, especially on edge hardware. Latent communication, which replaces text with continuous messages, has been studied only between transformers, yet sensing agents are often not transformers. We compare interfaces for such a sender. A heartbeat classifier passes events to a frozen Gemma~4 E4B model as text, including a filtered message listing only abnormal events, or through a learned linear adapter emitting four virtual tokens per event. The task, reporting the most urgent triage tier among 1 to 50 heartbeats, is a communication-fidelity benchmark: its answer is a fixed rule over the sender's outputs, so we measure what each channel costs and preserves, not clinical reasoning. Under a pre-specified analysis plan with three seeds and held-out patients, the adapter cut prompt-processing time against compact text by 24\%, 50\% and 78\% at 10, 20 and 50 events and was more accurate than calibrated text at 10 and 20 events (balanced accuracy 0.83 against 0.73). Filtered text was 0.11 to 0.17 more accurate and equally fast for single requests; under batched serving on one 12~GB GPU, the adapter's median throughput was 10 to 30\% higher and its median energy per decision 12 to 28\% lower. Event-level heart rate, interval and abnormal-run information was recoverable from the virtual tokens. The pattern largely held on a second sender and an external database. For this receiver, filtering is preferable when the question is known in advance; a latent channel suits many events carried at predictable cost.
+\end{abstract}
+
+\begin{highlights}
+\item Latent channel from a non-transformer sender compared with filtered text
+\item Adapter carries up to 50 events at four tokens each into a frozen model
+\item Filtered text is more accurate; the adapter wins under batched serving
+\item Per-slot, per-field recoverability of the virtual tokens is measured
+\item A selection rule, the analysis plan and its change log are released
+\end{highlights}

@@ -1,0 +1,965 @@
+{
+  "design": "Item 7, Deviation 16 analysis (run-order step 5). CPU only.\n\nOn results/p1_item7_eval_ds2v2.json (enlarged DS2 test set, corrected decoder):\n  consistency  tiers on the 380 earlier windows vs the earlier runs, per arm\n  primary      MEA r3 3-seed mean minus A-compact balanced accuracy at N = 5, 10, 20, 50;\n               95% CI from the record-level (cluster) bootstrap (primary) and the window\n               bootstrap (secondary); non-inferior if lower bound > -0.05, superior if > 0\n  secondary    N = 1; confusion matrices; recall per tier and per predicted class of the\n               most urgent beat; true-label escalation (sensitivity / specificity);\n               3-seed majority vote; natural windows: accuracy and false-alarm rate with a\n               record-level 95% CI; field-cap rate and output length\nWrites results/p1_item7_step5.json.\n\nRun (from repo root):\n    python p1_item7_step5.py\n",
+  "arms": [
+    "MEA:r3_seed101",
+    "MEA:r3_seed202",
+    "MEA:r3_seed303",
+    "A-compact"
+  ],
+  "n_rows": 4780,
+  "consistency_on_earlier_windows": {
+    "MEA:r3_seed101": {
+      "n": 380,
+      "same_tier": 380
+    },
+    "MEA:r3_seed202": {
+      "n": 380,
+      "same_tier": 380
+    },
+    "MEA:r3_seed303": {
+      "n": 380,
+      "same_tier": 380
+    },
+    "A-compact": {
+      "n": 380,
+      "same_tier": 380
+    }
+  },
+  "by_n": {
+    "1": {
+      "n_windows": 177,
+      "n_records": 22,
+      "balanced_accuracy": {
+        "MEA:r3_seed101": 0.8105263157894737,
+        "MEA:r3_seed202": 0.7339181286549707,
+        "MEA:r3_seed303": 0.8219298245614035,
+        "A-compact": 0.9722222222222222,
+        "MEA_mean": 0.7887914230019493,
+        "MEA_vote": 0.810233918128655
+      },
+      "confusion": {
+        "A-compact": {
+          "routine": {
+            "routine": 60
+          },
+          "priority": {
+            "priority": 55,
+            "urgent": 5
+          },
+          "urgent": {
+            "urgent": 57
+          }
+        },
+        "MEA:r3_seed101": {
+          "routine": {
+            "routine": 55,
+            "priority": 5
+          },
+          "priority": {
+            "priority": 53,
+            "urgent": 4,
+            "routine": 3
+          },
+          "urgent": {
+            "priority": 20,
+            "urgent": 36,
+            "routine": 1
+          }
+        },
+        "MEA:r3_seed202": {
+          "routine": {
+            "routine": 55,
+            "priority": 5
+          },
+          "priority": {
+            "priority": 55,
+            "urgent": 1,
+            "routine": 4
+          },
+          "urgent": {
+            "priority": 35,
+            "routine": 1,
+            "urgent": 21
+          }
+        },
+        "MEA:r3_seed303": {
+          "routine": {
+            "routine": 53,
+            "priority": 7
+          },
+          "priority": {
+            "priority": 56,
+            "urgent": 4
+          },
+          "urgent": {
+            "priority": 20,
+            "urgent": 37
+          }
+        }
+      },
+      "recall_by_class": {
+        "A-compact": {
+          "priority|F": 0.9333333333333333,
+          "priority|S": 1.0,
+          "priority|V": 0.8518518518518519,
+          "urgent|F": 1.0,
+          "urgent|S": 1.0,
+          "urgent|V": 1.0
+        },
+        "MEA:r3_seed101": {
+          "priority|F": 0.8,
+          "priority|S": 1.0,
+          "priority|V": 0.8518518518518519,
+          "urgent|F": 0.0,
+          "urgent|S": 0.0,
+          "urgent|V": 0.9473684210526315
+        },
+        "MEA:r3_seed202": {
+          "priority|F": 0.8,
+          "priority|S": 0.8888888888888888,
+          "priority|V": 1.0,
+          "urgent|F": 0.0,
+          "urgent|S": 0.0,
+          "urgent|V": 0.5526315789473685
+        },
+        "MEA:r3_seed303": {
+          "priority|F": 1.0,
+          "priority|S": 1.0,
+          "priority|V": 0.8518518518518519,
+          "urgent|F": 0.16666666666666666,
+          "urgent|S": 0.0,
+          "urgent|V": 0.9210526315789473
+        }
+      },
+      "truth": {
+        "reference": {
+          "sensitivity": 0.9433962264150944,
+          "specificity": 0.4596774193548387
+        },
+        "MEA:r3_seed101": {
+          "sensitivity": 0.9433962264150944,
+          "specificity": 0.45161290322580644
+        },
+        "MEA:r3_seed202": {
+          "sensitivity": 0.9245283018867925,
+          "specificity": 0.45161290322580644
+        },
+        "MEA:r3_seed303": {
+          "sensitivity": 0.9433962264150944,
+          "specificity": 0.4032258064516129
+        },
+        "A-compact": {
+          "sensitivity": 0.9433962264150944,
+          "specificity": 0.4596774193548387
+        },
+        "MEA_vote": {
+          "sensitivity": 0.9433962264150944,
+          "specificity": 0.4435483870967742
+        }
+      }
+    },
+    "5": {
+      "n_windows": 175,
+      "n_records": 22,
+      "balanced_accuracy": {
+        "MEA:r3_seed101": 0.8093758407317729,
+        "MEA:r3_seed202": 0.7774213075060533,
+        "MEA:r3_seed303": 0.7946731234866827,
+        "A-compact": 0.7298224374495561,
+        "MEA_mean": 0.7938234239081696,
+        "MEA_vote": 0.8068805488297014
+      },
+      "primary": {
+        "difference": 0.06400098645861352,
+        "cluster_ci95": [
+          -0.023119608866738202,
+          0.14764835735693962
+        ],
+        "n_windows": 175,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false,
+        "window_ci95": [
+          -0.006502107434310785,
+          0.13560274863240962
+        ]
+      },
+      "confusion": {
+        "A-compact": {
+          "routine": {
+            "routine": 60
+          },
+          "priority": {
+            "priority": 47,
+            "routine": 12
+          },
+          "urgent": {
+            "priority": 34,
+            "urgent": 22
+          }
+        },
+        "MEA:r3_seed101": {
+          "routine": {
+            "routine": 53,
+            "priority": 7
+          },
+          "priority": {
+            "priority": 49,
+            "urgent": 9,
+            "routine": 1
+          },
+          "urgent": {
+            "priority": 16,
+            "urgent": 40
+          }
+        },
+        "MEA:r3_seed202": {
+          "routine": {
+            "routine": 57,
+            "priority": 3
+          },
+          "priority": {
+            "priority": 51,
+            "urgent": 5,
+            "routine": 3
+          },
+          "urgent": {
+            "priority": 27,
+            "urgent": 29
+          }
+        },
+        "MEA:r3_seed303": {
+          "routine": {
+            "routine": 57,
+            "priority": 3
+          },
+          "priority": {
+            "priority": 53,
+            "routine": 5,
+            "urgent": 1
+          },
+          "urgent": {
+            "priority": 25,
+            "urgent": 30,
+            "routine": 1
+          }
+        }
+      },
+      "recall_by_class": {
+        "A-compact": {
+          "priority|F": 0.8,
+          "priority|S": 0.6111111111111112,
+          "priority|V": 0.9230769230769231,
+          "urgent|F": 0.5833333333333334,
+          "urgent|S": 0.75,
+          "urgent|V": 0.25
+        },
+        "MEA:r3_seed101": {
+          "priority|F": 1.0,
+          "priority|S": 0.8333333333333334,
+          "priority|V": 0.7307692307692307,
+          "urgent|F": 0.3333333333333333,
+          "urgent|S": 0.5,
+          "urgent|V": 0.8888888888888888
+        },
+        "MEA:r3_seed202": {
+          "priority|F": 1.0,
+          "priority|S": 0.8888888888888888,
+          "priority|V": 0.7692307692307693,
+          "urgent|F": 0.08333333333333333,
+          "urgent|S": 0.25,
+          "urgent|V": 0.7222222222222222
+        },
+        "MEA:r3_seed303": {
+          "priority|F": 0.9333333333333333,
+          "priority|S": 0.9444444444444444,
+          "priority|V": 0.8461538461538461,
+          "urgent|F": 0.3333333333333333,
+          "urgent|S": 0.125,
+          "urgent|V": 0.6944444444444444
+        }
+      },
+      "truth": {
+        "reference": {
+          "sensitivity": 0.9661016949152542,
+          "specificity": 0.5
+        },
+        "MEA:r3_seed101": {
+          "sensitivity": 0.9661016949152542,
+          "specificity": 0.4482758620689655
+        },
+        "MEA:r3_seed202": {
+          "sensitivity": 0.9661016949152542,
+          "specificity": 0.5
+        },
+        "MEA:r3_seed303": {
+          "sensitivity": 0.9152542372881356,
+          "specificity": 0.5
+        },
+        "A-compact": {
+          "sensitivity": 0.8813559322033898,
+          "specificity": 0.5603448275862069
+        },
+        "MEA_vote": {
+          "sensitivity": 0.9661016949152542,
+          "specificity": 0.5
+        }
+      }
+    },
+    "10": {
+      "n_windows": 169,
+      "n_records": 22,
+      "balanced_accuracy": {
+        "MEA:r3_seed101": 0.8056978137166816,
+        "MEA:r3_seed202": 0.784231805929919,
+        "MEA:r3_seed303": 0.7263327343516023,
+        "A-compact": 0.5553683737646002,
+        "MEA_mean": 0.7720874513327343,
+        "MEA_vote": 0.8045073375262054
+      },
+      "primary": {
+        "difference": 0.21671907756813402,
+        "cluster_ci95": [
+          0.1300666694451096,
+          0.30969361017087144
+        ],
+        "n_windows": 169,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": true,
+        "window_ci95": [
+          0.1330238594389539,
+          0.2995931915743236
+        ]
+      },
+      "confusion": {
+        "A-compact": {
+          "routine": {
+            "routine": 60
+          },
+          "priority": {
+            "priority": 23,
+            "routine": 30
+          },
+          "urgent": {
+            "urgent": 13,
+            "priority": 40,
+            "routine": 3
+          }
+        },
+        "MEA:r3_seed101": {
+          "routine": {
+            "priority": 13,
+            "routine": 47
+          },
+          "priority": {
+            "priority": 44,
+            "urgent": 9
+          },
+          "urgent": {
+            "urgent": 45,
+            "priority": 11
+          }
+        },
+        "MEA:r3_seed202": {
+          "routine": {
+            "priority": 8,
+            "routine": 51,
+            "urgent": 1
+          },
+          "priority": {
+            "priority": 38,
+            "urgent": 10,
+            "routine": 5
+          },
+          "urgent": {
+            "urgent": 44,
+            "priority": 12
+          }
+        },
+        "MEA:r3_seed303": {
+          "routine": {
+            "routine": 52,
+            "priority": 8
+          },
+          "priority": {
+            "priority": 44,
+            "routine": 8,
+            "urgent": 1
+          },
+          "urgent": {
+            "urgent": 27,
+            "priority": 28,
+            "routine": 1
+          }
+        }
+      },
+      "recall_by_class": {
+        "A-compact": {
+          "priority|F": 0.16666666666666666,
+          "priority|S": 0.2,
+          "priority|V": 0.85,
+          "urgent|F": 0.4,
+          "urgent|S": 0.5,
+          "urgent|V": 0.1111111111111111
+        },
+        "MEA:r3_seed101": {
+          "priority|F": 1.0,
+          "priority|S": 0.9333333333333333,
+          "priority|V": 0.6,
+          "urgent|F": 0.3,
+          "urgent|S": 0.6,
+          "urgent|V": 1.0
+        },
+        "MEA:r3_seed202": {
+          "priority|F": 0.9444444444444444,
+          "priority|S": 0.7333333333333333,
+          "priority|V": 0.5,
+          "urgent|F": 0.4,
+          "urgent|S": 0.7,
+          "urgent|V": 0.9166666666666666
+        },
+        "MEA:r3_seed303": {
+          "priority|F": 0.7777777777777778,
+          "priority|S": 0.8666666666666667,
+          "priority|V": 0.85,
+          "urgent|F": 0.3,
+          "urgent|S": 0.1,
+          "urgent|V": 0.6388888888888888
+        }
+      },
+      "truth": {
+        "reference": {
+          "sensitivity": 0.9206349206349206,
+          "specificity": 0.5188679245283019
+        },
+        "MEA:r3_seed101": {
+          "sensitivity": 0.9523809523809523,
+          "specificity": 0.41509433962264153
+        },
+        "MEA:r3_seed202": {
+          "sensitivity": 0.9365079365079365,
+          "specificity": 0.49056603773584906
+        },
+        "MEA:r3_seed303": {
+          "sensitivity": 0.8888888888888888,
+          "specificity": 0.5094339622641509
+        },
+        "A-compact": {
+          "sensitivity": 0.7142857142857143,
+          "specificity": 0.7075471698113207
+        },
+        "MEA_vote": {
+          "sensitivity": 0.9523809523809523,
+          "specificity": 0.4716981132075472
+        }
+      }
+    },
+    "20": {
+      "n_windows": 157,
+      "n_records": 22,
+      "balanced_accuracy": {
+        "MEA:r3_seed101": 0.8054935318093213,
+        "MEA:r3_seed202": 0.7851143009037745,
+        "MEA:r3_seed303": 0.7949672160198475,
+        "A-compact": 0.48148148148148145,
+        "MEA_mean": 0.7951916829109811,
+        "MEA_vote": 0.8245968456494772
+      },
+      "primary": {
+        "difference": 0.3137102014294996,
+        "cluster_ci95": [
+          0.18556521419040783,
+          0.4326351839413422
+        ],
+        "n_windows": 157,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": true,
+        "window_ci95": [
+          0.23362957055939507,
+          0.3893806485911747
+        ]
+      },
+      "confusion": {
+        "A-compact": {
+          "routine": {
+            "routine": 57
+          },
+          "priority": {
+            "routine": 34,
+            "priority": 11
+          },
+          "urgent": {
+            "urgent": 11,
+            "priority": 36,
+            "routine": 8
+          }
+        },
+        "MEA:r3_seed101": {
+          "routine": {
+            "routine": 47,
+            "priority": 9,
+            "urgent": 1
+          },
+          "priority": {
+            "priority": 34,
+            "urgent": 10,
+            "routine": 1
+          },
+          "urgent": {
+            "priority": 9,
+            "urgent": 46
+          }
+        },
+        "MEA:r3_seed202": {
+          "routine": {
+            "routine": 51,
+            "priority": 5,
+            "urgent": 1
+          },
+          "priority": {
+            "routine": 5,
+            "priority": 24,
+            "urgent": 16
+          },
+          "urgent": {
+            "urgent": 51,
+            "priority": 4
+          }
+        },
+        "MEA:r3_seed303": {
+          "routine": {
+            "routine": 49,
+            "priority": 8
+          },
+          "priority": {
+            "priority": 40,
+            "urgent": 4,
+            "routine": 1
+          },
+          "urgent": {
+            "priority": 20,
+            "urgent": 35
+          }
+        }
+      },
+      "recall_by_class": {
+        "A-compact": {
+          "priority|F": 0.2857142857142857,
+          "priority|S": 0.2,
+          "priority|V": 0.25,
+          "urgent|F": 0.2,
+          "urgent|S": 0.4444444444444444,
+          "urgent|V": 0.1388888888888889
+        },
+        "MEA:r3_seed101": {
+          "priority|F": 1.0,
+          "priority|S": 0.6,
+          "priority|V": 0.6875,
+          "urgent|F": 0.2,
+          "urgent|S": 1.0,
+          "urgent|V": 0.9722222222222222
+        },
+        "MEA:r3_seed202": {
+          "priority|F": 0.7857142857142857,
+          "priority|S": 0.26666666666666666,
+          "priority|V": 0.5625,
+          "urgent|F": 0.6,
+          "urgent|S": 1.0,
+          "urgent|V": 1.0
+        },
+        "MEA:r3_seed303": {
+          "priority|F": 0.9285714285714286,
+          "priority|S": 0.8,
+          "priority|V": 0.9375,
+          "urgent|F": 0.2,
+          "urgent|S": 0.4444444444444444,
+          "urgent|V": 0.8055555555555556
+        }
+      },
+      "truth": {
+        "reference": {
+          "sensitivity": 0.9454545454545454,
+          "specificity": 0.5294117647058824
+        },
+        "MEA:r3_seed101": {
+          "sensitivity": 0.9818181818181818,
+          "specificity": 0.46078431372549017
+        },
+        "MEA:r3_seed202": {
+          "sensitivity": 0.9454545454545454,
+          "specificity": 0.5196078431372549
+        },
+        "MEA:r3_seed303": {
+          "sensitivity": 0.9636363636363636,
+          "specificity": 0.47058823529411764
+        },
+        "A-compact": {
+          "sensitivity": 0.7090909090909091,
+          "specificity": 0.8137254901960784
+        },
+        "MEA_vote": {
+          "sensitivity": 0.9818181818181818,
+          "specificity": 0.4803921568627451
+        }
+      }
+    },
+    "50": {
+      "n_windows": 117,
+      "n_records": 22,
+      "balanced_accuracy": {
+        "MEA:r3_seed101": 0.804954954954955,
+        "MEA:r3_seed202": 0.6990990990990991,
+        "MEA:r3_seed303": 0.8056306306306306,
+        "A-compact": 0.5421171171171171,
+        "MEA_mean": 0.7698948948948949,
+        "MEA_vote": 0.8209459459459459
+      },
+      "primary": {
+        "difference": 0.22777777777777786,
+        "cluster_ci95": [
+          0.06520800899498369,
+          0.37376850890151947
+        ],
+        "n_windows": 117,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": true,
+        "window_ci95": [
+          0.12042042042042045,
+          0.3304072822822821
+        ]
+      },
+      "confusion": {
+        "A-compact": {
+          "routine": {
+            "routine": 40
+          },
+          "priority": {
+            "routine": 23,
+            "priority": 13,
+            "urgent": 1
+          },
+          "urgent": {
+            "priority": 25,
+            "routine": 4,
+            "urgent": 11
+          }
+        },
+        "MEA:r3_seed101": {
+          "routine": {
+            "routine": 31,
+            "priority": 9
+          },
+          "priority": {
+            "priority": 32,
+            "urgent": 5
+          },
+          "urgent": {
+            "urgent": 31,
+            "priority": 9
+          }
+        },
+        "MEA:r3_seed202": {
+          "routine": {
+            "routine": 35,
+            "priority": 3,
+            "urgent": 2
+          },
+          "priority": {
+            "priority": 11,
+            "urgent": 19,
+            "routine": 7
+          },
+          "urgent": {
+            "urgent": 37,
+            "priority": 3
+          }
+        },
+        "MEA:r3_seed303": {
+          "routine": {
+            "routine": 34,
+            "priority": 6
+          },
+          "priority": {
+            "priority": 33,
+            "urgent": 4
+          },
+          "urgent": {
+            "urgent": 27,
+            "priority": 13
+          }
+        }
+      },
+      "recall_by_class": {
+        "A-compact": {
+          "priority|F": 0.375,
+          "priority|S": 0.1875,
+          "priority|V": 0.5384615384615384,
+          "urgent|F": 0.5,
+          "urgent|S": 0.3,
+          "urgent|V": 0.15
+        },
+        "MEA:r3_seed101": {
+          "priority|F": 0.875,
+          "priority|S": 1.0,
+          "priority|V": 0.6923076923076923,
+          "urgent|F": 0.5,
+          "urgent|S": 0.7,
+          "urgent|V": 0.95
+        },
+        "MEA:r3_seed202": {
+          "priority|F": 0.5,
+          "priority|S": 0.3125,
+          "priority|V": 0.15384615384615385,
+          "urgent|F": 0.7,
+          "urgent|S": 1.0,
+          "urgent|V": 1.0
+        },
+        "MEA:r3_seed303": {
+          "priority|F": 1.0,
+          "priority|S": 0.9375,
+          "priority|V": 0.7692307692307693,
+          "urgent|F": 0.4,
+          "urgent|S": 0.5,
+          "urgent|V": 0.9
+        }
+      },
+      "truth": {
+        "reference": {
+          "sensitivity": 0.9166666666666666,
+          "specificity": 0.5217391304347826
+        },
+        "MEA:r3_seed101": {
+          "sensitivity": 0.9791666666666666,
+          "specificity": 0.43478260869565216
+        },
+        "MEA:r3_seed202": {
+          "sensitivity": 0.9166666666666666,
+          "specificity": 0.5507246376811594
+        },
+        "MEA:r3_seed303": {
+          "sensitivity": 0.9583333333333334,
+          "specificity": 0.463768115942029
+        },
+        "A-compact": {
+          "sensitivity": 0.6666666666666666,
+          "specificity": 0.7391304347826086
+        },
+        "MEA_vote": {
+          "sensitivity": 0.9583333333333334,
+          "specificity": 0.463768115942029
+        }
+      }
+    }
+  },
+  "natural": {
+    "5": {
+      "MEA:r3_seed101": {
+        "accuracy": 0.88,
+        "false_alarm": {
+          "rate": 0.08064516129032258,
+          "n": 62,
+          "ci95": [
+            0.0,
+            0.19607843137254902
+          ]
+        }
+      },
+      "MEA:r3_seed202": {
+        "accuracy": 0.88,
+        "false_alarm": {
+          "rate": 0.06451612903225806,
+          "n": 62,
+          "ci95": [
+            0.0,
+            0.1702127659574468
+          ]
+        }
+      },
+      "MEA:r3_seed303": {
+        "accuracy": 0.88,
+        "false_alarm": {
+          "rate": 0.04838709677419355,
+          "n": 62,
+          "ci95": [
+            0.0,
+            0.13793103448275862
+          ]
+        }
+      },
+      "A-compact": {
+        "accuracy": 0.84,
+        "false_alarm": {
+          "rate": 0.0,
+          "n": 62,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "10": {
+      "MEA:r3_seed101": {
+        "accuracy": 0.87,
+        "false_alarm": {
+          "rate": 0.11538461538461539,
+          "n": 52,
+          "ci95": [
+            0.0,
+            0.28
+          ]
+        }
+      },
+      "MEA:r3_seed202": {
+        "accuracy": 0.87,
+        "false_alarm": {
+          "rate": 0.07692307692307693,
+          "n": 52,
+          "ci95": [
+            0.0,
+            0.20512820512820512
+          ]
+        }
+      },
+      "MEA:r3_seed303": {
+        "accuracy": 0.81,
+        "false_alarm": {
+          "rate": 0.09615384615384616,
+          "n": 52,
+          "ci95": [
+            0.0,
+            0.23076923076923078
+          ]
+        }
+      },
+      "A-compact": {
+        "accuracy": 0.61,
+        "false_alarm": {
+          "rate": 0.0,
+          "n": 52,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "20": {
+      "MEA:r3_seed101": {
+        "accuracy": 0.89,
+        "false_alarm": {
+          "rate": 0.10416666666666667,
+          "n": 48,
+          "ci95": [
+            0.0,
+            0.2631578947368421
+          ]
+        }
+      },
+      "MEA:r3_seed202": {
+        "accuracy": 0.91,
+        "false_alarm": {
+          "rate": 0.08333333333333333,
+          "n": 48,
+          "ci95": [
+            0.0,
+            0.23255813953488372
+          ]
+        }
+      },
+      "MEA:r3_seed303": {
+        "accuracy": 0.88,
+        "false_alarm": {
+          "rate": 0.10416666666666667,
+          "n": 48,
+          "ci95": [
+            0.018867924528301886,
+            0.2432597231377705
+          ]
+        }
+      },
+      "A-compact": {
+        "accuracy": 0.6,
+        "false_alarm": {
+          "rate": 0.0,
+          "n": 48,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "50": {
+      "MEA:r3_seed101": {
+        "accuracy": 0.9,
+        "false_alarm": {
+          "rate": 0.1,
+          "n": 40,
+          "ci95": [
+            0.020833333333333332,
+            0.25
+          ]
+        }
+      },
+      "MEA:r3_seed202": {
+        "accuracy": 0.9,
+        "false_alarm": {
+          "rate": 0.025,
+          "n": 40,
+          "ci95": [
+            0.0,
+            0.10344827586206896
+          ]
+        }
+      },
+      "MEA:r3_seed303": {
+        "accuracy": 0.88,
+        "false_alarm": {
+          "rate": 0.075,
+          "n": 40,
+          "ci95": [
+            0.0,
+            0.2
+          ]
+        }
+      },
+      "A-compact": {
+        "accuracy": 0.56,
+        "false_alarm": {
+          "rate": 0.0,
+          "n": 40,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        }
+      }
+    }
+  },
+  "text": {
+    "MEA:r3_seed101": {
+      "field_cap_rate": 0.11548117154811716,
+      "median_output_tokens": 59.0,
+      "parse_rate": 1.0
+    },
+    "MEA:r3_seed202": {
+      "field_cap_rate": 0.14309623430962343,
+      "median_output_tokens": 55.0,
+      "parse_rate": 1.0
+    },
+    "MEA:r3_seed303": {
+      "field_cap_rate": 0.11882845188284519,
+      "median_output_tokens": 48.0,
+      "parse_rate": 1.0
+    },
+    "A-compact": {
+      "field_cap_rate": 0.3389121338912134,
+      "median_output_tokens": 51.0,
+      "parse_rate": 1.0
+    }
+  }
+}

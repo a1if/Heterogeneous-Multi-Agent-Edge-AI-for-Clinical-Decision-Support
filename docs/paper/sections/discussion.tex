@@ -1,0 +1,90 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Choosing a Communication Interface}
+The three research questions give three answers, and they do not point to the same arm. Table~\ref{tab:selection} sets the arms side by side on the criteria a system designer would use. Reading across it, no interface dominates: the filter wins on accuracy and readability, the latent channel on predictability of cost under load, and listing every event on nothing except simplicity at small $N$.
+
+\begin{table}[t]
+\caption{Interfaces compared on the criteria that decide the choice, from the measurements in Section~\ref{sec:results}. ``Content-dependent'' means that the cost varies with how many abnormal events a window contains.}
+\label{tab:selection}
+\centering
+\footnotesize
+\begin{tabular}{p{2.3cm}p{3.1cm}p{3.1cm}p{3.1cm}}
+\toprule
+Criterion & Text, every event & Filtered text (say less) & Adapter (latent) \\
+\midrule
+Accuracy ($N\!\ge\!10$) & Lowest, even calibrated & Highest & Between; above calibrated text at $N$ = 10, 20 \\
+Prompt length & Grows with $N$ & Content-dependent & Depends only on $N$ \\
+Single-request latency & Grows with $N$ & Equal to adapter within about 5\% & Flat in $N$ \\
+Batched throughput and energy & Does not fit at batch 8 or at $N=50$ & Between; fits only some batches & Highest; fits every configuration \\
+Memory planning & Impossible at large $N$ & Content-dependent & Fixed per event \\
+False alarms & None & None & 0.2 to 4.8\% of routine windows, by seed and database \\
+Auditability & Readable & Readable; normal events dropped & Needs a position-aware decoder \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+From the table we draw a selection rule for the task studied, with one part stated as a hypothesis.
+\begin{itemize}
+\item \textbf{The receiver's question is fixed and known when the sender writes its message:} filter on the sender side and send text. The filter was the most accurate arm at almost every $N$ on both senders and on the external database, raised no false alarms, matched the adapter for a single request, and can be read by a person without any decoder.
+\item \textbf{Many events must be communicated at a predictable cost, or requests are batched on constrained hardware:} use the latent channel. Its length depends only on $N$, so memory and batch size can be planned in advance, and in the batched measurements it delivered 10 to 30\% more decisions per second at 12 to 28\% less energy per decision than filtered text.
+\item \textbf{The question is not known when the sender encodes} (hypothesis, not tested here): a filter cannot discard what it cannot rank, whereas the latent channel carries information about every event. Our task has one question, so the experiment cannot show that the extra information would be used by a different one. A study that varies the question over fixed virtual tokens is the direct test, and we leave it to future work.
+\end{itemize}
+Against text that lists every event, the adapter wins on cost and, at moderate window sizes, on accuracy, but no careful engineer would send that prompt.
+
+The rule is a communication policy of the kind recent edge-intelligence work formalises, where the system chooses what to send, and in what form, according to conditions \cite{aei2026survey,dai2026tokenkv}. Existing policies choose between text and a transformer's cache. We add a third option for senders that are not transformers, and for them the choice turns on the shape of the workload and the serving regime more than on accuracy.
+
+\subsection{Why the Filter Wins on Accuracy and the Adapter Wins Under Load}
+The two results have different causes. The filter is accurate because it uses the sender's own labels to remove exactly the events that cannot change the answer, leaving a short list the receiver can reason over. Its accuracy therefore depends on how the sender's evidence is distributed: on the second sender, filtered text fell at 50 events when urgent windows rested on a single borderline beat among many. The adapter is less accurate for reasons this study does not separate. The receiver has to learn from a small training set to read tokens that were never part of its vocabulary, and the linear map from a classification-trained vector carries less than the sender's text fields do. The side inputs of the final adapter were added to close that second gap; the ablation shows they account for its gain, and the run-length result shows the gap only partly closed. The adapter wins under load for a structural reason: the filter's length depends on content, so batches of long prompts do not fit, whereas the adapter's length depends on $N$ alone. The first is a property of the sender's output and the second of the interface, and a designer who knows the workload can read off which regime applies.
+
+\subsection{What the Result Means for Auditability}
+The standing objection to a latent channel is that no one can read it. Much can be read back by training decoders on the tokens: label, tier and abnormal-run status at the level of the input, and heart rate and interval nearly so with a linear decoder, at every slot tested. An auditor needs a position-aware decoder per slot, and the same method shows what the channel does not carry (signal quality). But recoverable is not the same as used. At one virtual token per event every field remained recoverable, even from a run that failed the task, so a recoverability audit can certify what the channel carries but not that the receiver relies on it. The run-length result shows a field that reaches the language model without being used reliably. A pre-generation score computed from the context vector offers an inspection that does not depend on the tokens at all. Zhang and Emu show, for latent channels between language models, that equal end-task accuracy can arise from opposite mechanisms, and that a message must be replaced to know whether it matters \cite{zhang2026causalaudit}. The same distinction applies here: what the tokens hold and what the receiver does with them are separate questions, and our recoverability measurements address the first directly and the second only through task accuracy.
+
+\subsection{What the Receiver Adds}
+On this task, nothing that a rule could not do: the reference answer is a rule over the sender's outputs, and the rule reaches it exactly at negligible cost (Table~\ref{tab:accuracy}). This is a choice of design, not an oversight. Fixing the answer makes every error attributable to the channel, which is what a comparison of interfaces needs; on a task where the receiver must interpret, an error could come from the channel or from the receiver's judgement, and the two could not be separated. The study therefore says which channel to build into an agent system whose receiver is a general-purpose model, not that a language model improves heart-rhythm triage. Whether a latent channel still carries enough when the receiver must do what a rule cannot, for instance name the rhythms in a window from the timing of beats that are individually normal, against independent cardiologist annotations, is the natural next test. It is also the case where a sender-side filter should fail, because the evidence lies in the beats it removes.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.7\linewidth]{figures/fig_learning.pdf}
+\caption{Validation balanced accuracy against passes through the 447 training windows, for the three runs of the final adapter and nine runs of variants trained on the same windows (exploratory; no test data). Most runs reach their best checkpoint within two passes and stop early; a few are still improving at the three-pass limit. The lowest grey curve is the one-token run that failed to learn the task.}
+\label{fig:learning}
+\end{figure}
+
+\subsection{Limitations}
+\begin{itemize}
+\item \textbf{The task is a fixed rule.} The reference answer is a three-line rule over the perception outputs, so a language model is not needed for the answer. The study measures a channel, not reasoning, and says so. It does not show that the language model contributes judgement.
+\item \textbf{A fixed pipeline, not an autonomous agent system.} The two components form a fixed pipeline: the sender always transmits and the receiver answers one question. We use ``agent'' for an independently built component in such a pipeline. We do not test autonomous communication decisions, two-way exchange, tool use or multi-turn sessions, which are where an agentic system would use the channel.
+\item \textbf{One receiving model.} All results use Gemma~4 E4B in 4-bit quantisation. A second receiver, of a different family, is future work, and the adapter is specific to one embedding space.
+\item \textbf{One database for tuning, one external test.} The primary test set informed several design iterations. Each was logged before the data it affected, but the set is no longer untouched. The external confirmatory test on INCART was fixed for this reason, and it replicated the accuracy findings (Section~\ref{sec:incart}); its first timing of text with every event listed at 50 events was distorted by memory paging and was re-measured under the memory cap, with both measurements on record.
+\item \textbf{Training variance and data size.} Outcomes vary between training seeds (validation balanced accuracy 0.72 to 0.82 for the final adapter, and one failed run at one token per event), so every adapter result is reported over three seeds; the eight-token setting is a single run. The adapter was trained on 447 windows. Validation curves from the twelve runs that share this training set show that most reached their best checkpoint within two passes over the data and stopped early (Figure~\ref{fig:learning}), which suggests the adapter is close to capacity at this data size; a minority, including one run of the final adapter, were still improving at the three-pass limit, so a modest gain from longer training cannot be excluded. These curves concern repeated passes over a fixed set; we did not train on larger or smaller sets.
+\item \textbf{Perception quality.} Specificity of the encoder's rule against the annotations is 0.46 to 0.52, and fusion beats are almost never detected. The ceiling on usefulness is set upstream of the interface.
+\item \textbf{Zero-shot text baseline.} The adapter was trained on the task while the text arms are zero-shot under a frozen-model constraint. A trained text baseline would narrow the accuracy gap and was not run.
+\item \textbf{Fairness of calibration.} Calibration chose a single bias on the routine score. A richer calibration could further improve text with every event listed.
+\item \textbf{Hardware and software.} Timing was measured on one consumer GPU through a general-purpose framework, because production engines do not accept continuous embeddings; only relative results are meaningful. Both agents ran on one machine: message sizes between devices were computed (Table~\ref{tab:bandwidth}), but transfer over a real link was not measured.
+\item \textbf{Clinical use.} The system is a research prototype. No clinician rated its outputs, and nothing here supports clinical deployment.
+\end{itemize}
+
+\subsection{Implications for System Design}
+Three practical points follow. First, the value of a latent channel is a property of the workload and not of the channel: report cost against the number of events and under batching, and include a filtered text baseline, or the comparison says little. Second, a fixed per-event footprint changes how a system is provisioned even where accuracy is equal, because batch size no longer depends on what the sender has to say. Third, inspectability can be measured and not merely asserted: train decoders on the message and report what they recover, per slot and per field.
+
+\begin{table}[t]
+\caption{Bytes a sensor would transmit per window (median over the test windows, 8-byte header included) and time at 10~kbit/s for 50 events. Latent: the 35-dimensional per-event input of the adapter. Binary fields: label, confidence (16-bit), run length and signal quality, 5 bytes per event, rendered as text at the hub. Protocol overhead and radio energy are not modelled.}
+\label{tab:bandwidth}
+\centering
+\footnotesize
+\input{tables/bandwidth}
+\end{table}
+
+\subsection{Future Work: When a Single Event Might Benefit}
+For a single event the latent channel offered no measurable advantage on this task: the event's content fits a short text message that the receiver reads accurately (balanced accuracy about 0.97 for text against 0.75 to 0.80 for the adapter), and replacing about 50 tokens of event data in a prompt of about 540 saves under 10\% of the prompt. The single-event case may still favour a latent message where these conditions do not hold. We list the settings as hypotheses, none tested here, together with one that we tested and rejected.
+\begin{itemize}
+\item \textbf{Information that the text fields omit.} The task needed only the label, the confidence and the run length, which compact text carries exactly. Questions that depend on what a structured summary drops, such as beat morphology or the shape of the classifier's uncertainty, could favour the context vector, which holds more than its label.
+\item \textbf{Not bandwidth.} A latent channel is sometimes expected to save transmission between devices. We measured the bytes a sensor would send for every test window and found the opposite (Table~\ref{tab:bandwidth}): the adapter's input, 35 numbers per event, is larger than the event as JSON text at full precision and 4 to 10 times larger than compressed text or a binary encoding of the same fields even when quantised to 8 bits, because it carries the whole state of each event rather than the four fields the task needs. The channel's advantage is in the receiver's computation, not on the link, and we do not claim a bandwidth benefit.
+\item \textbf{Streaming into a running session.} An agent that receives each event as it occurs, appended to a cached context, pays four tokens per event instead of about sixty. Over a session this is the multi-event regime spread over time, where the advantage was observed.
+\item \textbf{Senders without a natural text form.} Our sender has an obvious text message, a class label and a confidence. Embedding models, anomaly detectors or fused multi-sensor states do not, and a text interface for them requires designing a lossy summary that a learned channel avoids.
+\end{itemize}
+The latent message is not a privacy measure: the recoverability results show that a trained decoder reads its content back.
+
+\section{Conclusion}
+\label{sec:conclusion}
+A perception agent that is not a transformer can talk to a frozen language model in several ways, and accuracy alone does not settle the choice. All results concern one receiving model, Gemma~4 E4B, and the conclusions are claims about that interface; whether they transfer to other receivers is untested. A sender-side filter is the more accurate and more readable interface when the receiver's question is known in advance. A linear adapter with four tokens per event gives a latent channel whose cost is fixed per event. It is more accurate than calibrated compact text at moderate window sizes, in our setup serves more decisions per second at lower median energy than the filter under batched serving on constrained hardware, and leaves each event's content recoverable from its tokens. The task fixes the answer to isolate communication fidelity, so the study says nothing about clinical reasoning or clinical value, which would need clinician evaluation or a task that requires clinical interpretation. We give a rule for choosing between the two and release the analysis plan, its change log, the harness and the analysis, so the comparison can be repeated for other senders, receivers and tasks.

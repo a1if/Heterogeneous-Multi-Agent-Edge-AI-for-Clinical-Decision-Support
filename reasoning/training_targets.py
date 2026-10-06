@@ -67,3 +67,31 @@ def canonical_reasoning_target(health_event: dict) -> str:
 def tier_target_prefix(health_event: dict) -> str:
     """Short completion used by the fast, tier-focused Day 4 objective."""
     return '{"urgency_tier":"' + urgency_tier_from_event(health_event) + '"}'
+
+
+_TIER_RANK = {"routine": 0, "priority": 1, "urgent": 2}
+
+
+def most_urgent_index(health_events: list[dict]) -> int:
+    """Index of the window's most urgent beat (the earliest one if tied)."""
+    ranks = [_TIER_RANK[urgency_tier_from_event(e)] for e in health_events]
+    return ranks.index(max(ranks))
+
+
+def canonical_window_target(health_events: list[dict]) -> str:
+    """Byte-stable teacher-forcing target for an N-event window (item 7): the tier
+    of the most urgent beat, a short justification naming that beat, and its
+    guideline fact, in the same ReasoningOutput schema as the single-event target."""
+    i = most_urgent_index(health_events)
+    top = health_events[i]
+    tier = urgency_tier_from_event(top)
+    n = len(health_events)
+    if tier == "routine":
+        justification = f"All {n} beats are normal, so routine ongoing monitoring is appropriate."
+    else:
+        justification = f"Beat {i + 1} of {n} is the most urgent: " + _justification(top, tier)
+    return json.dumps(
+        {"urgency_tier": tier, "justification": justification,
+         "referenced_guideline_fact": _guideline_fact(top["classification"]["label"])},
+        separators=(",", ":"),
+    )

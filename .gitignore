@@ -6,9 +6,15 @@ __pycache__/
 cache/
 logs/
 data/
-docs/
+docs/*
+!docs/REPRODUCE.md
+!docs/figures/
 *.log
 *.bak_*
 
 # Checkpoints and raw result files are tracked: Appendix A.4 of the
 # dissertation tells readers they are archived here.
+
+# local scratch and tool output
+_local/
+graphify-out/

@@ -29,7 +29,7 @@ docstrings) and are not touched.
 ``AAMI_CLASSES`` is deliberately NOT re-exported here. It already lives in
 ``perception.model``; importing it into this module would pull ``torch`` into
 every importer, including scripts that document themselves as needing neither a
-GPU nor a model load (e.g. ``check_s_class_headroom.py``). Files that need the
+GPU nor a model load (e.g. ``archive/dissertation/check_s_class_per_record.py``). Files that need the
 class list import it from ``perception.model`` directly -- still one source of
 truth, without the dependency cost.
 

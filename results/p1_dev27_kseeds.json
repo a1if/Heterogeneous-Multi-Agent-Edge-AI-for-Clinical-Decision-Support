@@ -1,0 +1,429 @@
+{
+  "design": "Deviations 26 and 27: three-seed group comparisons on DS2 v2 (CPU).\n\n  --dev 27  three-seed compression comparison: k = 1 and k = 2 (recipes r4k1, r4k2; seeds 101/202/303)\n            against k = 4 (r4 seeds 101/202/303). Primary: group-mean balanced accuracy difference at\n            N = 5, 10, 20, 50 with record-cluster bootstrap 95% CI; non-inferior if the lower bound > -0.05.\n  --dev 26  r4 ablation: r4hn (hard negatives, no side inputs) against r4 (side-input contribution) and\n            r3 against r4hn (hard-negative contribution; approximate, see Deviation 26).\nBoth report, per group: balanced accuracy by N (mean and seed range), false alarms (all / natural routine\nwindows), parse rate, and per-slot decodability (slots 0 and 49; Deviation 18 / 18b methods) per seed.\nRows: results/p1_item7_eval_ds2v2.json (r3), results/p1_item7_eval_ds2v2_r4.json (r4),\nresults/p1_item7_eval_ds2v2_sweep.json (k = 1, 2), results/p1_item7_eval_ds2v2_ablation.json (r4hn).\n\nRun (from repo root):\n    python p1_seed_group_analysis.py --dev 27      # -> results/p1_dev27_kseeds.json\n    python p1_seed_group_analysis.py --dev 26      # -> results/p1_dev26_ablation.json\n",
+  "deviation": 27,
+  "groups": {
+    "k1": [
+      "MEA:r4k1_seed101",
+      "MEA:r4k1_seed202",
+      "MEA:r4k1_seed303"
+    ],
+    "k2": [
+      "MEA:r4k2_seed101",
+      "MEA:r4k2_seed202",
+      "MEA:r4k2_seed303"
+    ],
+    "k4": [
+      "MEA:r4_seed101",
+      "MEA:r4_seed202",
+      "MEA:r4_seed303"
+    ]
+  },
+  "describe": {
+    "k1": {
+      "balanced_accuracy": {
+        "1": {
+          "mean": 0.7440545808966861,
+          "range": [
+            0.7219298245614034,
+            0.7763157894736842
+          ]
+        },
+        "5": {
+          "mean": 0.70323289391086,
+          "range": [
+            0.49018697874630085,
+            0.8149515738498789
+          ]
+        },
+        "10": {
+          "mean": 0.7229310172706399,
+          "range": [
+            0.544496855345912,
+            0.8527628032345014
+          ]
+        },
+        "20": {
+          "mean": 0.7457735247208932,
+          "range": [
+            0.5458089668615984,
+            0.855431508063087
+          ]
+        },
+        "50": {
+          "mean": 0.7254504504504503,
+          "range": [
+            0.49549549549549554,
+            0.8425675675675676
+          ]
+        }
+      },
+      "false_alarm": {
+        "MEA:r4k1_seed101": {
+          "all": 0.027139874739039668,
+          "natural": 0.019801980198019802
+        },
+        "MEA:r4k1_seed202": {
+          "all": 0.06263048016701461,
+          "natural": 0.04455445544554455
+        },
+        "MEA:r4k1_seed303": {
+          "all": 0.10020876826722339,
+          "natural": 0.07920792079207921
+        }
+      },
+      "parse_rate": 1.0
+    },
+    "k2": {
+      "balanced_accuracy": {
+        "1": {
+          "mean": 0.7927875243664717,
+          "range": [
+            0.7833333333333332,
+            0.7994152046783626
+          ]
+        },
+        "5": {
+          "mean": 0.8034055241682361,
+          "range": [
+            0.8018361581920903,
+            0.8049367769706753
+          ]
+        },
+        "10": {
+          "mean": 0.8205725267046021,
+          "range": [
+            0.8062368972746331,
+            0.8444669062593592
+          ]
+        },
+        "20": {
+          "mean": 0.828802646346506,
+          "range": [
+            0.7940457203615098,
+            0.8657097288676235
+          ]
+        },
+        "50": {
+          "mean": 0.7964714714714715,
+          "range": [
+            0.7828828828828828,
+            0.8189189189189189
+          ]
+        }
+      },
+      "false_alarm": {
+        "MEA:r4k2_seed101": {
+          "all": 0.08559498956158663,
+          "natural": 0.06930693069306931
+        },
+        "MEA:r4k2_seed202": {
+          "all": 0.07306889352818371,
+          "natural": 0.06930693069306931
+        },
+        "MEA:r4k2_seed303": {
+          "all": 0.10020876826722339,
+          "natural": 0.07425742574257425
+        }
+      },
+      "parse_rate": 1.0
+    },
+    "k4": {
+      "balanced_accuracy": {
+        "1": {
+          "mean": 0.8038011695906432,
+          "range": [
+            0.797953216374269,
+            0.80906432748538
+          ]
+        },
+        "5": {
+          "mean": 0.8138104205900816,
+          "range": [
+            0.8035579768630616,
+            0.8309927360774818
+          ]
+        },
+        "10": {
+          "mean": 0.8298392732354997,
+          "range": [
+            0.7909404013177598,
+            0.8856768493560946
+          ]
+        },
+        "20": {
+          "mean": 0.8302794022092268,
+          "range": [
+            0.8022328548644339,
+            0.8581251107566897
+          ]
+        },
+        "50": {
+          "mean": 0.8355855855855855,
+          "range": [
+            0.7828828828828828,
+            0.870945945945946
+          ]
+        }
+      },
+      "false_alarm": {
+        "MEA:r4_seed101": {
+          "all": 0.027139874739039668,
+          "natural": 0.0297029702970297
+        },
+        "MEA:r4_seed202": {
+          "all": 0.04801670146137787,
+          "natural": 0.039603960396039604
+        },
+        "MEA:r4_seed303": {
+          "all": 0.033402922755741124,
+          "natural": 0.024752475247524754
+        }
+      },
+      "parse_rate": 1.0
+    }
+  },
+  "contrasts": {
+    "k1_minus_k4": {
+      "5": {
+        "difference": -0.1105775266792216,
+        "cluster_ci95": [
+          -0.1425442699768454,
+          -0.07759834654865091
+        ],
+        "n_windows": 175,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      },
+      "10": {
+        "difference": -0.10690825596485976,
+        "cluster_ci95": [
+          -0.14394897500160644,
+          -0.06882021531994517
+        ],
+        "n_windows": 169,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      },
+      "20": {
+        "difference": -0.0845058774883336,
+        "cluster_ci95": [
+          -0.12225232391044813,
+          -0.04640788782347854
+        ],
+        "n_windows": 157,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      },
+      "50": {
+        "difference": -0.11013513513513518,
+        "cluster_ci95": [
+          -0.1550212933761667,
+          -0.06475854483207422
+        ],
+        "n_windows": 117,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      }
+    },
+    "k2_minus_k4": {
+      "5": {
+        "difference": -0.0104048964218455,
+        "cluster_ci95": [
+          -0.050240376458832975,
+          0.033318940276666445
+        ],
+        "n_windows": 175,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      },
+      "10": {
+        "difference": -0.00926674653089754,
+        "cluster_ci95": [
+          -0.0665095833899668,
+          0.03494308368302617
+        ],
+        "n_windows": 169,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      },
+      "20": {
+        "difference": -0.00147675586272078,
+        "cluster_ci95": [
+          -0.03579848982907657,
+          0.0318972995896923
+        ],
+        "n_windows": 157,
+        "n_records": 22,
+        "non_inferior": true,
+        "superior": false
+      },
+      "50": {
+        "difference": -0.03911411411411403,
+        "cluster_ci95": [
+          -0.12890305948198064,
+          0.026153403475473548
+        ],
+        "n_windows": 117,
+        "n_records": 22,
+        "non_inferior": false,
+        "superior": false
+      }
+    }
+  },
+  "no_accuracy_cost": {
+    "k1_minus_k4": false,
+    "k2_minus_k4": false
+  },
+  "decodability": {
+    "MEA:r4k1_seed101": {
+      "slot0": {
+        "label": 0.9838330932649135,
+        "tier": 0.9326264086950714,
+        "run3": 0.9768864880369051,
+        "heart_rate_r2": 0.8503442128562924,
+        "rr_r2": 0.8311896462912418
+      },
+      "slot49": {
+        "label": 0.9854388519134776,
+        "tier": 0.924613095843049,
+        "run3": 0.9623937344137168,
+        "heart_rate_r2": 0.8793579119527084,
+        "rr_r2": 0.8417097608706533
+      }
+    },
+    "MEA:r4k1_seed202": {
+      "slot0": {
+        "label": 0.9782997273247193,
+        "tier": 0.9286915965646377,
+        "run3": 0.9889053549091316,
+        "heart_rate_r2": 0.907768438779653,
+        "rr_r2": 0.915020720068939
+      },
+      "slot49": {
+        "label": 0.9949475433194204,
+        "tier": 0.9496023760643554,
+        "run3": 0.9755121065085929,
+        "heart_rate_r2": 0.9301651842219003,
+        "rr_r2": 0.9174393077524821
+      }
+    },
+    "MEA:r4k1_seed303": {
+      "slot0": {
+        "label": 0.9575514439300642,
+        "tier": 0.9255545973089726,
+        "run3": 0.9696401112253109,
+        "heart_rate_r2": 0.8407417262185409,
+        "rr_r2": 0.8316597650217871
+      },
+      "slot49": {
+        "label": 0.9867973549125748,
+        "tier": 0.9470046082949309,
+        "run3": 0.9409294802845967,
+        "heart_rate_r2": 0.9167388313321645,
+        "rr_r2": 0.8879199700958822
+      }
+    },
+    "MEA:r4k2_seed101": {
+      "slot0": {
+        "label": 0.952094931654118,
+        "tier": 0.9336467961170687,
+        "run3": 0.9824836070145246,
+        "heart_rate_r2": 0.8155117633815683,
+        "rr_r2": 0.8414878671522429
+      },
+      "slot49": {
+        "label": 0.9804424415514156,
+        "tier": 0.9452443383597723,
+        "run3": 0.9822087307088622,
+        "heart_rate_r2": 0.8233388015141285,
+        "rr_r2": 0.8250369308591778
+      }
+    },
+    "MEA:r4k2_seed202": {
+      "slot0": {
+        "label": 0.9518944631804043,
+        "tier": 0.9460751091094405,
+        "run3": 0.9189154735441515,
+        "heart_rate_r2": 0.808628837533441,
+        "rr_r2": 0.8383800743218732
+      },
+      "slot49": {
+        "label": 0.9557639269329381,
+        "tier": 0.9346233364984508,
+        "run3": 0.938730469839297,
+        "heart_rate_r2": 0.8446669513801159,
+        "rr_r2": 0.7832765094264902
+      }
+    },
+    "MEA:r4k2_seed303": {
+      "slot0": {
+        "label": 0.9542859515044619,
+        "tier": 0.9382530100073853,
+        "run3": 0.9746874775916055,
+        "heart_rate_r2": 0.8170447256411603,
+        "rr_r2": 0.8482395119249062
+      },
+      "slot49": {
+        "label": 0.9828069002827675,
+        "tier": 0.9168186794200576,
+        "run3": 0.9267116029670706,
+        "heart_rate_r2": 0.22937733988310505,
+        "rr_r2": 0.2045432190281895
+      }
+    },
+    "MEA:r4_seed101": {
+      "slot0": {
+        "label": 0.954649459524741,
+        "tier": 0.9222895898607831,
+        "run3": 0.932858474556015,
+        "heart_rate_r2": 0.66473715841563,
+        "rr_r2": 0.6512723007526386
+      },
+      "slot49": {
+        "label": 0.9494775477684727,
+        "tier": 0.9256491636636768,
+        "run3": 0.9668913481686864,
+        "heart_rate_r2": 0.7762829242873799,
+        "rr_r2": 0.7681742822091393
+      }
+    },
+    "MEA:r4_seed202": {
+      "slot0": {
+        "label": 0.9779486811520811,
+        "tier": 0.9283749396256257,
+        "run3": 0.946526599262216,
+        "heart_rate_r2": 0.7620206273613542,
+        "rr_r2": 0.7176681560958174
+      },
+      "slot49": {
+        "label": 0.9843819492716928,
+        "tier": 0.9328630665632923,
+        "run3": 0.97743624064823,
+        "heart_rate_r2": 0.5943899348442108,
+        "rr_r2": 0.6940749407369982
+      }
+    },
+    "MEA:r4_seed303": {
+      "slot0": {
+        "label": 0.9479206474857051,
+        "tier": 0.9339263331000631,
+        "run3": 0.9612942291910669,
+        "heart_rate_r2": 0.7162009559024421,
+        "rr_r2": 0.7181352297370563
+      },
+      "slot49": {
+        "label": 0.9805613525618007,
+        "tier": 0.9472532684435849,
+        "run3": 0.9766116117312427,
+        "heart_rate_r2": 0.7202322798499561,
+        "rr_r2": 0.7426853324551361
+      }
+    }
+  }
+}

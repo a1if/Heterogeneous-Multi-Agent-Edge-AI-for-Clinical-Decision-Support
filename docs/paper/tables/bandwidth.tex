@@ -1,0 +1,14 @@
+\begin{tabular}{lrrrr}
+\toprule
+Interface & $N$=10 & $N$=20 & $N$=50 & ms at 10 kbit/s, $N$=50 \\
+\midrule
+Compact JSON text & 1,278 & 2,545 & 6,348 & 5,078 \\
+Filtered JSON text & 251 & 252 & 412 & 330 \\
+Compact JSON, zlib & 210 & 279 & 461 & 369 \\
+Filtered JSON, zlib & 161 & 163 & 181 & 145 \\
+Latent, float32 & 1,408 & 2,808 & 7,008 & 5,606 \\
+Latent, float16 & 708 & 1,408 & 3,508 & 2,806 \\
+Latent, int8 & 362 & 712 & 1,762 & 1,410 \\
+Binary fields & 58 & 108 & 258 & 206 \\
+\bottomrule
+\end{tabular}

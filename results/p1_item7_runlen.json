@@ -1,0 +1,277 @@
+{
+  "design": "Item 7, Deviation 18b: run-length decodability from adapter tokens, with a well-posed metric. CPU.\n\nPrimary: balanced accuracy of the binary field run >= 3 (MLP); secondary: R^2 of the bounded\ntarget run_z = log(1 + min(run, 20)) / log(4). Same samples, sources and decoders as the\nDeviation 18 slot analysis (p1_item7_r4_analysis.slot_decoding). See docs/analysis_plan.md.\n\nRun (from repo root):\n    python p1_item7_runlen.py\n",
+  "n_train": 4358,
+  "n_test": 1888,
+  "positives": {
+    "ds1": 450,
+    "ds2": 69
+  },
+  "input_35d": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9947033898305084,
+        "balanced_accuracy": 0.9484507334018533
+      },
+      "mlp": {
+        "accuracy": 0.9973516949152542,
+        "balanced_accuracy": 0.9846826174598242
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9999995995460063
+      },
+      "mlp": {
+        "r2": 0.9645203178089994
+      }
+    }
+  },
+  "r3_seed101_slot0": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9570974576271186,
+        "balanced_accuracy": 0.5245874863557776
+      },
+      "mlp": {
+        "accuracy": 0.9539194915254238,
+        "balanced_accuracy": 0.5508242305455299
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.33450445405894
+      },
+      "mlp": {
+        "r2": -0.36330921798883575
+      }
+    }
+  },
+  "r3_seed101_slot49": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9576271186440678,
+        "balanced_accuracy": 0.52486236266144
+      },
+      "mlp": {
+        "accuracy": 0.9502118644067796,
+        "balanced_accuracy": 0.5907290994414832
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.3415873367484139
+      },
+      "mlp": {
+        "r2": -0.850947829902327
+      }
+    }
+  },
+  "r3_seed202_slot0": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9533898305084746,
+        "balanced_accuracy": 0.5296348527220722
+      },
+      "mlp": {
+        "accuracy": 0.9454449152542372,
+        "balanced_accuracy": 0.6091697142083164
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.38419143247324217
+      },
+      "mlp": {
+        "r2": -0.4027728586788979
+      }
+    }
+  },
+  "r3_seed202_slot49": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9565677966101694,
+        "balanced_accuracy": 0.5243126100501151
+      },
+      "mlp": {
+        "accuracy": 0.9507415254237288,
+        "balanced_accuracy": 0.5352319716996916
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.3933124569303984
+      },
+      "mlp": {
+        "r2": 0.02641663533929617
+      }
+    }
+  },
+  "r3_seed303_slot0": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9560381355932204,
+        "balanced_accuracy": 0.5100947327325892
+      },
+      "mlp": {
+        "accuracy": 0.9586864406779662,
+        "balanced_accuracy": 0.5532981172964919
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.4466799213375684
+      },
+      "mlp": {
+        "r2": -1.604958631538158
+      }
+    }
+  },
+  "r3_seed303_slot49": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9576271186440678,
+        "balanced_accuracy": 0.5109193616495765
+      },
+      "mlp": {
+        "accuracy": 0.9560381355932204,
+        "balanced_accuracy": 0.5310092342503845
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.43801031127248624
+      },
+      "mlp": {
+        "r2": -0.12740380906060245
+      }
+    }
+  },
+  "r4_seed101_slot0": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.9957627118644068,
+        "balanced_accuracy": 0.9978009895547004
+      },
+      "mlp": {
+        "accuracy": 0.9915254237288136,
+        "balanced_accuracy": 0.932858474556015
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9862219623887789
+      },
+      "mlp": {
+        "r2": 0.3179829961326902
+      }
+    }
+  },
+  "r4_seed101_slot49": {
+    "run3": {
+      "linear": {
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0
+      },
+      "mlp": {
+        "accuracy": 0.9899364406779662,
+        "balanced_accuracy": 0.9668913481686864
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9850043271193909
+      },
+      "mlp": {
+        "r2": 0.5057806926477737
+      }
+    }
+  },
+  "r4_seed202_slot0": {
+    "run3": {
+      "linear": {
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0
+      },
+      "mlp": {
+        "accuracy": 0.9909957627118644,
+        "balanced_accuracy": 0.946526599262216
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9865018661707209
+      },
+      "mlp": {
+        "r2": 0.3900570485469175
+      }
+    }
+  },
+  "r4_seed202_slot49": {
+    "run3": {
+      "linear": {
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0
+      },
+      "mlp": {
+        "accuracy": 0.996822033898305,
+        "balanced_accuracy": 0.97743624064823
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9843794904864696
+      },
+      "mlp": {
+        "r2": 0.24203911277055312
+      }
+    }
+  },
+  "r4_seed303_slot0": {
+    "run3": {
+      "linear": {
+        "accuracy": 1.0,
+        "balanced_accuracy": 1.0
+      },
+      "mlp": {
+        "accuracy": 0.9925847457627118,
+        "balanced_accuracy": 0.9612942291910669
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9864451014081466
+      },
+      "mlp": {
+        "r2": 0.41303600708392363
+      }
+    }
+  },
+  "r4_seed303_slot49": {
+    "run3": {
+      "linear": {
+        "accuracy": 0.996292372881356,
+        "balanced_accuracy": 0.9980758658603628
+      },
+      "mlp": {
+        "accuracy": 0.9952330508474576,
+        "balanced_accuracy": 0.9766116117312427
+      }
+    },
+    "run_z": {
+      "linear": {
+        "r2": 0.9850905918864471
+      },
+      "mlp": {
+        "r2": 0.4534771282816421
+      }
+    }
+  },
+  "verdict": {
+    "input": 0.9846826174598242,
+    "r3_mean": 0.5617103945736496,
+    "r4_mean": 0.9602697505929094,
+    "r4_min": 0.932858474556015,
+    "r4_carries_run": true
+  },
+  "seconds": 164.17712235450745
+}

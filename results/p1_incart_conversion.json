@@ -1,0 +1,894 @@
+{
+  "design": "INCART conversion for the confirmatory evaluation (Deviation 21, docs/confirmatory_plan.md).\n\nConverts the St Petersburg INCART 12-lead Arrhythmia Database (PhysioNet incartdb 1.0.0,\nalready downloaded to data/incartdb/ and checked against SHA256SUMS.txt) into the same\narray format as data_prep.py, so the frozen perception agent and every downstream script\ncan read it unchanged. The procedure is fixed by the plan, before any inspection:\n\n  - lead II (asserted present); 257 Hz -> 360 Hz polyphase resampling (up 360, down 257)\n  - annotation positions mapped to the 360 Hz grid: round(sample * 360 / 257)\n  - beats whose symbol is in data_prep.AAMI_MAP (unchanged AAMI EC57 mapping); 360-sample\n    window centred on the mapped position, inside the recording, z-scored (SD < 1e-8 skipped)\n  - RR interval in ms from the ORIGINAL 257 Hz positions to the previous accepted beat;\n    the first beat of a recording gets the split median (as data_prep.build_split);\n    gaps > 12 s are capped later by p1_item7_common.load_split, as for MIT-BIH\n  - record_ids = recording number (I01 -> 1 ... I75 -> 75), used for chronological replay\n    and the sampler's per-record cap; patient_ids from files-patients-diagnoses.txt, used\n    for the patient-cluster bootstrap\n\nOnly conversion checks are written (beat counts per class and recording, exclusions);\nnothing about model performance.\n\nRun (from repo root):\n    python incart_prep.py\nProduces:\n    data/processed/incart_test.npz   (features, labels, rr_interval_ms, record_ids, patient_ids)\n    results/p1_incart_conversion.json\n",
+  "records": {
+    "I01": {
+      "patient": 1,
+      "beats": 2756,
+      "by_class": {
+        "N": 2412,
+        "V": 344
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I02": {
+      "patient": 1,
+      "beats": 2673,
+      "by_class": {
+        "N": 2444,
+        "V": 229
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I03": {
+      "patient": 2,
+      "beats": 2451,
+      "by_class": {
+        "N": 2324,
+        "V": 125,
+        "S": 2
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I04": {
+      "patient": 2,
+      "beats": 2422,
+      "by_class": {
+        "N": 2268,
+        "F": 17,
+        "S": 16,
+        "V": 121
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I05": {
+      "patient": 2,
+      "beats": 1775,
+      "by_class": {
+        "N": 1519,
+        "V": 247,
+        "F": 9
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I06": {
+      "patient": 3,
+      "beats": 2492,
+      "by_class": {
+        "N": 2435,
+        "S": 48,
+        "V": 9
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I07": {
+      "patient": 3,
+      "beats": 2704,
+      "by_class": {
+        "N": 2638,
+        "S": 65,
+        "V": 1
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I08": {
+      "patient": 4,
+      "beats": 2129,
+      "by_class": {
+        "N": 1776,
+        "V": 351,
+        "S": 2
+      },
+      "skipped": {
+        "window_outside_recording": 1,
+        "symbol_not_mapped": 1
+      }
+    },
+    "I09": {
+      "patient": 5,
+      "beats": 2988,
+      "by_class": {
+        "N": 2947,
+        "V": 41
+      },
+      "skipped": {
+        "window_outside_recording": 1,
+        "symbol_not_mapped": 8
+      }
+    },
+    "I10": {
+      "patient": 5,
+      "beats": 3680,
+      "by_class": {
+        "N": 3597,
+        "V": 83
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I11": {
+      "patient": 5,
+      "beats": 2081,
+      "by_class": {
+        "N": 2077,
+        "V": 4
+      },
+      "skipped": {
+        "window_outside_recording": 1,
+        "symbol_not_mapped": 24
+      }
+    },
+    "I12": {
+      "patient": 6,
+      "beats": 2807,
+      "by_class": {
+        "N": 2798,
+        "V": 6,
+        "F": 2,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I13": {
+      "patient": 6,
+      "beats": 2023,
+      "by_class": {
+        "N": 1793,
+        "V": 230
+      },
+      "skipped": {}
+    },
+    "I14": {
+      "patient": 6,
+      "beats": 1864,
+      "by_class": {
+        "N": 1800,
+        "V": 64
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I15": {
+      "patient": 7,
+      "beats": 2633,
+      "by_class": {
+        "N": 2630,
+        "V": 3
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I16": {
+      "patient": 8,
+      "beats": 1522,
+      "by_class": {
+        "N": 1520,
+        "V": 2
+      },
+      "skipped": {}
+    },
+    "I17": {
+      "patient": 8,
+      "beats": 1672,
+      "by_class": {
+        "N": 1645,
+        "V": 27
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I18": {
+      "patient": 9,
+      "beats": 3083,
+      "by_class": {
+        "N": 2661,
+        "V": 366,
+        "F": 56
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I19": {
+      "patient": 9,
+      "beats": 2062,
+      "by_class": {
+        "N": 1212,
+        "V": 850
+      },
+      "skipped": {
+        "symbol_not_mapped": 1
+      }
+    },
+    "I20": {
+      "patient": 10,
+      "beats": 2650,
+      "by_class": {
+        "N": 2360,
+        "S": 179,
+        "V": 110,
+        "F": 1
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I21": {
+      "patient": 10,
+      "beats": 2183,
+      "by_class": {
+        "N": 2071,
+        "S": 104,
+        "V": 8
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I22": {
+      "patient": 10,
+      "beats": 3126,
+      "by_class": {
+        "N": 2816,
+        "V": 185,
+        "S": 124,
+        "F": 1
+      },
+      "skipped": {}
+    },
+    "I23": {
+      "patient": 11,
+      "beats": 2204,
+      "by_class": {
+        "N": 2191,
+        "V": 13
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I24": {
+      "patient": 11,
+      "beats": 2569,
+      "by_class": {
+        "N": 2563,
+        "V": 6
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I25": {
+      "patient": 12,
+      "beats": 1711,
+      "by_class": {
+        "N": 1704,
+        "V": 5,
+        "S": 2
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I26": {
+      "patient": 12,
+      "beats": 1509,
+      "by_class": {
+        "N": 1498,
+        "V": 4,
+        "S": 7
+      },
+      "skipped": {}
+    },
+    "I27": {
+      "patient": 13,
+      "beats": 2604,
+      "by_class": {
+        "N": 1884,
+        "V": 720
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I28": {
+      "patient": 13,
+      "beats": 1716,
+      "by_class": {
+        "N": 1712,
+        "V": 4
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I29": {
+      "patient": 14,
+      "beats": 2618,
+      "by_class": {
+        "N": 1835,
+        "V": 783
+      },
+      "skipped": {
+        "window_outside_recording": 2,
+        "symbol_not_mapped": 1
+      }
+    },
+    "I30": {
+      "patient": 14,
+      "beats": 2460,
+      "by_class": {
+        "N": 1705,
+        "V": 755
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I31": {
+      "patient": 14,
+      "beats": 3208,
+      "by_class": {
+        "V": 1365,
+        "N": 1843
+      },
+      "skipped": {
+        "window_outside_recording": 1,
+        "symbol_not_mapped": 1
+      }
+    },
+    "I32": {
+      "patient": 14,
+      "beats": 1618,
+      "by_class": {
+        "N": 1561,
+        "V": 57
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I33": {
+      "patient": 15,
+      "beats": 1835,
+      "by_class": {
+        "N": 1245,
+        "S": 589,
+        "V": 1
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I34": {
+      "patient": 15,
+      "beats": 1964,
+      "by_class": {
+        "N": 1428,
+        "S": 536
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I35": {
+      "patient": 16,
+      "beats": 3674,
+      "by_class": {
+        "N": 3199,
+        "V": 457,
+        "F": 18
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I36": {
+      "patient": 16,
+      "beats": 3908,
+      "by_class": {
+        "N": 3446,
+        "V": 450,
+        "F": 12
+      },
+      "skipped": {
+        "window_outside_recording": 3
+      }
+    },
+    "I37": {
+      "patient": 16,
+      "beats": 2461,
+      "by_class": {
+        "N": 2009,
+        "V": 452
+      },
+      "skipped": {}
+    },
+    "I38": {
+      "patient": 17,
+      "beats": 2697,
+      "by_class": {
+        "V": 544,
+        "N": 2153
+      },
+      "skipped": {
+        "window_outside_recording": 1,
+        "symbol_not_mapped": 1
+      }
+    },
+    "I39": {
+      "patient": 17,
+      "beats": 1774,
+      "by_class": {
+        "N": 1461,
+        "V": 313
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I40": {
+      "patient": 18,
+      "beats": 2665,
+      "by_class": {
+        "N": 2567,
+        "S": 6,
+        "V": 92
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I41": {
+      "patient": 18,
+      "beats": 1630,
+      "by_class": {
+        "N": 1624,
+        "S": 5,
+        "V": 1
+      },
+      "skipped": {}
+    },
+    "I42": {
+      "patient": 19,
+      "beats": 3107,
+      "by_class": {
+        "V": 1554,
+        "N": 1544,
+        "F": 9
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I43": {
+      "patient": 19,
+      "beats": 2208,
+      "by_class": {
+        "V": 1120,
+        "N": 1086,
+        "F": 2
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I44": {
+      "patient": 20,
+      "beats": 2494,
+      "by_class": {
+        "N": 1803,
+        "V": 683,
+        "S": 8
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I45": {
+      "patient": 20,
+      "beats": 1926,
+      "by_class": {
+        "N": 1435,
+        "V": 491
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I46": {
+      "patient": 20,
+      "beats": 2657,
+      "by_class": {
+        "N": 2231,
+        "V": 422,
+        "F": 3,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I47": {
+      "patient": 21,
+      "beats": 1951,
+      "by_class": {
+        "V": 93,
+        "N": 1857,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I48": {
+      "patient": 21,
+      "beats": 2356,
+      "by_class": {
+        "N": 2118,
+        "V": 235,
+        "F": 1,
+        "S": 2
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I49": {
+      "patient": 22,
+      "beats": 2146,
+      "by_class": {
+        "N": 2119,
+        "V": 27
+      },
+      "skipped": {
+        "symbol_not_mapped": 1,
+        "window_outside_recording": 1
+      }
+    },
+    "I50": {
+      "patient": 22,
+      "beats": 2997,
+      "by_class": {
+        "N": 2993,
+        "V": 4
+      },
+      "skipped": {
+        "symbol_not_mapped": 1,
+        "window_outside_recording": 1
+      }
+    },
+    "I51": {
+      "patient": 23,
+      "beats": 2775,
+      "by_class": {
+        "N": 1969,
+        "V": 802,
+        "F": 1,
+        "S": 3
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I52": {
+      "patient": 23,
+      "beats": 1746,
+      "by_class": {
+        "N": 1609,
+        "V": 137
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I53": {
+      "patient": 23,
+      "beats": 2260,
+      "by_class": {
+        "V": 1110,
+        "N": 1150
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I54": {
+      "patient": 24,
+      "beats": 2362,
+      "by_class": {
+        "N": 2339,
+        "V": 22,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I55": {
+      "patient": 24,
+      "beats": 2165,
+      "by_class": {
+        "N": 2147,
+        "V": 17,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I56": {
+      "patient": 24,
+      "beats": 1704,
+      "by_class": {
+        "N": 1671,
+        "V": 7,
+        "S": 26
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I57": {
+      "patient": 25,
+      "beats": 2867,
+      "by_class": {
+        "N": 2840,
+        "V": 21,
+        "F": 3,
+        "S": 3
+      },
+      "skipped": {
+        "window_outside_recording": 2,
+        "symbol_not_mapped": 2
+      }
+    },
+    "I58": {
+      "patient": 25,
+      "beats": 2323,
+      "by_class": {
+        "N": 2311,
+        "V": 12
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I59": {
+      "patient": 26,
+      "beats": 2147,
+      "by_class": {
+        "N": 2066,
+        "V": 81
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I60": {
+      "patient": 26,
+      "beats": 2474,
+      "by_class": {
+        "N": 2474
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I61": {
+      "patient": 26,
+      "beats": 1453,
+      "by_class": {
+        "N": 1452,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I62": {
+      "patient": 27,
+      "beats": 2269,
+      "by_class": {
+        "N": 1453,
+        "S": 9,
+        "V": 795,
+        "F": 12
+      },
+      "skipped": {}
+    },
+    "I63": {
+      "patient": 27,
+      "beats": 1992,
+      "by_class": {
+        "N": 1845,
+        "V": 138,
+        "S": 1,
+        "F": 8
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I64": {
+      "patient": 27,
+      "beats": 1911,
+      "by_class": {
+        "N": 1885,
+        "V": 23,
+        "F": 3
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I65": {
+      "patient": 28,
+      "beats": 2664,
+      "by_class": {
+        "N": 2273,
+        "V": 382,
+        "S": 5,
+        "F": 4
+      },
+      "skipped": {}
+    },
+    "I66": {
+      "patient": 28,
+      "beats": 2338,
+      "by_class": {
+        "N": 2137,
+        "V": 200,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I67": {
+      "patient": 28,
+      "beats": 2974,
+      "by_class": {
+        "N": 2437,
+        "V": 531,
+        "S": 5,
+        "F": 1
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    },
+    "I68": {
+      "patient": 29,
+      "beats": 2644,
+      "by_class": {
+        "N": 2481,
+        "V": 161,
+        "S": 2
+      },
+      "skipped": {
+        "symbol_not_mapped": 1
+      }
+    },
+    "I69": {
+      "patient": 29,
+      "beats": 2168,
+      "by_class": {
+        "N": 1999,
+        "V": 167,
+        "F": 1,
+        "S": 1
+      },
+      "skipped": {
+        "window_outside_recording": 1,
+        "symbol_not_mapped": 1
+      }
+    },
+    "I70": {
+      "patient": 30,
+      "beats": 1665,
+      "by_class": {
+        "N": 1539,
+        "S": 126
+      },
+      "skipped": {
+        "symbol_not_mapped": 1,
+        "window_outside_recording": 1
+      }
+    },
+    "I71": {
+      "patient": 30,
+      "beats": 1668,
+      "by_class": {
+        "N": 1633,
+        "S": 35
+      },
+      "skipped": {
+        "symbol_not_mapped": 7,
+        "window_outside_recording": 2
+      }
+    },
+    "I72": {
+      "patient": 31,
+      "beats": 2268,
+      "by_class": {
+        "N": 1874,
+        "V": 386,
+        "S": 8
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I73": {
+      "patient": 31,
+      "beats": 1992,
+      "by_class": {
+        "N": 1890,
+        "V": 70,
+        "S": 32
+      },
+      "skipped": {}
+    },
+    "I74": {
+      "patient": 32,
+      "beats": 2403,
+      "by_class": {
+        "N": 2081,
+        "V": 274,
+        "F": 48
+      },
+      "skipped": {
+        "window_outside_recording": 2
+      }
+    },
+    "I75": {
+      "patient": 32,
+      "beats": 2102,
+      "by_class": {
+        "V": 613,
+        "N": 1482,
+        "F": 7
+      },
+      "skipped": {
+        "window_outside_recording": 1
+      }
+    }
+  },
+  "skipped": {
+    "window_outside_recording": 91,
+    "symbol_not_mapped": 51
+  },
+  "totals": {
+    "beats": 175777,
+    "recordings": 75,
+    "patients": 32,
+    "by_class": {
+      "N": 153594,
+      "V": 20006,
+      "S": 1958,
+      "F": 219
+    },
+    "median_rr_ms_fill": 731.5175097276264,
+    "rr_gaps_over_12s": 0
+  }
+}

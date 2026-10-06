@@ -22,6 +22,8 @@ import numpy as np
 import torch
 
 from perception.model import CNNLSTM, AAMI_CLASSES
+from perception.model_rr import CNNLSTMRR
+from perception.rr_features import LOCAL_WINDOW, beat_rr_features, clip_rr_s, standardize
 from perception.health_event_schema import HealthEventJSON
 
 WINDOW_LEN = 360
@@ -71,14 +73,37 @@ def estimate_qrs_duration_ms(window: np.ndarray, sample_rate_hz: int = SAMPLE_RA
 
 
 class PerceptionAgent:
+    """Wraps either encoder; which one is decided by the checkpoint's format.
+
+    - Reference CNN-LSTM (``cnn_lstm.pt``, a bare state_dict): one 1-s window in,
+      no RR input. Behaviour is unchanged by the RR integration.
+    - RR-branch CNN-LSTM (``cnn_lstm_rr_seed*.pt``, a dict carrying
+      ``rr_standardizer``): additionally takes the perception/rr_features.py
+      interval features, built here from per-record state exactly as the
+      training features are built (shared ``beat_rr_features``).
+    """
+
     def __init__(self, checkpoint_path: str | None = None, device: str | None = None):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
-        self.model = CNNLSTM().to(self.device)
-        if checkpoint_path:
-            self.model.load_state_dict(torch.load(checkpoint_path, map_location=self.device))
+        checkpoint = torch.load(checkpoint_path, map_location=self.device) if checkpoint_path else None
+        self.uses_rr = isinstance(checkpoint, dict) and "rr_standardizer" in checkpoint
+        if self.uses_rr:
+            arch = checkpoint.get("arch", "cnn_lstm_rr")  # Deviation 22: second sender architecture
+            if arch == "resnet1d_rr":
+                from perception.model_resnet_rr import ResNet1DRR
+                self.model = ResNet1DRR().to(self.device)
+            else:
+                self.model = CNNLSTMRR().to(self.device)
+            self.model.load_state_dict(checkpoint["state_dict"])
+            self._rr_stats = checkpoint["rr_standardizer"]
+        else:
+            self.model = CNNLSTM().to(self.device)
+            if checkpoint is not None:
+                self.model.load_state_dict(checkpoint)
         self.model.eval()  # dropout disabled at inference, per test_deterministic_output_at_inference
 
         self._consecutive_abnormal_beats = 0
+        self._rr_history_s: list[float] = []  # clipped pre-RRs of earlier beats in this record
         self._last_context_vector = None  # (32,) numpy array, for Arm B's adapter
 
     def get_state(self) -> dict:
@@ -92,6 +117,7 @@ class PerceptionAgent:
         label, so corpus-building/evaluation code must reset at that boundary.
         """
         self._consecutive_abnormal_beats = 0
+        self._rr_history_s = []  # the RR encoder's local average is per record too
 
     def get_last_context_vector(self) -> np.ndarray:
         """Returns the 32-dim context vector from the most recent predict()
@@ -101,7 +127,11 @@ class PerceptionAgent:
         return self._last_context_vector
 
     def predict(self, raw_segment: np.ndarray, rr_interval_ms: float | None = None,
-                event_seq: int = 0) -> dict:
+                event_seq: int = 0, next_rr_interval_ms: float | None = None) -> dict:
+        """``next_rr_interval_ms`` (the following beat's pre-RR) is used only by
+        the RR encoder, as its post-RR feature; a live agent supplies it one beat
+        late. None means no following beat in the record (post-RR := pre-RR,
+        matching training). The reference encoder ignores it."""
         if raw_segment.shape[-1] != WINDOW_LEN:
             raise ValueError(
                 f"Expected a {WINDOW_LEN}-sample window, got shape {raw_segment.shape}."
@@ -117,7 +147,10 @@ class PerceptionAgent:
 
         x = torch.from_numpy(normalized).float().reshape(1, 1, WINDOW_LEN).to(self.device)
         with torch.no_grad():
-            logits, context_vector = self.model(x)
+            if self.uses_rr:
+                logits, context_vector = self.model(x, self._rr_input(rr_interval_ms, next_rr_interval_ms))
+            else:
+                logits, context_vector = self.model(x)
             probs = torch.softmax(logits, dim=-1).squeeze(0).cpu().numpy()
 
         self._last_context_vector = context_vector.squeeze(0).cpu().numpy()
@@ -229,13 +262,27 @@ class PerceptionAgent:
         return event
 
 
+    def _rr_input(self, rr_interval_ms, next_rr_interval_ms) -> torch.Tensor:
+        if rr_interval_ms is None:
+            # The 800 ms default used for the JSON field would silently corrupt
+            # every interval feature; callers must replay chronologically with real RRs.
+            raise ValueError("The RR encoder needs rr_interval_ms (use replay_selected).")
+        pre_s = clip_rr_s(rr_interval_ms)
+        post_s = None if next_rr_interval_ms is None else clip_rr_s(next_rr_interval_ms)
+        features = beat_rr_features(pre_s, post_s, self._rr_history_s)
+        self._rr_history_s = (self._rr_history_s + [pre_s])[-LOCAL_WINDOW:]
+        features = standardize(features[None, :], self._rr_stats)
+        return torch.from_numpy(features).to(self.device)
+
+
 def replay_selected(agent: "PerceptionAgent", X, rr, record_ids, selected):
     """Chronological per-record replay that visits only the beats that can
     affect the selected events' state. Returns {idx: (health_event, context_vector)}.
 
     Equivalence argument (why this is not an approximation): the only state
-    predict() carries between calls is _consecutive_abnormal_beats, and
-    reset_state() is called at every record boundary. So the state at index i
+    predict() carries between calls is _consecutive_abnormal_beats (and, for the
+    RR encoder, the record's pre-RR history), and reset_state() clears both at
+    every record boundary. So the state at index i
     depends *only* on the beats from the start of i's own record up to i.
     Therefore:
       - records containing no selected index can be skipped entirely, and
@@ -268,7 +315,10 @@ def replay_selected(agent: "PerceptionAgent", X, rr, record_ids, selected):
     for rec in sorted(last_needed, key=lambda r: record_start[r]):
         agent.reset_state()
         for i in range(record_start[rec], last_needed[rec] + 1):
-            event = agent.predict(X[i], rr_interval_ms=float(rr[i]), event_seq=i)
+            # Post-RR for the RR encoder: the next beat's pre-RR, same record only.
+            next_rr = float(rr[i + 1]) if i + 1 < len(rr) and record_ids[i + 1] == rec else None
+            event = agent.predict(X[i], rr_interval_ms=float(rr[i]), event_seq=i,
+                                  next_rr_interval_ms=next_rr)
             if i in selected_set:
                 out[i] = (event, agent.get_last_context_vector().copy())
     return out

@@ -1,0 +1,56 @@
+{
+  "release": "r4-confirmatory",
+  "analysis_plan": "docs/confirmatory_plan.md (Deviation 21)",
+  "git_commit": "5f05742da88e36ecd51e9b03738e8e1c63a85d01",
+  "calibration_deltas": {
+    "A-compact": -3.75,
+    "A-filtered": 8.0
+  },
+  "checkpoints": {
+    "perception/checkpoints/cnn_lstm_rr_seed0.pt": "e0e953787691c522b87c0eb03829f76ab8919f04274835f77bd772cef3d8861d",
+    "reasoning/checkpoints/p1_item7_mea_r4_seed101.pt": "b3599d27ee055162afb95928c859a40d93c96809e36719b2e8783479d055f244",
+    "reasoning/checkpoints/p1_item7_mea_r4_seed202.pt": "2175ff86dab8e5a832a5841f424ab0157ba927aac853e9395be75bd3db03811f",
+    "reasoning/checkpoints/p1_item7_mea_r4_seed303.pt": "b1204b79e619c920404d4ad9226ed5042eb61a91a1b831a6519798a2b6e805ed"
+  },
+  "code": {
+    "incart_prep.py": "9f67ce0c017403dc049520fcf8d430d54e8353a8ad4e923a5df30762affbfa4b",
+    "data_prep.py": "5cca1c63487ff421a1b9b08e3187ccb939937d86a57e65825d2604c79fe221c7",
+    "p1_incart_windows.py": "22bc165e0b387ab833e0e1690cc8f3c70f863f3fdbb028af62cbdf252d90fece",
+    "p1_confirmatory_analysis.py": "bdaaff346a3a0d2a3fd720a8d603c9d6bce9b43c7cc980fc3314151b9fec51f3",
+    "p1_item7_eval.py": "a7703b79f804d0194ba0c10472790f10430ae914d8ab19178069c71eb5543411",
+    "p1_item7_filtered.py": "a921859e06d7a09784af6497272ca88e0865d6f44fc0a8759538071e3e760acb",
+    "p1_item7_common.py": "699a6dcf1cce39883d729211961901636887579b2c35bd5f5561a4c5ea1461d5",
+    "p1_item7_testset_v2.py": "982d9c5324a1da07574ffd8b4d38be52ce83af3d03b56cede4aaf321f0d5fa67",
+    "p1_pilot2_stratified.py": "782ae29963460af4d6bdcee1e6dabbe5a091d47aec07b78a0e57243af652b32b",
+    "p1_pilot_multi_event.py": "9f356e50cde7cad22f237aad04cebf57979b72ef901f7ffda0c9d29fe020a05f",
+    "p1_item7_tier1.py": "5e12b76553e06f7a219bc3781ec00bc5b72767bb1c614bfcaa7cc760679e725e",
+    "p1_item7_calib.py": "f6784ba7fa6a705c06e4d151960ab9dd350043f961258abac7b8188b66384722",
+    "p1_item7_ttd.py": "2bae66037b65f3091f6bde62e8be928e2acae2f158bbb78d5d9d4010336020f8",
+    "p1_io.py": "e2601f8e807fb8f0dbfa947060d277aefa44b6ab8e94c3b9aae621cbb74ec76e",
+    "perception/perception_agent.py": "406cf329004bcb85b1f54f78e8ffc1c07235874478a5324be70c874baabf593d",
+    "perception/model_rr.py": "ed2d7c1612dc8ff98edb071beeb5c8e30dec8f800d7cfc25aba41bbf34f071fc",
+    "perception/model.py": "8a904ef364e01c64b34e9d91a822ac7a741d5dbcef7c5c2cdc37dcc2ab1a3d79",
+    "perception/rr_features.py": "62b2659ecee0c4382256d5f1ae0530256b86c01b530ecbdc4a206bc1e0f763b0",
+    "reasoning/constrained_json.py": "bc9920bc396c577053f5173d16ed857ea05d4d10a8c2cfd40f21f18446f392f5",
+    "reasoning/multi_event_adapter.py": "686ae7b726e8085b2359b89b4d89a43ec174e0f3d5ff2f9a4b912658781be3b4",
+    "reasoning/virtual_adapter.py": "4f16637faf5b92eb95b28fb201372ae3b1caa8f1fc4b3a4f3f86a31418b934ee",
+    "reasoning/prompt_template.py": "da6faed8ef19a9ee7d27acad7b04dd807101e5447263aacaf7550f2c007fe36e",
+    "reasoning/prompt_template_family.py": "d6342983e6fa8f17e537304e3776a45098d3aa7ef76ebf77f5bbf633ec454ae2",
+    "reasoning/fixed_context_neutral.py": "4048dd4cc9751647b226f1bf849caa952c95add8403266adbdd31618accb1900",
+    "reasoning/training_targets.py": "90b30d74d00a1b3ace2943c96d895f537ea72bcf25d75043dea26739e603f6cd",
+    "reasoning/output_schema.py": "a8d055e648f75f817ad6fcad1a576acfe73ff0f2d2d2943399ba72022818acb8",
+    "reasoning/model_loader.py": "eaeeb69dabd5769e9d81603cc2fcf991de605d330445bc9c48899b0ffa26ce4f",
+    "docs/confirmatory_plan.md": "4661eefbe7b5bbbb5154d3fac947236569c8be86daf8eb12194010d4e4d90f20"
+  },
+  "versions": {
+    "torch": "2.11.0+cu128",
+    "transformers": "5.14.1",
+    "gpu": "NVIDIA GeForce RTX 5070"
+  },
+  "decoding": {
+    "max_new_tokens": 128,
+    "field_cap": 40,
+    "greedy": true
+  },
+  "manifest_sha256": "5ac078dbb187a14b4b4b07f76564ab9ea4b2548e6777ad0443872dd511d31bb4"
+}

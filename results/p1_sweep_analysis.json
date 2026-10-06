@@ -1,0 +1,507 @@
+{
+  "design": "Deviation 24 analysis: compression sweep, k virtual tokens per event (1, 2, 4, 8), seed 101. CPU.\n\nInputs: results/p1_item7_eval_ds2v2_sweep.json (k = 1, 2, 8), results/p1_item7_eval_ds2v2_r4.json (k = 4 =\nr4 seed 101, plus A-compact / A-filtered references), the reasoning/checkpoints/p1_item7_mea_r4k*_seed101.pt\nadapters and r4 seed 101 for per-slot decodability. Output: results/p1_sweep_analysis.json.\nPer k: balanced accuracy by N, parse rate, false alarms, prompt tokens (scaffold + kN, from the MEA token\ncount at k = 4), and decodability at slots 0 and 49 of label, tier, run >= 3 (balanced accuracy) and heart\nrate, RR (R^2). The r4 seed spread at k = 4 is reported as the noise band. Descriptive (no tests).\n\nRun (from repo root):\n    python p1_sweep_analysis.py\n",
+  "by_k": {
+    "1": {
+      "balanced_accuracy": {
+        "1": 0.7763157894736842,
+        "5": 0.8149515738498789,
+        "10": 0.8527628032345014,
+        "20": 0.855431508063087,
+        "50": 0.8425675675675676
+      },
+      "parse_rate": 1.0,
+      "false_alarm": 0.027139874739039668,
+      "prompt_tokens": {
+        "1": 513.0,
+        "5": 517.0,
+        "10": 523.0,
+        "20": 533.0,
+        "50": 563.0
+      },
+      "decodability": {
+        "slot0": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9973516949152542,
+              "balanced_accuracy": 0.9972657849708583
+            },
+            "mlp": {
+              "accuracy": 0.9904661016949152,
+              "balanced_accuracy": 0.9838330932649135
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9507415254237288,
+              "balanced_accuracy": 0.9092855545779505
+            },
+            "mlp": {
+              "accuracy": 0.9735169491525424,
+              "balanced_accuracy": 0.9326264086950714
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.996822033898305,
+              "balanced_accuracy": 0.9983507421660253
+            },
+            "mlp": {
+              "accuracy": 0.9957627118644068,
+              "balanced_accuracy": 0.9768864880369051
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.9692685452201801
+            },
+            "mlp": {
+              "r2": 0.8503442128562924
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9495698350353142
+            },
+            "mlp": {
+              "r2": 0.8311896462912418
+            }
+          }
+        },
+        "slot49": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9957627118644068,
+              "balanced_accuracy": 0.9960178648377468
+            },
+            "mlp": {
+              "accuracy": 0.982521186440678,
+              "balanced_accuracy": 0.9854388519134776
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9507415254237288,
+              "balanced_accuracy": 0.9092855545779505
+            },
+            "mlp": {
+              "accuracy": 0.9676906779661016,
+              "balanced_accuracy": 0.924613095843049
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.9994703389830508,
+              "balanced_accuracy": 0.9997251236943375
+            },
+            "mlp": {
+              "accuracy": 0.9947033898305084,
+              "balanced_accuracy": 0.9623937344137168
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.967906247306982
+            },
+            "mlp": {
+              "r2": 0.8793579119527084
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9474640165258081
+            },
+            "mlp": {
+              "r2": 0.8417097608706533
+            }
+          }
+        }
+      }
+    },
+    "2": {
+      "balanced_accuracy": {
+        "1": 0.7833333333333332,
+        "5": 0.8018361581920903,
+        "10": 0.8110137765798143,
+        "20": 0.8266524898103845,
+        "50": 0.7876126126126127
+      },
+      "parse_rate": 1.0,
+      "false_alarm": 0.08559498956158663,
+      "prompt_tokens": {
+        "1": 514.0,
+        "5": 522.0,
+        "10": 533.0,
+        "20": 553.0,
+        "50": 613.0
+      },
+      "decodability": {
+        "slot0": {
+          "label": {
+            "linear": {
+              "accuracy": 0.996292372881356,
+              "balanced_accuracy": 0.9964338382154506
+            },
+            "mlp": {
+              "accuracy": 0.971927966101695,
+              "balanced_accuracy": 0.952094931654118
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9523305084745762,
+              "balanced_accuracy": 0.9117255504352278
+            },
+            "mlp": {
+              "accuracy": 0.9729872881355932,
+              "balanced_accuracy": 0.9336467961170687
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.996822033898305,
+              "balanced_accuracy": 0.9983507421660253
+            },
+            "mlp": {
+              "accuracy": 0.993114406779661,
+              "balanced_accuracy": 0.9824836070145246
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.9678219493770419
+            },
+            "mlp": {
+              "r2": 0.8155117633815683
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9506996329169858
+            },
+            "mlp": {
+              "r2": 0.8414878671522429
+            }
+          }
+        },
+        "slot49": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9978813559322034,
+              "balanced_accuracy": 0.9976817583485621
+            },
+            "mlp": {
+              "accuracy": 0.9819915254237288,
+              "balanced_accuracy": 0.9804424415514156
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.951271186440678,
+              "balanced_accuracy": 0.9098231889865526
+            },
+            "mlp": {
+              "accuracy": 0.9751059322033898,
+              "balanced_accuracy": 0.9452443383597723
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.9989406779661016,
+              "balanced_accuracy": 0.999450247388675
+            },
+            "mlp": {
+              "accuracy": 0.9925847457627118,
+              "balanced_accuracy": 0.9822087307088622
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.9655338653195561
+            },
+            "mlp": {
+              "r2": 0.8233388015141285
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9502580192983932
+            },
+            "mlp": {
+              "r2": 0.8250369308591778
+            }
+          }
+        }
+      }
+    },
+    "4": {
+      "balanced_accuracy": {
+        "1": 0.797953216374269,
+        "5": 0.8035579768630616,
+        "10": 0.7909404013177598,
+        "20": 0.8022328548644339,
+        "50": 0.7828828828828828
+      },
+      "parse_rate": 1.0,
+      "false_alarm": 0.027139874739039668,
+      "prompt_tokens": {
+        "1": 516.0,
+        "5": 532.0,
+        "10": 553.0,
+        "20": 593.0,
+        "50": 713.0
+      },
+      "decodability": {
+        "slot0": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9915254237288136,
+              "balanced_accuracy": 0.9935241044384123
+            },
+            "mlp": {
+              "accuracy": 0.9676906779661016,
+              "balanced_accuracy": 0.954649459524741
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9507415254237288,
+              "balanced_accuracy": 0.9048643113159242
+            },
+            "mlp": {
+              "accuracy": 0.9623940677966102,
+              "balanced_accuracy": 0.9222895898607831
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.9957627118644068,
+              "balanced_accuracy": 0.9978009895547004
+            },
+            "mlp": {
+              "accuracy": 0.9915254237288136,
+              "balanced_accuracy": 0.932858474556015
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.9518342445284426
+            },
+            "mlp": {
+              "r2": 0.66473715841563
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9217437786292886
+            },
+            "mlp": {
+              "r2": 0.6512723007526386
+            }
+          }
+        },
+        "slot49": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9925847457627118,
+              "balanced_accuracy": 0.9935220245715238
+            },
+            "mlp": {
+              "accuracy": 0.9788135593220338,
+              "balanced_accuracy": 0.9494775477684727
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9496822033898306,
+              "balanced_accuracy": 0.9037890424987198
+            },
+            "mlp": {
+              "accuracy": 0.9645127118644068,
+              "balanced_accuracy": 0.9256491636636768
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 1.0,
+              "balanced_accuracy": 1.0
+            },
+            "mlp": {
+              "accuracy": 0.9899364406779662,
+              "balanced_accuracy": 0.9668913481686864
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.9455710789065249
+            },
+            "mlp": {
+              "r2": 0.7762829242873799
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9210739790605568
+            },
+            "mlp": {
+              "r2": 0.7681742822091393
+            }
+          }
+        }
+      }
+    },
+    "8": {
+      "balanced_accuracy": {
+        "1": 0.7543859649122807,
+        "5": 0.7679378531073446,
+        "10": 0.8001048218029351,
+        "20": 0.7835548467127413,
+        "50": 0.7959459459459458
+      },
+      "parse_rate": 1.0,
+      "false_alarm": 0.060542797494780795,
+      "prompt_tokens": {
+        "1": 520.0,
+        "5": 552.0,
+        "10": 593.0,
+        "20": 673.0,
+        "50": 913.0
+      },
+      "decodability": {
+        "slot0": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9952330508474576,
+              "balanced_accuracy": 0.995601891460043
+            },
+            "mlp": {
+              "accuracy": 0.972457627118644,
+              "balanced_accuracy": 0.9504834948238823
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9555084745762712,
+              "balanced_accuracy": 0.9164461731599971
+            },
+            "mlp": {
+              "accuracy": 0.9602754237288136,
+              "balanced_accuracy": 0.9384285433587221
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.996822033898305,
+              "balanced_accuracy": 0.9983507421660253
+            },
+            "mlp": {
+              "accuracy": 0.9947033898305084,
+              "balanced_accuracy": 0.983308235931512
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.9533168170816698
+            },
+            "mlp": {
+              "r2": -0.6159599970689034
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9283582915283499
+            },
+            "mlp": {
+              "r2": -0.22566129297041915
+            }
+          }
+        },
+        "slot49": {
+          "label": {
+            "linear": {
+              "accuracy": 0.9957627118644068,
+              "balanced_accuracy": 0.9960178648377468
+            },
+            "mlp": {
+              "accuracy": 0.9745762711864406,
+              "balanced_accuracy": 0.9702248741342271
+            }
+          },
+          "tier": {
+            "linear": {
+              "accuracy": 0.9565677966101694,
+              "balanced_accuracy": 0.918125960061444
+            },
+            "mlp": {
+              "accuracy": 0.9597457627118644,
+              "balanced_accuracy": 0.91075893129372
+            }
+          },
+          "run3": {
+            "linear": {
+              "accuracy": 0.996822033898305,
+              "balanced_accuracy": 0.9983507421660253
+            },
+            "mlp": {
+              "accuracy": 0.9867584745762712,
+              "balanced_accuracy": 0.9373560883109847
+            }
+          },
+          "heart_rate": {
+            "linear": {
+              "r2": 0.947900074875384
+            },
+            "mlp": {
+              "r2": 0.5915770840974798
+            }
+          },
+          "rr": {
+            "linear": {
+              "r2": 0.9222836705414903
+            },
+            "mlp": {
+              "r2": 0.6024416379501644
+            }
+          }
+        }
+      }
+    }
+  },
+  "references": {
+    "A-compact": {
+      "1": 0.9722222222222222,
+      "5": 0.7298224374495561,
+      "10": 0.5553683737646002,
+      "20": 0.48148148148148145,
+      "50": 0.5421171171171171
+    },
+    "A-filtered": {
+      "1": 0.9663742690058479,
+      "5": 0.9880952380952381,
+      "10": 0.9821428571428571,
+      "20": 0.9454545454545454,
+      "50": 0.9416666666666668
+    }
+  },
+  "r4_seed_band": {
+    "1": [
+      0.797953216374269,
+      0.80906432748538
+    ],
+    "5": [
+      0.8035579768630616,
+      0.8309927360774818
+    ],
+    "10": [
+      0.7909404013177598,
+      0.8856768493560946
+    ],
+    "20": [
+      0.8022328548644339,
+      0.8581251107566897
+    ],
+    "50": [
+      0.7828828828828828,
+      0.870945945945946
+    ]
+  }
+}

@@ -1,0 +1,2471 @@
+{
+  "armA.accuracy.n80": {
+    "value": 100.0,
+    "unit": "%",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "armB.accuracy.n80": {
+    "value": 95.0,
+    "unit": "%",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "armA.tokens.mean.n80": {
+    "value": 645.2,
+    "unit": "tok",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "armB.tokens.mean.n80": {
+    "value": 486.0,
+    "unit": "tok",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "tokens.reduction.n80": {
+    "value": 24.7,
+    "unit": "%",
+    "derived_from": [
+      "armA.tokens.mean.n80",
+      "armB.tokens.mean.n80"
+    ]
+  },
+  "armA.gen_ms.mean.n80": {
+    "value": 9892.2,
+    "unit": "ms",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "armB.gen_ms.mean.n80": {
+    "value": 8573.7,
+    "unit": "ms",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "latency.reduction.n80": {
+    "value": 13.3,
+    "unit": "%",
+    "derived_from": [
+      "armA.gen_ms.mean.n80",
+      "armB.gen_ms.mean.n80"
+    ]
+  },
+  "armA.vram.mean.n80": {
+    "value": 9256.1,
+    "unit": "MB",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "armB.vram.mean.n80": {
+    "value": 9230.2,
+    "unit": "MB",
+    "source": "day6_run_comparison.py",
+    "run": "2026-08-09",
+    "n": 80
+  },
+  "audit.armB.headline": {
+    "value": 67.6,
+    "sd": 12.5,
+    "unit": "%",
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-23",
+    "method": "5-fold x 3 repeat CV, PCA-30 (random_state=42), scaled; value is the mean over 10 PCA seeds",
+    "note": "Seed-swept central estimate over 10 PCA seeds (sd 0.28 pp, range 67.1-67.9%). Supersedes the previously recorded 67.9%, which was a single draw from an UNSEEDED PCA: at 64x10240 sklearn selects the randomized SVD solver, so the figure was not reproducible (re-running the unmodified script gave 67.5%). PCA now carries random_state=42, making any single run reproducible; the quoted headline is the sweep mean, not one seed. Only this probe moved -- no-PCA, RBF, context-32d, the out-of-fold confusion matrix, per-class recalls and the attribution Wilcoxon p are all bit-identical to before."
+  },
+  "audit.context32d": {
+    "value": 69.6,
+    "sd": 9.9,
+    "unit": "%",
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-09"
+  },
+  "audit.armB.headline.sd": {
+    "value": 12.5,
+    "unit": "pp",
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-23",
+    "derived_from": "audit.armB.headline (sd field)",
+    "note": "Fold-level sd across the 15 CV folds at the default PCA seed -- NOT the PCA-seed sd (see audit.armB.headline.pca_seed_sd)."
+  },
+  "audit.context32d.sd": {
+    "value": 9.9,
+    "unit": "pp",
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-09",
+    "derived_from": "audit.context32d (sd field)"
+  },
+  "audit.attribution.wilcoxon_p": {
+    "value": 0.53,
+    "format": ".3f",
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-09"
+  },
+  "e0.mcnemar.p_onesided": {
+    "value": 0.0625,
+    "format": ".4f",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80
+  },
+  "e0.wilcoxon.tokens.p": {
+    "value": 5.722602253452675e-15,
+    "format": ".2e",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80
+  },
+  "e0.wilcoxon.gen_ms.p": {
+    "value": 4.637683588120806e-12,
+    "format": ".2e",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80
+  },
+  "e0.armA.accuracy.ci_exact95.lower": {
+    "value": 96.3,
+    "unit": "%",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80,
+    "method": "Clopper-Pearson one-sided 95% lower bound (two-sided degenerates: Arm A is at the 100% ceiling, so only the lower bound is informative)"
+  },
+  "e0.armA.accuracy.ci_exact95.upper": {
+    "value": 100.0,
+    "unit": "%",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80,
+    "method": "trivial ceiling (80/80 correct), not a fitted bound"
+  },
+  "e0.armB.accuracy.ci_wilson95.lower": {
+    "value": 87.8,
+    "unit": "%",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80
+  },
+  "e0.armB.accuracy.ci_wilson95.upper": {
+    "value": 98.0,
+    "unit": "%",
+    "source": "e0_statistics.py",
+    "run": "2026-08-16",
+    "n": 80
+  },
+  "perception.accuracy.ds2.overall": {
+    "value": 85.4,
+    "unit": "%",
+    "source": "perception_eval.py",
+    "checkpoint": "perception/checkpoints/cnn_lstm.pt",
+    "run": "2026-08-09",
+    "n": 49680,
+    "note": "deterministic full-DS2 eval of the ONE frozen checkpoint shared by both arms -- not a best-of-3 selection. The 84.9/80.1/85.4 range in edge_health_agent_kb.md describes variance across 3 separate TRAINING runs (different checkpoints); this figure is a single eval of the specific checkpoint actually in use, which happens to numerically coincide with that range's upper end. Report this checkpoint-specific number, not the training-time range. Also distinct from the Arm A/B urgency-tier accuracy (armA/B.accuracy.n80), which is scored on the 80-event subset against the reference tier, not the AAMI class."
+  },
+  "perception.accuracy.ds2.N": {
+    "value": 89.9,
+    "unit": "%",
+    "source": "perception_eval.py",
+    "run": "2026-08-09"
+  },
+  "perception.accuracy.ds2.S": {
+    "value": 8.2,
+    "unit": "%",
+    "source": "perception_eval.py",
+    "run": "2026-08-09"
+  },
+  "perception.accuracy.ds2.s_recall_full": {
+    "value": 8.2,
+    "unit": "%",
+    "source": "perception_eval.py",
+    "run": "2026-08-09",
+    "n": "full DS2 S-class population",
+    "note": "same figure as perception.accuracy.ds2.S, re-keyed for explicit contrast with s_recall_matched20 below"
+  },
+  "perception.accuracy.ds2.s_recall_matched20": {
+    "value": 30.0,
+    "unit": "%",
+    "source": "s_class_matched_check.py",
+    "run": "2026-08-09",
+    "n": 20,
+    "ci95": [
+      14.5,
+      51.9
+    ],
+    "note": "same figure as s_class.classifier_recall_matched; ci95 is documentation only (a list isn't independently {{...}}-renderable) -- use the .ci95.lower/.ci95.upper keys below in prose"
+  },
+  "perception.accuracy.ds2.s_recall_matched20.ci95.lower": {
+    "value": 14.5,
+    "unit": "%",
+    "source": "s_class_matched_check.py",
+    "run": "2026-08-09",
+    "n": 20
+  },
+  "perception.accuracy.ds2.s_recall_matched20.ci95.upper": {
+    "value": 51.9,
+    "unit": "%",
+    "source": "s_class_matched_check.py",
+    "run": "2026-08-09",
+    "n": 20
+  },
+  "perception.accuracy.ds2.V": {
+    "value": 77.2,
+    "unit": "%",
+    "source": "perception_eval.py",
+    "run": "2026-08-09"
+  },
+  "perception.accuracy.ds2.F": {
+    "value": 0.3,
+    "unit": "%",
+    "source": "perception_eval.py",
+    "run": "2026-08-09"
+  },
+  "armA.accuracy.n60": {
+    "value": 100.0,
+    "unit": "%",
+    "n": 60,
+    "source": "day6_run_comparison.py (60-event run)",
+    "note": "produced by an earlier invocation at PER_CLASS=15, predating this sprint; the script has since been re-run at PER_CLASS=20 and overwrote day6_results.json, so this raw 60-event output is no longer on disk -- documented in edge_health_agent_kb.md §2.19, not re-derivable from the current checkout"
+  },
+  "armB.accuracy.n60": {
+    "value": 95.0,
+    "unit": "%",
+    "n": 60,
+    "source": "day6_run_comparison.py (60-event run)",
+    "note": "see armA.accuracy.n60 note on provenance"
+  },
+  "armA.tokens.mean.n60": {
+    "value": 644.1,
+    "unit": "tok",
+    "n": 60,
+    "source": "day6_run_comparison.py (60-event run)",
+    "note": "see armA.accuracy.n60 note on provenance"
+  },
+  "armB.tokens.mean.n60": {
+    "value": 486.0,
+    "unit": "tok",
+    "n": 60,
+    "source": "day6_run_comparison.py (60-event run)",
+    "note": "see armA.accuracy.n60 note on provenance"
+  },
+  "tokens.reduction.n60": {
+    "value": 24.5,
+    "unit": "%",
+    "derived_from": [
+      "armA.tokens.mean.n60",
+      "armB.tokens.mean.n60"
+    ]
+  },
+  "armA.gen_ms.mean.n60": {
+    "value": 10356.4,
+    "unit": "ms",
+    "source": "edge_health_agent_kb.md §2.19",
+    "note": "see armA.accuracy.n60 note on provenance"
+  },
+  "armB.gen_ms.mean.n60": {
+    "value": 8920.8,
+    "unit": "ms",
+    "source": "edge_health_agent_kb.md §2.19",
+    "note": "see armA.accuracy.n60 note on provenance"
+  },
+  "latency.reduction.n60": {
+    "value": 13.9,
+    "unit": "%",
+    "derived_from": [
+      "armA.gen_ms.mean.n60",
+      "armB.gen_ms.mean.n60"
+    ]
+  },
+  "s_class.classifier_recall_matched": {
+    "value": 30.0,
+    "unit": "%",
+    "n": 20,
+    "correct": 6,
+    "source": "s_class_matched_check.py",
+    "run": "2026-08-09"
+  },
+  "s_class.classifier_recall_matched.ci_wilson95.lower": {
+    "value": 14.5,
+    "unit": "%",
+    "source": "s_class_matched_check.py",
+    "run": "2026-08-09",
+    "n": 20
+  },
+  "s_class.classifier_recall_matched.ci_wilson95.upper": {
+    "value": 51.9,
+    "unit": "%",
+    "source": "s_class_matched_check.py",
+    "run": "2026-08-09",
+    "n": 20
+  },
+  "s_class.probe_recall_matched": {
+    "value": 60.0,
+    "unit": "%",
+    "n": 20,
+    "correct": 12,
+    "source": "day7_auditability_results_v2.json",
+    "run": "2026-08-09"
+  },
+  "s_class.probe_recall_matched.ci_wilson95.lower": {
+    "value": 38.7,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json",
+    "run": "2026-08-09",
+    "n": 20
+  },
+  "s_class.probe_recall_matched.ci_wilson95.upper": {
+    "value": 78.1,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json",
+    "run": "2026-08-09",
+    "n": 20
+  },
+  "e1.k4.accuracy": {
+    "value": 95.0,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "k=4 point reuses the existing headline checkpoint, not retrained -- same data as armB.*.n80"
+  },
+  "e1.k4.tokens_mean": {
+    "value": 486.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "k=4 point reuses the existing headline checkpoint, not retrained -- same data as armB.*.n80"
+  },
+  "e1.k4.gen_ms_mean": {
+    "value": 8573.7,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "k=4 point reuses the existing headline checkpoint, not retrained -- same data as armB.*.n80"
+  },
+  "e1.k4.vram_mean": {
+    "value": 9230.2,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "k=4 point reuses the existing headline checkpoint, not retrained -- same data as armB.*.n80"
+  },
+  "e1.k1.accuracy": {
+    "value": 72.5,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k1.pt"
+  },
+  "e1.k1.tokens_mean": {
+    "value": 483.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k1.pt"
+  },
+  "e1.k1.gen_ms_mean": {
+    "value": 9367.6,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k1.pt"
+  },
+  "e1.k1.vram_mean": {
+    "value": 9228.7,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k1.pt"
+  },
+  "e1.k2.accuracy": {
+    "value": 85.0,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k2.pt"
+  },
+  "e1.k2.tokens_mean": {
+    "value": 484.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k2.pt"
+  },
+  "e1.k2.gen_ms_mean": {
+    "value": 9048.6,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k2.pt"
+  },
+  "e1.k2.vram_mean": {
+    "value": 9230.9,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k2.pt"
+  },
+  "e1.k8.accuracy": {
+    "value": 80.0,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k8.pt"
+  },
+  "e1.k8.tokens_mean": {
+    "value": 490.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k8.pt"
+  },
+  "e1.k8.gen_ms_mean": {
+    "value": 10271.0,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k8.pt"
+  },
+  "e1.k8.vram_mean": {
+    "value": 9234.3,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 4,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e1_k8.pt"
+  },
+  "e2.seed_existing.accuracy": {
+    "value": 95.0,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "pre-dates explicit seed control (unrecorded init); same data as armB.*.n80"
+  },
+  "e2.seed_existing.tokens_mean": {
+    "value": 486.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "pre-dates explicit seed control (unrecorded init); same data as armB.*.n80"
+  },
+  "e2.seed_existing.gen_ms_mean": {
+    "value": 8573.7,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "pre-dates explicit seed control (unrecorded init); same data as armB.*.n80"
+  },
+  "e2.seed_existing.vram_mean": {
+    "value": 9230.2,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 0,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_day5_larger.pt",
+    "note": "pre-dates explicit seed control (unrecorded init); same data as armB.*.n80"
+  },
+  "e2.seed_101.accuracy": {
+    "value": 81.2,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 2,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed101.pt"
+  },
+  "e2.seed_101.tokens_mean": {
+    "value": 486.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 2,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed101.pt"
+  },
+  "e2.seed_101.gen_ms_mean": {
+    "value": 7567.7,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 2,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed101.pt"
+  },
+  "e2.seed_101.vram_mean": {
+    "value": 9231.5,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 2,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed101.pt"
+  },
+  "e2.seed_202.accuracy": {
+    "value": 78.8,
+    "unit": "%",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed202.pt"
+  },
+  "e2.seed_202.tokens_mean": {
+    "value": 486.0,
+    "unit": "tok",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed202.pt"
+  },
+  "e2.seed_202.gen_ms_mean": {
+    "value": 8156.1,
+    "unit": "ms",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed202.pt"
+  },
+  "e2.seed_202.vram_mean": {
+    "value": 9236.9,
+    "unit": "MB",
+    "n": 80,
+    "n_failed": 0,
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "checkpoint": "reasoning\\checkpoints\\virtual_adapter_e2_seed202.pt"
+  },
+  "e2.aggregate.accuracy_mean": {
+    "value": 85.0,
+    "unit": "%",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n_seeds": 3
+  },
+  "e2.aggregate.accuracy_std": {
+    "value": 8.7,
+    "unit": "pp",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n_seeds": 3
+  },
+  "e2.aggregate.tokens_mean": {
+    "value": 486.0,
+    "unit": "tok",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n_seeds": 3
+  },
+  "e2.aggregate.tokens_std": {
+    "value": 0.0,
+    "unit": "tok",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n_seeds": 3
+  },
+  "e2.aggregate.gen_ms_mean": {
+    "value": 8099.2,
+    "unit": "ms",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n_seeds": 3
+  },
+  "e2.aggregate.gen_ms_std": {
+    "value": 505.4,
+    "unit": "ms",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n_seeds": 3
+  },
+  "e1.seeded_ablation.seed": {
+    "value": 101,
+    "format": "d",
+    "source": "e1_ablation.py --seed 101 + e2_seed_variance.py",
+    "note": "shared training seed across all four k values in this specific curve. SCOPE OF CLAIM: controls ONE confound (uncontrolled initialization across k); does NOT give multiple seeds per k, so it cannot separate a genuine k-effect from seed-101-specific luck. E2 measured pure seed noise at fixed k=4 as std 8.7pp (ddof=1) / range 16.2pp -- same order as E1 adjacent-k deltas. Supportable claim: 'directionally consistent under a matched-seed check'. NOT 'accuracy depends on k'. Cite only in Results 4.6 / Discussion; never as headline accuracy."
+  },
+  "e1.seeded_ablation.k1": {
+    "accuracy": 73.8,
+    "failed": 0,
+    "tokens": 483.0,
+    "gen_ms": 14534.0,
+    "source": "e1_ablation.py --seed 101",
+    "run": "2026-08-11"
+  },
+  "e1.seeded_ablation.k2": {
+    "accuracy": 63.7,
+    "failed": 0,
+    "tokens": 484.0,
+    "gen_ms": 7320.6,
+    "source": "e1_ablation.py --seed 101",
+    "run": "2026-08-11"
+  },
+  "e1.seeded_ablation.k8": {
+    "accuracy": 63.7,
+    "failed": 0,
+    "tokens": 490.0,
+    "gen_ms": 7410.6,
+    "source": "e1_ablation.py --seed 101",
+    "run": "2026-08-11"
+  },
+  "e1.seeded_ablation.k4": {
+    "accuracy": 81.2,
+    "failed": 2,
+    "tokens": 486.0,
+    "gen_ms": 7567.7,
+    "source": "e2_seed_variance.py (seed=101 run, k=4)",
+    "note": "reused from E2 seed=101, NOT the headline checkpoint. Do NOT confuse with armB.accuracy.n80 (95.0%) or e1.k4.accuracy (95.0%) -- those are the uncontrolled-seed headline that E0/auditability/norm-check are all anchored to, and it does not move. This 81.2% belongs ONLY to the matched-seed curve in 4.6."
+  },
+  "norm_check.real_vocab.mean": {
+    "value": 1.2064,
+    "unit": "",
+    "format": ".4f",
+    "n": 262144,
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11",
+    "note": "L2 norm of Gemma 4 E4B input embedding rows (full vocab)"
+  },
+  "norm_check.real_vocab.std": {
+    "value": 0.0835,
+    "unit": "",
+    "format": ".4f",
+    "n": 262144,
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11"
+  },
+  "norm_check.virtual_init.mean": {
+    "value": 0.8994,
+    "unit": "",
+    "format": ".4f",
+    "n": 320,
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11",
+    "note": "untrained VirtualTokenAdapter (fresh nn.init.normal_ scheme) on the 80 held-out context vectors, 4 tokens each = 320"
+  },
+  "norm_check.virtual_init.std": {
+    "value": 0.0432,
+    "unit": "",
+    "format": ".4f",
+    "n": 320,
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11"
+  },
+  "norm_check.virtual_trained.mean": {
+    "value": 27.8038,
+    "unit": "",
+    "format": ".4f",
+    "n": 320,
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11",
+    "note": "trained adapter (headline checkpoint) on the same 320 positions"
+  },
+  "norm_check.virtual_trained.std": {
+    "value": 6.5944,
+    "unit": "",
+    "format": ".4f",
+    "n": 320,
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11"
+  },
+  "norm_check.trained_vs_real_vocab.ratio": {
+    "value": 23.0,
+    "unit": "x",
+    "format": ".1f",
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11",
+    "derived_from": [
+      "norm_check.virtual_trained.mean",
+      "norm_check.real_vocab.mean"
+    ]
+  },
+  "norm_check.trained_vs_init.ratio": {
+    "value": 30.9,
+    "unit": "x",
+    "format": ".1f",
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11",
+    "derived_from": [
+      "norm_check.virtual_trained.mean",
+      "norm_check.virtual_init.mean"
+    ]
+  },
+  "norm_check.real_vocab.n": {
+    "value": 262144,
+    "format": "d",
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11"
+  },
+  "norm_check.virtual_init.n": {
+    "value": 320,
+    "format": "d",
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11"
+  },
+  "norm_check.virtual_trained.n": {
+    "value": 320,
+    "format": "d",
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11"
+  },
+  "audit.confusion.true_N.pred_N": {
+    "value": 13,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_N.pred_S": {
+    "value": 6,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_N.pred_V": {
+    "value": 0,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_N.pred_F": {
+    "value": 1,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_S.pred_N": {
+    "value": 4,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_S.pred_S": {
+    "value": 12,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_S.pred_V": {
+    "value": 0,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_S.pred_F": {
+    "value": 4,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_V.pred_N": {
+    "value": 0,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_V.pred_S": {
+    "value": 0,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_V.pred_V": {
+    "value": 18,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_V.pred_F": {
+    "value": 2,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_F.pred_N": {
+    "value": 1,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_F.pred_S": {
+    "value": 3,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_F.pred_V": {
+    "value": 4,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.confusion.true_F.pred_F": {
+    "value": 12,
+    "format": "d",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.N.precision": {
+    "value": 72.2,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.N.recall": {
+    "value": 65.0,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.N.f1": {
+    "value": 68.4,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.S.precision": {
+    "value": 57.1,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.S.recall": {
+    "value": 60.0,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20,
+    "note": "Draw-dependent, and optimistic. Correct as reported for the headline 80-event selection, but that selection's S quarter comes from only 7 of the 16 S-containing DS2 records (up to 5 events each), and three of those records contribute a single event apiece that the probe recovers perfectly. Re-drawing the S quarter stratified across all 16 records (max 2/record, N/V/F quarters untouched, identical protocol) gives 45.0% -- see audit.s_redraw.per_class.S.recall. Report the 60.0% figure with this caveat rather than as a stable property of the representation."
+  },
+  "audit.per_class.S.f1": {
+    "value": 58.5,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.V.precision": {
+    "value": 81.8,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.V.recall": {
+    "value": 90.0,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.V.f1": {
+    "value": 85.7,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.F.precision": {
+    "value": 63.2,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.F.recall": {
+    "value": 60.0,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.per_class.F.f1": {
+    "value": 61.5,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 20
+  },
+  "audit.pooled_oof_accuracy": {
+    "value": 68.8,
+    "unit": "%",
+    "source": "day7_auditability_results_v2.json (derived: confusion_matrix/precision_recall_fscore_support on headline_oof_predictions vs true_classes, no new experiment)",
+    "run": "2026-08-10",
+    "n": 80,
+    "note": "accuracy of the POOLED 80 out-of-fold predictions, a different statistic from audit.armB.headline (mean of 15 individual fold accuracies) -- the two differ slightly (this vs headline) because fold sizes are unequal; both are legitimate summaries of the same CV run, not a discrepancy."
+  },
+  "e1.k4.n_failed": {
+    "value": 0,
+    "format": "d",
+    "n": 80,
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-10"
+  },
+  "e1.k1.n_failed": {
+    "value": 0,
+    "format": "d",
+    "n": 80,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10"
+  },
+  "e1.k2.n_failed": {
+    "value": 4,
+    "format": "d",
+    "n": 80,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10"
+  },
+  "e1.k8.n_failed": {
+    "value": 4,
+    "format": "d",
+    "n": 80,
+    "source": "e1_ablation.py",
+    "run": "2026-08-10"
+  },
+  "e1.k1.vs.k2.unseeded_gap": {
+    "value": 12.5,
+    "unit": "pp",
+    "derived_from": [
+      "e1.k1.accuracy",
+      "e1.k2.accuracy"
+    ],
+    "note": "k2 (85.0%) minus k1 (72.5%) in the uncontrolled-initialisation sweep, cited in §4.6 to quantify the k1/k2 ranking flip against the matched-seed curve"
+  },
+  "norm_check.comparison.init_vs_trained_wilcoxon": {
+    "value": 0.0,
+    "format": ".2e",
+    "statistic": 0.0,
+    "n": 320,
+    "interpretation": "drift is statistically supported",
+    "source": "day3_norm_check.py",
+    "run": "2026-08-11",
+    "note": "paired Wilcoxon signed-rank, virtual_init vs virtual_trained, n=320 matched positions (80 held-out events x 4 virtual tokens). p_value=0.0 is scipy's exact float output at this n given the effect size, not a rounded display value -- report as p < 1e-4 in prose rather than the literal 0.0."
+  },
+  "s_class.classifier_recall_n63": {
+    "value": 23.8,
+    "unit": "%",
+    "n": 63,
+    "correct": 15,
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "note": "expands the original class-matched N=20 check (s_class.classifier_recall_matched, 30.0%) with 43 additional S-class DS2 events; kept as a separate key rather than overwriting the N=20 entry -- both are cited in the Results prose."
+  },
+  "s_class.classifier_recall_n63.ci_wilson95.lower": {
+    "value": 15.0,
+    "unit": "%",
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "n": 63
+  },
+  "s_class.classifier_recall_n63.ci_wilson95.upper": {
+    "value": 35.6,
+    "unit": "%",
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "n": 63
+  },
+  "s_class.probe_recall_n63": {
+    "value": 34.9,
+    "unit": "%",
+    "n": 63,
+    "correct": 22,
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "note": "combines the original 20's existing CV out-of-fold predictions with 43 new predictions from a single probe fit once on the original 80-event set -- two distinct held-out mechanisms, see script docstring. Expands s_class.probe_recall_matched (N=20, 60.0%)."
+  },
+  "s_class.probe_recall_n63.ci_wilson95.lower": {
+    "value": 24.3,
+    "unit": "%",
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "n": 63
+  },
+  "s_class.probe_recall_n63.ci_wilson95.upper": {
+    "value": 47.2,
+    "unit": "%",
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "n": 63
+  },
+  "s_class.n63.cis_overlap": {
+    "value": "True",
+    "source": "s_class_expanded_check.py",
+    "run": "2026-08-11",
+    "note": "whether the classifier and probe Wilson 95% CIs overlap at N=63 (also true at N=20)"
+  },
+  "s_class.per_record.original20.classifier_mean": {
+    "value": 17.1,
+    "unit": "%",
+    "source": "check_s_class_per_record.py",
+    "run": "2026-08-11",
+    "n_records": 7,
+    "note": "Unweighted mean of per-record classifier accuracy across the 7 records containing the original 20 S-class events -- a different statistic from the pooled s_class.classifier_recall_matched (30.0%, N=20 events). Each record counted once regardless of its own n (1-5)."
+  },
+  "s_class.per_record.original20.probe_mean": {
+    "value": 68.6,
+    "unit": "%",
+    "source": "check_s_class_per_record.py",
+    "run": "2026-08-11",
+    "n_records": 7,
+    "note": "Unweighted mean of per-record probe accuracy across the same 7 records. Four (113, 117, 121, 202) show 100%; only 113 has n=5, the other three are n=1 single-event records -- not equally stable evidence."
+  },
+  "s_class.per_record.new43.classifier_mean": {
+    "value": 19.0,
+    "unit": "%",
+    "source": "check_s_class_per_record.py",
+    "run": "2026-08-11",
+    "n_records": 10
+  },
+  "s_class.per_record.new43.probe_mean": {
+    "value": 24.5,
+    "unit": "%",
+    "source": "check_s_class_per_record.py",
+    "run": "2026-08-11",
+    "n_records": 10,
+    "note": "Four (219, 231, 233, 234) show 0%; three of four (219, 233, 234) have n=5 -- this low end is more solidly established than the 100% end above."
+  },
+  "audit.armB.confusion.true_N": {
+    "pred_N": 13,
+    "pred_S": 6,
+    "pred_V": 0,
+    "pred_F": 1,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "From headline_oof_predictions vs true_classes, a single stratified-CV pass distinct from the repeated (5-fold x3-repeat) CV that produces the headline 67.9% mean accuracy (audit.armB.headline) -- single-pass overall accuracy on this pass is 68.8%, consistent with but not identical to the headline figure, since they are different CV runs of the same probe. Computed via sklearn.metrics.confusion_matrix, not present pre-computed in the results file."
+  },
+  "audit.armB.confusion.true_S": {
+    "pred_N": 4,
+    "pred_S": 12,
+    "pred_V": 0,
+    "pred_F": 4,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "From headline_oof_predictions vs true_classes, a single stratified-CV pass distinct from the repeated (5-fold x3-repeat) CV that produces the headline 67.9% mean accuracy (audit.armB.headline) -- single-pass overall accuracy on this pass is 68.8%, consistent with but not identical to the headline figure, since they are different CV runs of the same probe. Computed via sklearn.metrics.confusion_matrix, not present pre-computed in the results file."
+  },
+  "audit.armB.confusion.true_V": {
+    "pred_N": 0,
+    "pred_S": 0,
+    "pred_V": 18,
+    "pred_F": 2,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "From headline_oof_predictions vs true_classes, a single stratified-CV pass distinct from the repeated (5-fold x3-repeat) CV that produces the headline 67.9% mean accuracy (audit.armB.headline) -- single-pass overall accuracy on this pass is 68.8%, consistent with but not identical to the headline figure, since they are different CV runs of the same probe. Computed via sklearn.metrics.confusion_matrix, not present pre-computed in the results file."
+  },
+  "audit.armB.confusion.true_F": {
+    "pred_N": 1,
+    "pred_S": 3,
+    "pred_V": 4,
+    "pred_F": 12,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "From headline_oof_predictions vs true_classes, a single stratified-CV pass distinct from the repeated (5-fold x3-repeat) CV that produces the headline 67.9% mean accuracy (audit.armB.headline) -- single-pass overall accuracy on this pass is 68.8%, consistent with but not identical to the headline figure, since they are different CV runs of the same probe. Computed via sklearn.metrics.confusion_matrix, not present pre-computed in the results file."
+  },
+  "audit.armB.per_class.N": {
+    "precision": 72.2,
+    "recall": 65.0,
+    "f1": 68.4,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "Precision/recall/F1 computed via sklearn.metrics.precision_recall_fscore_support on the same single-pass headline_oof_predictions vs true_classes referenced in audit.armB.confusion.*; support=20 for every class (class-balanced by design, see Methodology 3.3)."
+  },
+  "audit.armB.per_class.S": {
+    "precision": 57.1,
+    "recall": 60.0,
+    "f1": 58.5,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "Precision/recall/F1 computed via sklearn.metrics.precision_recall_fscore_support on the same single-pass headline_oof_predictions vs true_classes referenced in audit.armB.confusion.*; support=20 for every class (class-balanced by design, see Methodology 3.3)."
+  },
+  "audit.armB.per_class.V": {
+    "precision": 81.8,
+    "recall": 90.0,
+    "f1": 85.7,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "Precision/recall/F1 computed via sklearn.metrics.precision_recall_fscore_support on the same single-pass headline_oof_predictions vs true_classes referenced in audit.armB.confusion.*; support=20 for every class (class-balanced by design, see Methodology 3.3)."
+  },
+  "audit.armB.per_class.F": {
+    "precision": 63.2,
+    "recall": 60.0,
+    "f1": 61.5,
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "Precision/recall/F1 computed via sklearn.metrics.precision_recall_fscore_support on the same single-pass headline_oof_predictions vs true_classes referenced in audit.armB.confusion.*; support=20 for every class (class-balanced by design, see Methodology 3.3)."
+  },
+  "audit.armB.confusion.single_pass_accuracy": {
+    "value": 68.8,
+    "unit": "%",
+    "format": ".1f",
+    "source": "day7_auditability_probe.py (results/day7_auditability_results_v2.json)",
+    "run": "2026-08-09",
+    "note": "From headline_oof_predictions vs true_classes, a single stratified-CV pass distinct from the repeated (5-fold x3-repeat) CV that produces the headline 67.9% mean accuracy (audit.armB.headline) -- single-pass overall accuracy on this pass is 68.8%, consistent with but not identical to the headline figure, since they are different CV runs of the same probe. Computed via sklearn.metrics.confusion_matrix, not present pre-computed in the results file."
+  },
+  "audit.armB.headline.pca_seed_sd": {
+    "value": 0.28,
+    "unit": "pp",
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-23",
+    "n_seeds": 10,
+    "note": "Reproducibility spread of the headline across PCA random seeds; distinct from the fold-level sd. Range 67.1-67.9%.",
+    "format": ".2f"
+  },
+  "audit.s_redraw.per_class.S.recall": {
+    "value": 45.0,
+    "unit": "%",
+    "n": 20,
+    "source": "s_class_headroom_bias_check.py",
+    "run": "2026-08-23",
+    "note": "S-class recall under a stratified S redraw (round-robin across all 16 S-containing records, max 2/record vs the headline draw's 7 records / max 5). Directly comparable to audit.per_class.S.recall (60.0%): same probe, same CV protocol, same N/V/F quarters, only the S draw differs -- a 15.0 pp fall. Distinct from s_class.probe_recall_n63 (34.9%), which answers a different question (more S data) AND uses a mixed mechanism (existing CV out-of-fold for the original 20 plus single-fit predictions for 43 more), so it corroborates the direction but is not a like-for-like comparison."
+  },
+  "audit.s_redraw.headline": {
+    "value": 67.5,
+    "unit": "%",
+    "sd": 0.44,
+    "source": "s_class_headroom_bias_check.py",
+    "run": "2026-08-23",
+    "note": "Headline auditability recomputed with the stratified S redraw substituted in, mean over 10 PCA seeds. Moves -0.12 pp against audit.armB.headline (67.6%), i.e. 0.24x the combined PCA-seed noise -- no detectable change. The headline survives the redraw even though S-class recall does not: S loses 3 correct while N gains 1 and F gains 2, because the harder S events stop intruding on the N/F decision regions. Pooled out-of-fold accuracy is 68.8% either way."
+  },
+  "audit.s_redraw.headline.delta_pp": {
+    "value": -0.12,
+    "unit": "pp",
+    "format": ".2f",
+    "source": "s_class_headroom_bias_check.py",
+    "run": "2026-08-23",
+    "note": "Signed change in the headline under the stratified S redraw; compare against audit.armB.headline.pca_seed_sd as the noise floor."
+  },
+  "audit.s_redraw.n_records": {
+    "value": 16,
+    "format": "d",
+    "source": "s_class_headroom_bias_check.py",
+    "run": "2026-08-23",
+    "note": "S-containing records represented in the redrawn S quarter (max 2 events each), versus 7 records (max 5 each) in the headline draw."
+  },
+  "e1.k1.failed": {
+    "value": 0,
+    "format": "d",
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e1.k1.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "e1.k2.failed": {
+    "value": 4,
+    "format": "d",
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e1.k2.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "e1.k4.failed": {
+    "value": 0,
+    "format": "d",
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e1.k4.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "e1.k8.failed": {
+    "value": 4,
+    "format": "d",
+    "source": "e1_ablation.py",
+    "run": "2026-08-10",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e1.k8.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "e2.seed_101.failed": {
+    "value": 2,
+    "format": "d",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e2.seed_101.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "e2.seed_202.failed": {
+    "value": 0,
+    "format": "d",
+    "source": "e2_seed_variance.py",
+    "run": "2026-08-10",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e2.seed_202.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "e2.seed_existing.failed": {
+    "value": 0,
+    "format": "d",
+    "source": "day6_run_comparison.py Arm B (results/day6_results.json)",
+    "run": "2026-08-16",
+    "n": 80,
+    "note": "Generation failures (parse retries exhausted) out of n=80. Promoted from the n_failed subfield of e2.seed_existing.accuracy so the LaTeX can reference it directly; same number, not a new measurement."
+  },
+  "s_class.stratified_redraw.probe_recall": {
+    "value": 45.0,
+    "unit": "%",
+    "n": 20,
+    "source": "s_class_headroom_bias_check.py",
+    "run": "2026-08-23",
+    "note": "S-class probe recall under the stratified redraw (round-robin over all 16 S-containing records, max 2/record). Same measurement as audit.s_redraw.per_class.S.recall, under the name chapter 5 cites."
+  },
+  "s_class.stratified_redraw.probe_recall_n": {
+    "value": 9,
+    "format": "d",
+    "source": "s_class_headroom_bias_check.py",
+    "run": "2026-08-23",
+    "note": "Numerator of s_class.stratified_redraw.probe_recall (out of 20)."
+  },
+  "s_class.stratified_redraw.reproduction_check": {
+    "value": 67.6,
+    "unit": "%",
+    "sd": 0.28,
+    "source": "day7_auditability_probe.py",
+    "run": "2026-08-23",
+    "note": "Seeded, reproducible headline auditability estimate: mean over 10 PCA seeds (sd 0.28 pp, range 67.1-67.9%). This is the value audit.armB.headline now carries; the unseeded single draw it replaced was 67.9%."
+  },
+  "tokens.reduction.n80.ci95.lower": {
+    "value": 23.9,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI lower bound for the reduction reported at tokens.reduction.n80. No CI existed for this quantity before this run."
+  },
+  "tokens.reduction.n80.ci95.upper": {
+    "value": 25.5,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI upper bound for the reduction reported at tokens.reduction.n80."
+  },
+  "latency.reduction.n80.ci95.lower": {
+    "value": 10.0,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI lower bound for the reduction reported at latency.reduction.n80. No CI existed for this quantity before this run."
+  },
+  "latency.reduction.n80.ci95.upper": {
+    "value": 16.6,
+    "unit": "%",
+    "format": ".1f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI upper bound for the reduction reported at latency.reduction.n80."
+  },
+  "vram.reduction.n80.ci95.lower": {
+    "value": 0.27,
+    "unit": "%",
+    "format": ".2f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI lower bound for the reduction reported at vram.reduction.n80. No CI existed for this quantity before this run."
+  },
+  "vram.reduction.n80.ci95.upper": {
+    "value": 0.29,
+    "unit": "%",
+    "format": ".2f",
+    "source": "make_headline_figures.py (paired bootstrap, 20000 resamples, results/day6_results.json.bak_pre_rerun_20260816)",
+    "run": "2026-08-24",
+    "n": 80,
+    "note": "Paired bootstrap 95% CI upper bound for the reduction reported at vram.reduction.n80."
+  },
+  "vram.reduction.n80": {
+    "value": 0.28,
+    "unit": "%",
+    "format": ".2f",
+    "derived_from": [
+      "armA.vram.mean.n80",
+      "armB.vram.mean.n80"
+    ],
+    "note": "Small relative to the ~9GB working set dominated by the frozen quantised LLM, which both arms load identically; reported to 2dp because 1dp collapses point and both CI bounds to the same displayed value."
+  },
+  "p1.table.01": {
+    "caption": "Table 1. Dissertation headline results (dissertation Table 4.1).",
+    "section": "2. Starting point: the dissertation",
+    "subsection": null,
+    "type": "reference",
+    "columns": [
+      "Measure (80-event set)",
+      "Arm A (JSON)",
+      "Arm B (adapter)"
+    ],
+    "rows": [
+      [
+        "Mean prompt tokens",
+        "645.2",
+        "486.0 (−24.7%)"
+      ],
+      [
+        "Mean generation latency",
+        "9,892 ms",
+        "8,574 ms (−13.3%)"
+      ],
+      [
+        "Task accuracy",
+        "100%",
+        "95.0% (seeds: 85.0% ± 8.7 pp)"
+      ],
+      [
+        "Class recoverability",
+        "100% by construction",
+        "67.6% (probe)"
+      ]
+    ],
+    "source": [
+      "results_ledger.json (dissertation keys armA.* / armB.*, n80)"
+    ],
+    "run": null,
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.02": {
+    "caption": "Table 2. Weaknesses identified in the single-event evaluation and the Phase 1 response to each.",
+    "section": "4. Weaknesses in the original evaluation and how Phase 1 addressed them",
+    "subsection": null,
+    "type": "qualitative",
+    "columns": [
+      "Weakness",
+      "Why it matters",
+      "What Phase 1 did",
+      "What it showed"
+    ],
+    "rows": [
+      [
+        "One comparison baseline (full JSON, the most verbose text form)",
+        "A saving against a verbose prompt may not hold against a well-designed one",
+        "Added compact JSON and label-only text arms",
+        "Against compact JSON, a single event leaves little to save: interface tokens 4 vs ~57, but end-to-end prompt length similar (486 vs 458)"
+      ],
+      [
+        "Latency measured with free-length answers",
+        "Answer length, not the interface, can drive total time",
+        "Timed every arm with output length fixed",
+        "With equal output length, arms differ by ≤ 3%; decode speed is identical (~169 ms/token), so latency gains must come from the prompt side"
+      ],
+      [
+        "One training run reported as the headline",
+        "Adapter training is sensitive to the random seed",
+        "Multiple seeds per configuration, reported as mean and range",
+        "Single-event accuracy varies across seeds (78.8–95.0%)"
+      ],
+      [
+        "Methods text describes 3 full-batch updates",
+        "Reproducibility",
+        "Checked against the code",
+        "The code performs 192 per-example updates (64 × 3 epochs); the description is updated accordingly"
+      ],
+      [
+        "Auditability measured only as class recoverability",
+        "Needs to locate where information is lost",
+        "Added inverse decoders and an RR-timing encoder",
+        "Recoverability reproduced (69.6%); the loss sits in the encoder, and the RR branch raises it to 81% (mean of 10 seeds)"
+      ]
+    ],
+    "source": [
+      "docs/analysis_plan.md"
+    ],
+    "run": null,
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.03": {
+    "caption": "Table 3. RR encoder across 10 seeds (Deviation 19). Seed 0, on which all adapters were trained, was the only seed when it was chosen and ranks 3rd, 4th and 7th of 10 on accuracy, S sensitivity and recoverability (representative by the pre-registered rule); it has the highest V sensitivity of the 10.",
+    "section": "5. What changed in the system",
+    "subsection": "5.1 Perception: RR-timing branch",
+    "type": "results",
+    "columns": [
+      "Measure (DS2)",
+      "Reference CNN-LSTM",
+      "RR encoder, 10 seeds: mean ± SD [range]",
+      "Seed 0 (used downstream)"
+    ],
+    "rows": [
+      [
+        "Accuracy",
+        "0.854",
+        "0.926 ± 0.019 [0.889, 0.949]",
+        "0.911"
+      ],
+      [
+        "S sensitivity",
+        "8%",
+        "48% ± 21% [15%, 73%]",
+        "38%"
+      ],
+      [
+        "V sensitivity",
+        "77%",
+        "93% ± 3% [86%, 97%]",
+        "97%"
+      ],
+      [
+        "F sensitivity",
+        "0.3%",
+        "5% ± 7% [0%, 18%]",
+        "0%"
+      ],
+      [
+        "Class recoverability (probe)",
+        "69.6%",
+        "81.2% ± 5.0% [74.6%, 88.3%]",
+        "84.6%"
+      ]
+    ],
+    "source": [
+      "results/p1_rr_seeds.json"
+    ],
+    "run": "2026-10-01",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.04": {
+    "caption": "Table 4. Cost of the latent interface relative to compact text (E3, E3b, Deviation 14). End-to-end response time is dominated by generating the answer (~160 ms/token for every arm), so full-response latency depends on answer length, not on the interface. Recipe r4 keeps 4 tokens per event (the side inputs enter the same projection), so these costs apply to it unchanged.",
+    "section": "6. Efficiency results",
+    "subsection": null,
+    "type": "results",
+    "columns": [
+      "Events per prompt",
+      "Prefill vs text",
+      "Time to decision vs text",
+      "Other"
+    ],
+    "rows": [
+      [
+        "1",
+        "0%",
+        "+1%",
+        "no advantage"
+      ],
+      [
+        "5",
+        "−8%",
+        "−1%",
+        "no advantage"
+      ],
+      [
+        "10",
+        "−24%",
+        "−4%",
+        "−79 MB context memory"
+      ],
+      [
+        "20",
+        "−50%",
+        "−14%",
+        "−177 MB"
+      ],
+      [
+        "50",
+        "−78% (845 → 183 ms)",
+        "−36% (1,812 → 1,161 ms)",
+        "−460 MB; energy 391 → 230 J"
+      ]
+    ],
+    "source": [
+      "results/p1_e3_multi_event.json",
+      "results/p1_e3b_context_costs.json",
+      "results/p1_item7_ttd.json"
+    ],
+    "run": "2026-09-28",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.05": {
+    "caption": "Table 5. Decisions per second and energy per decision (GPU, joules) when requests are batched (adapter: r4 seed 101). 'Does not fit': the batch exceeds the memory cap of the 12 GB card. Filtered-text figures at batch 8 come only from the batches that fit, which are its shorter prompts, so they favour filtered text.",
+    "section": "6. Efficiency results",
+    "subsection": "6.1 Serving conditions: batching and prefix caching (Deviation 23)",
+    "type": "results",
+    "columns": [
+      "N",
+      "Batch",
+      "Adapter",
+      "Text, all events",
+      "Filtered text"
+    ],
+    "rows": [
+      [
+        "10",
+        "1",
+        "0.98 /s · 83 J",
+        "0.92 /s · 111 J",
+        "0.97 /s · 95 J"
+      ],
+      [
+        "10",
+        "4",
+        "3.19 /s · 39 J",
+        "2.23 /s · 65 J",
+        "2.80 /s · 49 J"
+      ],
+      [
+        "10",
+        "8",
+        "4.72 /s · 33 J",
+        "does not fit",
+        "3.63 /s · 43 J (3 of 6 batches fit)"
+      ],
+      [
+        "20",
+        "4",
+        "3.17 /s · 39 J",
+        "1.70 /s · 92 J",
+        "2.49 /s · 54 J"
+      ],
+      [
+        "20",
+        "8",
+        "4.55 /s · 33 J",
+        "does not fit",
+        "4.00 /s · 38 J (3 of 6 fit)"
+      ],
+      [
+        "50",
+        "1",
+        "1.00 /s · 89 J",
+        "0.60 /s · 232 J",
+        "0.96 /s · 92 J"
+      ],
+      [
+        "50",
+        "4",
+        "2.79 /s · 48 J",
+        "does not fit",
+        "2.25 /s · 63 J (12 of 15 fit)"
+      ],
+      [
+        "50",
+        "8",
+        "4.11 /s · 38 J",
+        "does not fit",
+        "3.72 /s · 43 J (3 of 6 fit)"
+      ]
+    ],
+    "source": [
+      "results/p1_serving.json"
+    ],
+    "run": "2026-10-02",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.06": {
+    "caption": "Table 6. Balanced accuracy on the class-balanced DS2 test windows (adapters: mean of 3 seeds). Text answers are identical across the r3 and r4 comparisons (same windows, prompts and decoder).",
+    "section": "7. Accuracy results",
+    "subsection": "7.1 Primary test (pre-registered, Deviation 16)",
+    "type": "results",
+    "columns": [
+      "N",
+      "Windows",
+      "Text (default)",
+      "Text (calibrated)",
+      "Adapter r3",
+      "Adapter r4 (final)"
+    ],
+    "rows": [
+      [
+        "1",
+        "177",
+        "0.97",
+        "0.97",
+        "0.79",
+        "0.80"
+      ],
+      [
+        "5",
+        "175",
+        "0.73",
+        "0.79",
+        "0.79",
+        "0.81"
+      ],
+      [
+        "10",
+        "169",
+        "0.56",
+        "0.73",
+        "0.77",
+        "0.83"
+      ],
+      [
+        "20",
+        "157",
+        "0.48",
+        "0.73",
+        "0.80",
+        "0.83"
+      ],
+      [
+        "50",
+        "117",
+        "0.54",
+        "0.76",
+        "0.77",
+        "0.84"
+      ]
+    ],
+    "source": [
+      "results/p1_item7_r4_analysis.json",
+      "results/p1_item7_calib.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.07": {
+    "caption": "Table 7. Adapter minus text, balanced accuracy, with patient-level (record-cluster) bootstrap 95% confidence intervals; non-inferiority margin −0.05.",
+    "section": "7. Accuracy results",
+    "subsection": "7.2 Primary comparison against default and calibrated text",
+    "type": "results",
+    "columns": [
+      "N",
+      "r4 − default text [95% CI]",
+      "r4 − calibrated text [95% CI]",
+      "Verdict vs calibrated text",
+      "r3 − calibrated text (before)"
+    ],
+    "rows": [
+      [
+        "5",
+        "+0.08 [+0.01, +0.16]",
+        "+0.03 [−0.04, +0.10]",
+        "non-inferior",
+        "+0.02 [−0.06, +0.10]"
+      ],
+      [
+        "10",
+        "+0.27 [+0.20, +0.35]",
+        "+0.10 [+0.03, +0.17]",
+        "superior",
+        "+0.04 [−0.04, +0.13]"
+      ],
+      [
+        "20",
+        "+0.35 [+0.23, +0.46]",
+        "+0.10 [+0.01, +0.18]",
+        "superior",
+        "+0.06 [−0.03, +0.16]"
+      ],
+      [
+        "50",
+        "+0.29 [+0.16, +0.42]",
+        "+0.08 [−0.02, +0.17]",
+        "non-inferior",
+        "+0.01 [−0.11, +0.13]"
+      ]
+    ],
+    "source": [
+      "results/p1_item7_r4_analysis.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.08": {
+    "caption": "Table 8. Natural-prevalence windows (100 per N; 40–62 routine windows per N), where the tiers occur at their real frequency.",
+    "section": "7. Accuracy results",
+    "subsection": "7.4 False alarms: identified in r3, reduced in r4",
+    "type": "results",
+    "columns": [
+      "N",
+      "Accuracy: text",
+      "Accuracy: r4 (3 seeds)",
+      "False alarms: text",
+      "False alarms: r3",
+      "False alarms: r4"
+    ],
+    "rows": [
+      [
+        "5",
+        "0.84",
+        "0.89–0.90",
+        "0%",
+        "4.8–8.1%",
+        "3.2%"
+      ],
+      [
+        "10",
+        "0.61",
+        "0.87–0.91",
+        "0%",
+        "7.7–11.5%",
+        "1.9–3.8%"
+      ],
+      [
+        "20",
+        "0.60",
+        "0.88–0.93",
+        "0%",
+        "8.3–10.4%",
+        "4.2–6.2%"
+      ],
+      [
+        "50",
+        "0.56",
+        "0.92–0.95",
+        "0%",
+        "2.5–10.0%",
+        "0–2.5%"
+      ]
+    ],
+    "source": [
+      "results/p1_item7_r4_analysis.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.09": {
+    "caption": "Table 9. Adapter against the filtered text prompt (default decoding; calibration changes the filtered arm by about 0.01 or less). Record-cluster bootstrap 95% CIs.",
+    "section": "7. Accuracy results",
+    "subsection": "7.6 Filtered text baseline (Deviation 20)",
+    "type": "results",
+    "columns": [
+      "N",
+      "Adapter r4 (3 seeds)",
+      "Filtered text",
+      "Adapter − filtered [95% CI]",
+      "Prompt tokens: adapter / filtered (median)"
+    ],
+    "rows": [
+      [
+        "1",
+        "0.804",
+        "0.966",
+        "–",
+        "516 / 679"
+      ],
+      [
+        "5",
+        "0.814",
+        "0.988",
+        "−0.17 [−0.22, −0.13]",
+        "532 / 679"
+      ],
+      [
+        "10",
+        "0.830",
+        "0.982",
+        "−0.15 [−0.19, −0.11]",
+        "553 / 682"
+      ],
+      [
+        "20",
+        "0.830",
+        "0.945",
+        "−0.12 [−0.16, −0.07]",
+        "593 / 683"
+      ],
+      [
+        "50",
+        "0.836",
+        "0.942",
+        "−0.11 [−0.17, −0.05]",
+        "713 / 750"
+      ]
+    ],
+    "source": [
+      "results/p1_item7_filtered.json"
+    ],
+    "run": "2026-10-01",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.10": {
+    "caption": "Table 10. Second sender: balanced accuracy on its DS2 test windows, with record-cluster bootstrap 95% CIs (non-inferiority margin −0.05). Calibrated filtered text is shown in the last column.",
+    "section": "9. Replication on a second sender (Deviation 22)",
+    "subsection": null,
+    "type": "results",
+    "columns": [
+      "N",
+      "Adapter (3 seeds)",
+      "Text",
+      "Text, calibrated",
+      "Filtered text",
+      "Adapter − calibrated text",
+      "Adapter − filtered"
+    ],
+    "rows": [
+      [
+        "1",
+        "0.789",
+        "0.964",
+        "0.964",
+        "0.955",
+        "–",
+        "–"
+      ],
+      [
+        "5",
+        "0.770",
+        "0.715",
+        "0.787",
+        "0.959",
+        "−0.02 [−0.11, +0.08]",
+        "−0.19 [−0.25, −0.13]"
+      ],
+      [
+        "10",
+        "0.823",
+        "0.585",
+        "0.732",
+        "0.929",
+        "+0.09 [+0.02, +0.16]",
+        "−0.11 [−0.18, −0.04]"
+      ],
+      [
+        "20",
+        "0.780",
+        "0.586",
+        "0.733",
+        "0.907",
+        "+0.05 [−0.03, +0.13]",
+        "−0.13 [−0.20, −0.06]"
+      ],
+      [
+        "50",
+        "0.794",
+        "0.550",
+        "0.733",
+        "0.800",
+        "+0.06 [−0.02, +0.14]",
+        "−0.01 [−0.09, +0.08]"
+      ]
+    ],
+    "source": [
+      "results/p1_second_sender_analysis.json"
+    ],
+    "run": "2026-10-02",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.11": {
+    "caption": "Table 11. r4 ablation: balanced accuracy on DS2 (3-seed means; record-cluster bootstrap CIs), false alarms on routine windows, and recoverability of each event's facts from its tokens (slots 0 and 49).",
+    "section": "10. What the channel needs: ablation and compression (Deviations 24, 26, 27)",
+    "subsection": "10.1 Ablation of recipe r4",
+    "type": "results",
+    "columns": [
+      "Recipe",
+      "N = 5",
+      "N = 10",
+      "N = 20",
+      "N = 50",
+      "False alarms",
+      "Heart rate / RR from tokens (R²)",
+      "Run ≥ 3 from tokens"
+    ],
+    "rows": [
+      [
+        "r3: neither change",
+        "0.794",
+        "0.772",
+        "0.795",
+        "0.770",
+        "10.6%",
+        "below 0",
+        "0.56"
+      ],
+      [
+        "r4hn: hard negatives only",
+        "0.788",
+        "0.786",
+        "0.802",
+        "0.781",
+        "8.6%",
+        "below 0",
+        "0.55"
+      ],
+      [
+        "r4: hard negatives + side inputs",
+        "0.814",
+        "0.830",
+        "0.830",
+        "0.836",
+        "3.6%",
+        "0.70 / 0.72",
+        "0.96"
+      ],
+      [
+        "Side inputs (r4 − r4hn), 95% CI",
+        "+0.03 [−0.02, +0.06]",
+        "+0.04 [−0.01, +0.11]",
+        "+0.03 [−0.01, +0.07]",
+        "+0.05 [+0.01, +0.11]",
+        "−5.0 points",
+        "",
+        ""
+      ]
+    ],
+    "source": [
+      "results/p1_dev26_ablation.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.12": {
+    "caption": "Table 12. Tokens per event: accuracy (3-seed means), the least favourable difference from 4 tokens across N, false alarms (mean and seed range) and recoverability (slot 0).",
+    "section": "10. What the channel needs: ablation and compression (Deviations 24, 26, 27)",
+    "subsection": "10.2 How many tokens per event?",
+    "type": "results",
+    "columns": [
+      "Tokens per event (prompt at N = 50)",
+      "Balanced accuracy, N = 5 / 10 / 20 / 50",
+      "Difference from 4 tokens, worst N [95% CI]",
+      "False alarms",
+      "Facts recoverable from tokens"
+    ],
+    "rows": [
+      [
+        "1 (563 tokens), 3 seeds",
+        "0.70 / 0.72 / 0.75 / 0.73",
+        "−0.11 [−0.16, −0.06]",
+        "6.3% (2.7–10.0)",
+        "yes (heart rate R² 0.87)"
+      ],
+      [
+        "2 (613 tokens), 3 seeds",
+        "0.80 / 0.82 / 0.83 / 0.80",
+        "−0.04 [−0.13, +0.03]",
+        "8.6% (7.3–10.0)",
+        "yes (0.81)"
+      ],
+      [
+        "4 (713 tokens, r4), 3 seeds",
+        "0.81 / 0.83 / 0.83 / 0.84",
+        "–",
+        "3.6% (2.7–4.8)",
+        "yes (0.71)"
+      ],
+      [
+        "8 (913 tokens), 1 run",
+        "0.77 / 0.80 / 0.78 / 0.80",
+        "single run",
+        "6.1%",
+        "label, tier, run yes"
+      ]
+    ],
+    "source": [
+      "results/p1_dev27_kseeds.json",
+      "results/p1_sweep_analysis.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.13": {
+    "caption": "Table 13. INCART hypotheses (adapter: mean of three seeds; patient-cluster bootstrap, margin −0.05). *The N = 50 timing was re-measured under the GPU memory cap (Deviation 21a): the original run was distorted by memory paging (compact text 6.9 s instead of about 0.86 s).",
+    "section": "11. External confirmatory test on INCART (Deviation 21)",
+    "subsection": null,
+    "type": "results",
+    "columns": [
+      "Hypothesis",
+      "N",
+      "Estimate [95% CI]",
+      "Result"
+    ],
+    "rows": [
+      [
+        "H1 (primary): adapter non-inferior to calibrated text",
+        "10",
+        "+0.08 [+0.03, +0.15]",
+        "Confirmed"
+      ],
+      [
+        "",
+        "20",
+        "+0.09 [+0.04, +0.15]",
+        ""
+      ],
+      [
+        "",
+        "50",
+        "+0.05 [−0.04, +0.13]",
+        ""
+      ],
+      [
+        "H2: adapter superior to calibrated text",
+        "10",
+        "+0.08 [+0.03, +0.15]",
+        "Confirmed"
+      ],
+      [
+        "",
+        "20",
+        "+0.09 [+0.04, +0.15]",
+        ""
+      ],
+      [
+        "H3: adapter non-inferior to calibrated filtered text",
+        "10",
+        "−0.11 [−0.17, −0.05]",
+        "Not confirmed"
+      ],
+      [
+        "",
+        "20",
+        "−0.11 [−0.16, −0.06]",
+        ""
+      ],
+      [
+        "",
+        "50",
+        "−0.07 [−0.15, −0.004]",
+        ""
+      ],
+      [
+        "H4: faster time to first token than text",
+        "10 / 20 / 50",
+        "−27% / −51% / −77%*",
+        "Not tested in sequence (H3 failed); descriptive"
+      ]
+    ],
+    "source": [
+      "results/p1_confirmatory_incart.json",
+      "results/p1_incart_timing_n50_capped.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.14": {
+    "caption": "Table 14. Balanced accuracy on INCART by number of events (default decoding unless stated).",
+    "section": "11. External confirmatory test on INCART (Deviation 21)",
+    "subsection": null,
+    "type": "results",
+    "columns": [
+      "N",
+      "Adapter (3 seeds)",
+      "Text",
+      "Text, calibrated",
+      "Filtered text"
+    ],
+    "rows": [
+      [
+        "1",
+        "0.746",
+        "0.983",
+        "0.978",
+        "0.972"
+      ],
+      [
+        "5",
+        "0.789",
+        "0.722",
+        "0.806",
+        "0.939"
+      ],
+      [
+        "10",
+        "0.815",
+        "0.583",
+        "0.733",
+        "0.939"
+      ],
+      [
+        "20",
+        "0.822",
+        "0.517",
+        "0.728",
+        "0.933"
+      ],
+      [
+        "50",
+        "0.822",
+        "0.533",
+        "0.775",
+        "0.892"
+      ]
+    ],
+    "source": [
+      "results/p1_confirmatory_incart.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.15": {
+    "caption": "Table 15. Research questions: dissertation answer and how Phase 1 refined or extended it.",
+    "section": "12. Status of the research questions",
+    "subsection": null,
+    "type": "qualitative",
+    "columns": [
+      "Question",
+      "Dissertation",
+      "Now"
+    ],
+    "rows": [
+      [
+        "RQ1 cost",
+        "Token and latency savings vs full JSON",
+        "Refined: the saving is a multi-event effect; 19–78% lower prefill and 4–36% faster decision at N = 10–50 vs compact text; replicated on a second sender. Against filtered text, single-request latency is similar; with batching the adapter has 10–30% higher throughput, 12–28% less energy per decision and a fixed memory footprint (Section 6.1); 4 tokens per event is the smallest reliable setting (Section 10.2)"
+      ],
+      [
+        "RQ2 accuracy",
+        "95% on the evaluation set; seed variance flagged as open",
+        "Resolved with seeds and held-out patients: superior to calibrated text at N = 10–20 and non-inferior at 5 and 50 (r4); superior to default text at N = 5–50; false alarms reduced to 3.6% (text 0%); text remains preferable for single events. Confirmed on an unseen database (INCART: non-inferior at 10–50 events, superior at 10 and 20). Filtered text is more accurate at every N; second sender superior to calibrated text at N = 10 and non-inferior at 20 and 50"
+      ],
+      [
+        "RQ3 auditability",
+        "67.6% recoverability vs 100%",
+        "Extended: cost located in the encoder; RR branch raises it to 81% ± 5 (10 seeds); per-event decoding holds at every slot; heart rate, RR and run length now carried in the tokens (r4); replicated on a second sender (heart rate and RR R² about 0.9); facts are recoverable only when passed to the adapter, and remain recoverable at 1 token per event; recoverable is not the same as used (Section 10); uncertainty check available"
+      ]
+    ],
+    "source": [
+      "docs/analysis_plan.md"
+    ],
+    "run": null,
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.table.16": {
+    "caption": "Table 16. Deviations 1–27 (full text in the analysis plan).",
+    "section": "Appendix A. Pre-registered deviations",
+    "subsection": null,
+    "type": "reference",
+    "columns": [
+      "#",
+      "Change",
+      "Why"
+    ],
+    "rows": [
+      [
+        "1–4",
+        "Training description; seeds; baseline family; forced-length timing",
+        "Strengthen the original evaluation"
+      ],
+      [
+        "5",
+        "Efficiency gate; generation cap 256 tokens",
+        "Claim efficiency only where CI excludes 0"
+      ],
+      [
+        "6–8",
+        "Tier-balanced training; multi-event pilots; stratified pilot",
+        "Diagnose single-event limits"
+      ],
+      [
+        "9",
+        "Multi-event adapter on the RR encoder",
+        "Test accuracy where efficiency exists"
+      ],
+      [
+        "10",
+        "Class-balanced test windows",
+        "Test set was dominated by V beats"
+      ],
+      [
+        "11",
+        "Recipe r2 (batch 1, schedule, larger validation) + early-stop minimum",
+        "r1 under-trained"
+      ],
+      [
+        "12",
+        "Schema-constrained decoding (+4 corrections)",
+        "Malformed JSON, not truncation"
+      ],
+      [
+        "13",
+        "N = 50 (recipe r3)",
+        "Largest efficiency gain"
+      ],
+      [
+        "14",
+        "Time-to-decision latency",
+        "Latency beyond prefill"
+      ],
+      [
+        "15",
+        "Exploratory robustness analyses",
+        "Patient clustering, true labels, seed vote"
+      ],
+      [
+        "16 / 16a",
+        "Enlarged test set (1,195 windows); step 1 retired",
+        "Precision; claim moved to multi-event"
+      ],
+      [
+        "17",
+        "Threshold calibration of both arms",
+        "False alarms; fair comparison"
+      ],
+      [
+        "18 / 18b",
+        "Recipe r4: hard negatives + heart rate, RR and run-length side inputs; run-length decodability measured as run ≥ 3 balanced accuracy",
+        "False alarms and facts missing from the vector; the planned R² was ill-posed on this split"
+      ],
+      [
+        "19",
+        "RR encoder retrained with 10 seeds",
+        "Its gains were single-run numbers"
+      ],
+      [
+        "20",
+        "Filtered text baseline (abnormal beats listed, normal beats counted)",
+        "Strongest objection to the efficiency claim"
+      ],
+      [
+        "21 / 21a",
+        "Confirmatory test of the frozen system on INCART (H1, H2 confirmed; H3 not; H4 not tested in sequence); N = 50 timing re-measured under the memory cap",
+        "DS2 has informed several iterations; memory paging in the timing step"
+      ],
+      [
+        "22",
+        "Second sender architecture (ResNet1D-RR)",
+        "Results came from one sender architecture"
+      ],
+      [
+        "23 / 23a",
+        "Serving conditions: batching, prefix caching, energy; memory cap so that oversized batches are recorded, not paged",
+        "Timing so far was batch 1, no caching"
+      ],
+      [
+        "24",
+        "Compression sweep (1, 2, 4, 8 tokens per event)",
+        "Cost against accuracy and recoverability"
+      ],
+      [
+        "25",
+        "Text generation stopped at the tier token, if verified on DS2 first (verified: 2,390 of 2,390 identical)",
+        "Compute for the confirmatory run"
+      ],
+      [
+        "26",
+        "Ablation of r4: hard negatives only (no side inputs), 3 seeds",
+        "Separate the two r4 changes"
+      ],
+      [
+        "27",
+        "1 and 2 tokens per event repeated with 3 seeds",
+        "A single-run sweep cannot separate the setting from training variance"
+      ]
+    ],
+    "source": [
+      "docs/analysis_plan.md"
+    ],
+    "run": null,
+    "report": "reports/Phase1_Technical_Report.docx",
+    "note": "values as printed in the report (rounded); full precision in the source files"
+  },
+  "p1.figure.01": {
+    "file": "reports/figures/fig1_pipeline.png",
+    "caption": "Figure 1. Pipeline before (single event) and after Phase 1 (multi-event). The highlighted block is the component trained in this work.",
+    "section": "5. What changed in the system",
+    "subsection": null,
+    "script": "reports/make_figures.py:fig_pipeline",
+    "source": [],
+    "run": null,
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.02": {
+    "file": "reports/figures/fig7_training_r4.png",
+    "caption": "Figure 2. Validation balanced accuracy during training, recipe r4, three seeds. The best checkpoint per seed is selected on validation only; seed 303 was still improving when it reached the 3-epoch cap and was evaluated as pre-registered.",
+    "section": "5. What changed in the system",
+    "subsection": "5.3 Recipe r4: hard negatives and side inputs (final)",
+    "script": "reports/make_figures.py:fig_training",
+    "source": [
+      "results/p1_item7_train_r4_seed101.json",
+      "results/p1_item7_train_r4_seed202.json",
+      "results/p1_item7_train_r4_seed303.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.03": {
+    "file": "reports/figures/fig2_latency.png",
+    "caption": "Figure 3. Median latency per request (batch 1, 21 DS2 windows per N). Left: time to first token. Right: time until the urgency tier is generated (token 7 of the constrained answer).",
+    "section": "6. Efficiency results",
+    "subsection": null,
+    "script": "reports/make_figures.py:fig_latency",
+    "source": [
+      "results/p1_item7_ttd.json",
+      "results/p1_item7_r4_analysis.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.04": {
+    "file": "reports/figures/fig3_accuracy_vs_n.png",
+    "caption": "Figure 4. Balanced accuracy on the DS2 test set by window size. The final adapter (r4) stays at 0.80–0.84 for every N and sits above the previous recipe (r3) at every N; default text falls sharply from N = 5; text with a calibrated threshold recovers part of the gap.",
+    "section": "7. Accuracy results",
+    "subsection": "7.1 Primary test (pre-registered, Deviation 16)",
+    "script": "reports/make_figures.py:fig_accuracy",
+    "source": [
+      "results/p1_item7_r4_analysis.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.05": {
+    "file": "reports/figures/fig4_forest.png",
+    "caption": "Figure 5. The comparisons of Table 7. Dotted red line: non-inferiority margin. Hollow markers show the previous recipe (r3) against calibrated text.",
+    "section": "7. Accuracy results",
+    "subsection": "7.2 Primary comparison against default and calibrated text",
+    "script": "reports/make_figures.py:fig_forest",
+    "source": [
+      "results/p1_item7_r4_analysis.json",
+      "results/p1_item7_calib.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.06": {
+    "file": "reports/figures/fig5_why_text_fails.png",
+    "caption": "Figure 6. Left: text misses urgent windows caused by a single high-confidence V/F beat (a numeric threshold, 0.85, buried in a long list) far more than runs of abnormal beats. Right: text is worst when the key beat is in the middle of the list, the 'lost in the middle' effect; the adapter (r4, 3 seeds) shows no position effect.",
+    "section": "7. Accuracy results",
+    "subsection": "7.3 Why text fails with many events",
+    "script": "reports/make_figures.py:fig_why_text_fails",
+    "source": [
+      "results/p1_item7_eval_ds2v2_r4.json"
+    ],
+    "run": "2026-10-01",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.07": {
+    "file": "reports/figures/fig6_confusion_n50.png",
+    "caption": "Figure 7. Confusion at N = 50. Text under-escalates (priority → routine, urgent → priority) and never raises a false alarm; the r4 adapter never calls an urgent window routine and escalates 3% of routine windows.",
+    "section": "7. Accuracy results",
+    "subsection": "7.3 Why text fails with many events",
+    "script": "reports/make_figures.py:fig_confusion",
+    "source": [
+      "results/p1_item7_eval_ds2v2_r4.json"
+    ],
+    "run": "2026-10-01",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.08": {
+    "file": "reports/figures/fig9_false_alarms.png",
+    "caption": "Figure 8. Routine windows escalated to priority or urgent (bars: mean of 3 seeds; lines: seed range). Text never escalates a routine window.",
+    "section": "7. Accuracy results",
+    "subsection": "7.4 False alarms: identified in r3, reduced in r4",
+    "script": "reports/make_figures.py:fig_false_alarms",
+    "source": [
+      "results/p1_item7_r4_analysis.json"
+    ],
+    "run": "2026-09-30",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.09": {
+    "file": "reports/figures/fig8_auditability.png",
+    "caption": "Figure 9. Balanced accuracy of decoding each event's fields from its virtual-token slot (recipe r3, mean of 3 seeds) versus from the encoder's 32-d vector.",
+    "section": "8. Auditability",
+    "subsection": null,
+    "script": "reports/make_figures.py:fig_audit",
+    "source": [
+      "results/p1_item7_slot_decoder.json"
+    ],
+    "run": "2026-09-28",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.10": {
+    "file": "reports/figures/fig10_side_info.png",
+    "caption": "Figure 10. Facts carried per event after the r4 change, decoded from slots 0 and 49 of each seed (bars: mean; lines: range). Left: heart rate and RR interval (R²). Right: presence of a run of ≥ 3 abnormal beats (balanced accuracy; Deviation 18b, a pre-registered replacement for an R² metric that proved ill-posed on this split).",
+    "section": "8. Auditability",
+    "subsection": null,
+    "script": "reports/make_figures.py:fig_side_info",
+    "source": [
+      "results/p1_item7_r4_analysis.json",
+      "results/p1_item7_runlen.json"
+    ],
+    "run": "2026-10-01",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.11": {
+    "file": "reports/figures/fig11_two_senders.png",
+    "caption": "Figure 11. Both senders side by side. The pattern replicates: text with every event listed falls as N grows, the adapter stays roughly flat, and filtered text is the most accurate arm, except at N = 50 on the second sender.",
+    "section": "9. Replication on a second sender (Deviation 22)",
+    "subsection": null,
+    "script": "reports/make_figures.py:fig_two_senders",
+    "source": [
+      "results/p1_item7_r4_analysis.json",
+      "results/p1_item7_filtered.json",
+      "results/p1_second_sender_analysis.json"
+    ],
+    "run": "2026-10-02",
+    "report": "reports/Phase1_Technical_Report.docx"
+  },
+  "p1.figure.12": {
+    "file": "reports/figures/fig12_compression.png",
+    "caption": "Figure 12. Every training run at each setting. With 1 token one run in three failed; with 2 tokens accuracy is close to 4 tokens but false alarms are higher in every run; 4 tokens is the smallest setting at which all runs were reliable on both measures.",
+    "section": "10. What the channel needs: ablation and compression (Deviations 24, 26, 27)",
+    "subsection": "10.2 How many tokens per event?",
+    "script": "reports/make_figures.py:fig_compression",
+    "source": [
+      "results/p1_item7_eval_ds2v2_r4.json",
+      "results/p1_item7_eval_ds2v2_sweep.json",
+      "results/p1_sweep_analysis.json"
+    ],
+    "run": "2026-10-04",
+    "report": "reports/Phase1_Technical_Report.docx"
+  }
+}

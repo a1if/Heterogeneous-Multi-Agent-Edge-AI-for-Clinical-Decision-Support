@@ -80,7 +80,8 @@ def prepare_events(selected=None, *, note="") -> list[dict]:
     return prepared
 
 
-def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: str) -> list[dict]:
+def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: str,
+                   resume_from: list[dict] | None = None, on_event=None) -> list[dict]:
     """Runs Arm B (real generate()) over every prepared event for one checkpoint.
 
     A checkpoint occasionally exhausts run_adapter_arm_timed's parse retries and
@@ -89,12 +90,19 @@ def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: st
     not a reason to lose the other 79 events' worth of GPU time. Caught here and
     recorded as a failed event (counts against accuracy, excluded from the
     continuous-metric means) rather than propagating and killing the whole run.
+
+    Optional per-event checkpointing: ``resume_from`` holds rows already saved for
+    this checkpoint (those events are skipped), and ``on_event(results)`` is called
+    after every event so the caller can save. Without them, behaviour is unchanged.
     """
     print(f"\nEvaluating {label}: {len(prepared)} events, Arm B only "
           f"(~10-12 min, do not run other GPU workloads concurrently)...")
-    results = []
+    results = list(resume_from or [])
+    done = {r["idx"] for r in results}
     run_start = time.time()
     for i, item in enumerate(prepared):
+        if item["idx"] in done:
+            continue
         # Carried through unchanged on both the success and failure paths. Kept as
         # an explicit leading dict so key ORDER in the saved JSON stays exactly as
         # it was when day6_results.json and the E1/E2 result files were written.
@@ -116,6 +124,8 @@ def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: st
             elapsed = time.time() - run_start
             print(f"[{label}][{i+1}/{len(prepared)}] idx={item['idx']} true={item['true_class']} "
                   f"GENERATION FAILED: {e} elapsed={elapsed:.0f}s")
+            if on_event:
+                on_event(results)
             continue
 
         results.append({**base,
@@ -126,10 +136,16 @@ def run_arm_b_eval(prepared: list[dict], model, processor, adapter, *, label: st
             "time_to_first_token_ms": out["time_to_first_token_ms"],
             "peak_vram_mb": vram, "parse_attempts": out["parse_attempts"],
             "generation_failed": False,
+            # Generated text, kept for the Phase 1 unsupported-claim scorer (step 9);
+            # appended last so existing key order is unchanged.
+            "justification": out["result"]["justification"],
+            "referenced_guideline_fact": out["result"]["referenced_guideline_fact"],
         })
         elapsed = time.time() - run_start
         print(f"[{label}][{i+1}/{len(prepared)}] idx={item['idx']} true={item['true_class']} "
               f"B={out['result']['urgency_tier']} ref={item['reference_tier']} elapsed={elapsed:.0f}s")
+        if on_event:
+            on_event(results)
     return results
 
 
