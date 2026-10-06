@@ -71,15 +71,25 @@ write("cost.tex", rows,
 
 # ---- Serving ----------------------------------------------------------------------------------------------
 serv = load("p1_serving.json")["summary"]
+serv_rows = [x for x in load("p1_serving.json")["rows"] if not x.get("exceeds_memory")]
 
 
-def cell(d):
+def iqr(n, b, arm, key):
+    import numpy as np
+    v = [x[key] for x in serv_rows if x["n"] == int(n) and x["batch"] == int(b) and x["arm"] == arm]
+    return np.percentile(v, 25), np.percentile(v, 75)
+
+
+def cell(d, n, b, arm):
     if d.get("n_measurements", 0) == 0:
         return "does not fit"
-    s = f"{d['decisions_per_s']:.2f}/s, {d['joules_per_decision']:.0f} J"
+    dl, dh = iqr(n, b, arm, "decisions_per_s")
+    jl, jh = iqr(n, b, arm, "joules_per_decision")
+    s = (f"{d['decisions_per_s']:.2f} ({dl:.2f}--{dh:.2f})/s; "
+         f"{d['joules_per_decision']:.0f} ({jl:.0f}--{jh:.0f}) J")
     if d.get("exceeds_memory", 0):
         tot = d["n_measurements"] + d["exceeds_memory"]
-        s += f" ({d['n_measurements']} of {tot} fit)"
+        s += f"$^\\ast$ {d['n_measurements']}/{tot}"
     return s
 
 
@@ -87,7 +97,8 @@ rows = []
 for key in ["N10_B1", "N10_B4", "N10_B8", "N20_B1", "N20_B4", "N20_B8", "N50_B1", "N50_B4", "N50_B8"]:
     n, b = key[1:].split("_B")
     d = serv[key]
-    rows.append([n, b, cell(d["MEA"]), cell(d["A-compact"]), cell(d["A-filtered"])])
+    rows.append([n, b, cell(d["MEA"], n, b, "MEA"), cell(d["A-compact"], n, b, "A-compact"),
+                 cell(d["A-filtered"], n, b, "A-filtered")])
 write("serving.tex", rows, ["$N$", "Batch", "Adapter", "Text, all events", "Filtered text"], "rrccc")
 for key in ["N10_B4", "N20_B4", "N50_B1", "N50_B4"]:
     audit[f"serv_adapter_{key}"] = round(serv[key]["MEA"]["decisions_per_s"], 2)

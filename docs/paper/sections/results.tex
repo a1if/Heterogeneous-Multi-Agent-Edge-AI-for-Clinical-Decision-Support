@@ -23,10 +23,10 @@ At a single event the adapter has nothing to save. Its four tokens replace about
 \label{fig:cost}
 \end{figure}
 
-\textbf{Serving.} Single-request timing flatters neither arm because nothing is reused. Under batching, text that lists every event could not be served at 50 events, nor at a batch of eight at any $N \ge 10$, on the 12~GB card, whereas the adapter fitted every configuration with a peak of 10.0~GB. Against A-filtered, the adapter was within about 5\% for single requests and was ahead once requests were batched, with 10 to 30\% more decisions per second and 12 to 28\% less energy per decision (Table~\ref{tab:serving}). Filtered text fitted only some batches of eight, because its length depends on how many abnormal beats a window contains. Its figures at batch eight come only from the batches that fit, which are the shortest, so they favour filtered text. Prefix caching shortened every arm's prefill and did not change the ranking.
+\textbf{Serving.} Single-request timing flatters neither arm because nothing is reused. Under batching, text that lists every event could not be served at 50 events, nor at a batch of eight at any $N \ge 10$, on the 12~GB card, whereas the adapter fitted every configuration with a peak of 10.0~GB. Against A-filtered, the adapter was within about 5\% for single requests. Once requests were batched, its median throughput was 10 to 30\% higher and its median energy per decision 12 to 28\% lower (Table~\ref{tab:serving}), but at a batch of four the interquartile ranges of the two arms overlap for throughput at 10 and 50 events and for energy at 50 events, because the cost of filtered text varies with content. Filtered text fitted only some batches: 3 of 6 at a batch of eight for every $N$, and 12 of 15 at a batch of four for 50 events. Its figures for those cells describe only the batches that fit, which are its shortest prompts, so they favour filtered text and are not a measurement of filtered text at that batch size. These serving results come from one GPU, one serving framework and one adapter, and we read them as a promising result for this setup rather than a general advantage. Prefix caching shortened every arm's prefill and did not change the ranking.
 
 \begin{table}[t]
-\caption{Decisions per second and GPU energy per decision when requests are batched (final adapter, seed 101). ``Does not fit'': the batch exceeds the 12~GB memory cap.}
+\caption{Decisions per second and GPU board energy per decision when requests are batched: median (interquartile range) over all measurements of the cell (final adapter, first training seed). ``Does not fit'': the batch exceeds the 12~GB memory cap. $^\ast$Only the stated number of batches fitted; the values describe that subset (the shortest prompts) and not the arm at that batch size.}
 \label{tab:serving}
 \centering
 \small
@@ -36,7 +36,7 @@ At a single event the adapter has nothing to save. Its four tokens replace about
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig_serving.pdf}
-\caption{Throughput (top) and GPU energy per decision (bottom) when requests are batched, for 10, 20 and 50 events per prompt (final adapter, seed 101). A cross marks a configuration that did not fit in the memory cap of the 12~GB card. Filtered text at batch eight is plotted from the batches that fit, which are its shortest prompts.}
+\caption{Throughput (top) and GPU energy per decision (bottom) when requests are batched, for 10, 20 and 50 events per prompt (final adapter, first training seed; medians). A cross marks a configuration that did not fit in the memory cap of the 12~GB card. Filtered text at batch eight is plotted from the batches that fit, which are its shortest prompts.}
 \label{fig:serving}
 \end{figure}
 
