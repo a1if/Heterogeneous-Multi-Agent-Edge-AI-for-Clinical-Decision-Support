@@ -12,3 +12,7 @@ docs/
 
 # Checkpoints and raw result files are tracked: Appendix A.4 of the
 # dissertation tells readers they are archived here.
+
+# local scratch and tool output
+_local/
+graphify-out/

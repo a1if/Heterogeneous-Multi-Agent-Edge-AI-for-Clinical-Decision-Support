@@ -293,3 +293,11 @@ It continues the eval (A-compact from window 16, then A-filtered), then calibrat
 - [x] 2026-10-06: terminology pass: removed 'pre-registered/registered' (protocol now says the study was not registered with a third-party registry; analysis plan was time-stamped in version control), replaced internal names r3/r4/recipe/HN/SI with 'final adapter' / 'earlier adapter' / 'hard negatives' / 'side inputs' in text, captions, generated tables and figure legends
 
 - [ ] Tue 6 Oct 00:41: Deviation 29 (data-scaling curve) STOPPED by user request after ~3 min; no results. Resumable later via scripts/run_scaling.sh if wanted.
+
+## Codebase cleanup (2026-10-06, branch `cleanup`)
+- [x] Essential set from paper inputs + freeze manifest + import closure (graphify refresh): 65 scripts, 19 tests
+- [x] 120 supporting files moved with git mv to archive/phase1_support/ and archive/dissertation/docs/
+- [x] Committed untracked paper inputs: scripts/position_effect.py, p1_position_effect.json, variant training logs (learning-curve figure), second-sender filtered/compact logs, stop-at-tier eval
+- [x] Verified: paper tables rebuild identically, paper compiles, 49 CPU tests pass (Gemma GPU tests day2/day3 not run)
+- [ ] Rewrite README.md for the paper (still describes the dissertation)
+- [ ] Merge cleanup into phase1-step1 after review

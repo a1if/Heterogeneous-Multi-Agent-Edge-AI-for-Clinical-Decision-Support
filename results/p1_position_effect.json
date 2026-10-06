@@ -1,0 +1,77 @@
+{
+ "design": "Exploratory: accuracy by position of the window's most urgent beat (first/middle/last third), stratified DS2 windows with N >= 10 and a non-routine reference tier. Logic copied from reports/make_figures.py fig_why_text_fails.",
+ "by_arm": {
+  "text": {
+   "First third": {
+    "n": 166,
+    "accuracy": 0.30120481927710846
+   },
+   "Last third": {
+    "n": 47,
+    "accuracy": 0.3829787234042553
+   },
+   "Middle third": {
+    "n": 73,
+    "accuracy": 0.1917808219178082
+   }
+  },
+  "adapter": {
+   "First third": {
+    "n": 498,
+    "accuracy": 0.7831325301204819
+   },
+   "Last third": {
+    "n": 141,
+    "accuracy": 0.7446808510638298
+   },
+   "Middle third": {
+    "n": 219,
+    "accuracy": 0.7351598173515982
+   }
+  }
+ },
+ "by_adapter_seed": {
+  "MEA:r4_seed101": {
+   "First third": {
+    "n": 166,
+    "accuracy": 0.7228915662650602
+   },
+   "Last third": {
+    "n": 47,
+    "accuracy": 0.723404255319149
+   },
+   "Middle third": {
+    "n": 73,
+    "accuracy": 0.6438356164383562
+   }
+  },
+  "MEA:r4_seed202": {
+   "First third": {
+    "n": 166,
+    "accuracy": 0.7590361445783133
+   },
+   "Last third": {
+    "n": 47,
+    "accuracy": 0.7446808510638298
+   },
+   "Middle third": {
+    "n": 73,
+    "accuracy": 0.7945205479452054
+   }
+  },
+  "MEA:r4_seed303": {
+   "First third": {
+    "n": 166,
+    "accuracy": 0.8674698795180723
+   },
+   "Last third": {
+    "n": 47,
+    "accuracy": 0.7659574468085106
+   },
+   "Middle third": {
+    "n": 73,
+    "accuracy": 0.7671232876712328
+   }
+  }
+ }
+}
