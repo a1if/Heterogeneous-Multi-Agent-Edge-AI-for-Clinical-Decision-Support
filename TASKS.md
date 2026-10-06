@@ -301,3 +301,4 @@ It continues the eval (A-compact from window 16, then A-filtered), then calibrat
 - [x] Verified: paper tables rebuild identically, paper compiles, 49 CPU tests pass (Gemma GPU tests day2/day3 not run)
 - [ ] Rewrite README.md for the paper (still describes the dissertation)
 - [ ] Merge cleanup into phase1-step1 after review
+- [x] Size cleanup: deleted 25 resume + smoke checkpoints (225 MB), cache/item7 replay cache, _local scratch, __pycache__; git gc (.git 200 MB -> 56 MB); 16 dissertation-only checkpoints untracked and moved to D:\Dissertationrchived_checkpoints
