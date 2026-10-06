@@ -1,174 +1,221 @@
-# Heterogeneous Multi-Agent Edge AI for Clinical Decision Support
+# Efficient Communication Between a Non-Transformer Perception Agent and a Frozen Gemma Language Model
 
-Research code for a dissertation investigating whether a learned adapter that
-projects a non-transformer perception model's internal feature representation
-directly into a language model's input embedding space can replace a
-text-based agent-to-agent interface, reducing inter-agent communication cost
-(tokens, latency, memory) while preserving task accuracy  and at what
-auditability cost.
+Code, results and paper for a communication-fidelity benchmark of the channel between an ECG heartbeat classifier
+and a frozen language model: plain text, a filtered text message, or a learned latent channel of virtual tokens.
 
-## Research Question
+**Status:** manuscript in preparation (journal submission planned for October 2026). Every number in the paper is
+rebuilt from the files in this repository by two scripts (see [Reproduce](#reproduce)).
 
-> Can a small, learned adapter that projects a non-transformer perception
-> model's internal feature representation directly into a language model's
-> input embedding space,  replacing a text-based structured interface ,
-> reduce inter-agent communication cost (tokens, latency, memory) compared to
-> the text-based baseline, while preserving task accuracy, and what
-> auditability cost does this trade-off impose relative to the structured
-> text interface?
+## The question
 
-## System Overview
+Agents built on language models usually talk to each other in text. When the sender is not a language model, for
+example a convolutional network watching a sensor, text has to be written out, read back in, and paid for in prompt
+tokens, time and energy on every decision. Latent communication replaces text with continuous vectors injected
+directly into the receiver's input, but it has only been studied between transformers.
 
-The system is a two-agent pipeline evaluated under two competing interfaces
-for passing information between agents.
+This project asks what each kind of channel **costs** and what it **preserves** when a non-transformer sender talks
+to a frozen language model on edge hardware (one 12 GB consumer GPU):
 
-**Perception Agent** (`perception/`) — a CNN-LSTM classifier trained on the
-five-way AAMI EC57 arrhythmia classification task from single-lead ECG
-windows. Three 1D convolutional blocks feed a bidirectional LSTM, reduced by
-a unidirectional context LSTM to a 32-dimensional context vector immediately
-before the classification head. This context vector is the sole quantity
-passed downstream to the adapter.
+| | Research question |
+|---|---|
+| RQ1 | Cost: how much prompt processing time, memory, throughput and energy does each channel need? |
+| RQ2 | Accuracy: does the receiver still reach the right decision? |
+| RQ3 | Recoverability: is event-level information still recoverable from the latent channel? |
 
-**Reasoning Agent** (`reasoning/`) — Gemma 4 E4B, loaded via HuggingFace
-`transformers` with 4-bit (NF4) quantisation through `bitsandbytes`, frozen
-in both experimental arms (no fine-tuning of the LLM itself).
+## The system
 
-**Two arms, one controlled variable** — whether an event crosses the
-Perception-to-Reasoning boundary as:
-
-- **Arm A (baseline):** generated JSON text, following a structured
-  text-based interface.
-- **Arm B (treatment):** adapter-projected virtual tokens. `VirtualTokenAdapter`
-  is a single linear layer mapping the Perception Agent's 32-dimensional
-  context vector directly into Gemma 4 E4B's 2,560-dimensional input
-  embedding space, bypassing text generation entirely.
-
-Every other variable — model weights, input events, prompt scaffolding, test
-set, decoding strategy, run order, timer boundaries — is held identical
-across both arms. Four dependent variables are measured directly (token
-count, generation latency, VRAM footprint, task accuracy), plus auditability,
-assessed separately via a held-out linear-probe protocol that recovers the
-true class label from each arm's transmitted representation.
-
-## Dataset
-
-The MIT-BIH Arrhythmia Database (Moody and Mark, 2001), accessed via the
-`wfdb` Python library under its Open Data Commons Attribution licence. Paced
-recordings are excluded following standard practice, leaving 44 recordings.
-Records are split by patient (inter-patient split, following de Chazal,
-O'Dwyer and Reilly, 2004) into DS1 (training) and DS2 (testing), with no
-patient appearing in both sets, to avoid morphology leakage inflating
-reported accuracy.
-
-The raw dataset is not included in this repository. See
-`data_prep.py` for the preprocessing pipeline that extracts, windows, and
-splits the data once acquired.
-
-## Repository Structure
-
-```
-perception/           CNN-LSTM Perception Agent (model, schema, checkpoint dir)
-reasoning/             Arm A / Arm B reasoning pipeline: baseline arm, adapter
-                       arm, virtual-token adapter, prompt templates, training
-tests/                 pytest suite
-archive/dissertation/  Scripts behind the submitted dissertation's results (unchanged)
-reports/               Phase 1 technical report and figure scripts
-results/               Raw JSON outputs from the scripts below
-results_ledger.json    Single source of numeric truth, consumed by render_ledger.py
+```mermaid
+flowchart LR
+    ECG["ECG beats<br/>(MIT-BIH, INCART)"] --> S["Sender<br/>CNN-LSTM + RR features<br/>(perception/)"]
+    S -- "events as compact JSON text" --> R
+    S -- "only abnormal events (filtered text)" --> R
+    S -- "32-d vector per event" --> A["Adapter<br/>linear, 4 virtual tokens per event<br/>(reasoning/multi_event_adapter.py)"]
+    A -- "virtual tokens" --> R["Receiver<br/>Gemma 4 E4B, frozen, 4-bit<br/>schema-constrained decoding"]
+    R --> T["Most urgent triage tier<br/>among 1-50 beats"]
 ```
 
-Current (Phase 1, journal extension) scripts sit flat at the repository root
-(`p1_*.py`, `data_prep.py`, `train_perception_agent*.py`, `render_ledger.py`).
-Scripts that produced the submitted dissertation's results were moved to
-`archive/dissertation/` unchanged; run them from the repository root with the
-root on the import path, e.g. `PYTHONPATH=. python archive/dissertation/e1_ablation.py`.
-See `PROJECT_LAYOUT.md` and `archive/dissertation/README.md`.
+- **Sender:** a CNN-LSTM heartbeat classifier with RR-interval features, trained on MIT-BIH (inter-patient split:
+  DS1 for training, DS2 for testing). A ResNet1D sender is used as a second, independent sender.
+- **Channels (arms):** compact JSON text; filtered text listing only abnormal beats; calibrated variants of both; and
+  the multi-event adapter, a linear map from each event's 32-d vector to four virtual tokens in Gemma's embedding space.
+- **Receiver:** Gemma 4 E4B, frozen and 4-bit quantised, with decoding constrained to the output schema.
+- **Task:** report the most urgent triage tier among 1 to 50 heartbeats. The correct answer is a fixed rule over the
+  sender's outputs, so every error is attributable to the channel, not to the receiver's clinical judgement. This is a
+  benchmark of communication fidelity, not of clinical reasoning or clinical value.
 
-## Requirements
+## Main results
 
-- Python 3.13
-- PyTorch with CUDA support, `transformers`, `bitsandbytes`
-- `wfdb`, `numpy`, `scipy`, `pandas`, `scikit-learn`
-- Access to `google/gemma-4-E4B-it` (gated model; requires licence acceptance
-  and `huggingface-cli login`)
-- An NVIDIA GPU with at least 12GB VRAM (development and evaluation were
-  performed on a single RTX 5070, 12GB GDDR7)
+Held-out patients, three adapter training runs, patient-cluster bootstrap intervals (20,000 resamples), analysis plan
+fixed before the test data were used.
 
-## Reproducing the Experiments
+| Finding | Result |
+|---|---|
+| Prompt-processing time, adapter vs compact text | **−24%, −50%, −78%** at 10, 20, 50 events |
+| Context memory saved at 50 events | 460 MB |
+| Balanced accuracy, adapter vs calibrated text | **0.83 vs 0.73** at 10 and 20 events (difference +0.10, 95% CI excludes 0) |
+| Filtered text vs adapter | filtered text is 0.11 to 0.17 more accurate and as fast for single requests |
+| Batched serving, adapter vs filtered text | median throughput 10 to 30% higher, median energy per decision 12 to 28% lower |
+| Recoverability | heart rate, interval and abnormal-run information is decodable from the virtual tokens |
+| External test (INCART, 75 records, analysis frozen in advance) | non-inferior and superior to calibrated text (H1, H2 confirmed); not non-inferior to filtered text (H3); first token 27 to 77% faster |
+| Second sender (ResNet1D) | the same pattern largely holds |
 
-1. Acquire the MIT-BIH Arrhythmia Database and run `data_prep.py` to produce
-   the DS1/DS2 splits under `data/`.
-2. Train the Perception Agent: `python train_perception_agent.py`.
-3. Train the adapter (Arm B): see `reasoning/adapter_training.py`.
-4. Run the comparison and statistics scripts from the repository root, e.g.
-   `PYTHONPATH=. python archive/dissertation/day6_run_comparison.py`,
-   `PYTHONPATH=. python archive/dissertation/e0_statistics.py`,
-   `PYTHONPATH=. python archive/dissertation/e1_ablation.py`.
-5. Regenerate the results ledger with `render_ledger.py`.
+**Practical rule:** when the receiver's question is known in advance, filter on the sender side and send text; a
+latent channel earns its place when many events must be carried at a predictable cost.
 
-Each script's own docstring documents its exact invocation and outputs.
+Scope: one receiving model (Gemma 4 E4B), one GPU and one serving framework; whether the results transfer to other
+receivers is untested.
 
-## Where Each Reported Result Comes From
+## Repository layout
 
-Every figure and table in the dissertation is computed from a file in
-`results/`. This table maps each one to the script that produced it.
+Only the code needed to understand the system and rebuild the paper is at the top level. Development diagnostics,
+run queues and the supervisor report are kept, with their original paths, in [`archive/`](archive/).
 
-| In the dissertation | Produced by | Raw file in `results/` |
+```
+perception/              Sender: CNN-LSTM (+RR features), ResNet1D, event schema, replay agent
+reasoning/               Receiver side: Gemma loader, multi-event adapter, prompts, constrained decoding, targets
+p1_item7_common.py       Shared pipeline: replay of a split through the sender, windows, arms
+p1_item7_*.py            Pipeline steps: test windows, adapter training, evaluation, calibration, timing
+p1_*_analysis.py         Analyses that turn raw outputs into the numbers in the paper (CPU)
+p1_serving.py            Batched serving benchmark (throughput, memory, GPU energy)
+incart_prep.py, p1_incart_windows.py, p1_confirmatory_analysis.py   External INCART test
+p1_freeze.py             Freeze manifest (SHA-256 of code, checkpoints, calibration) for the INCART test
+scripts/make_paper_tables.py, scripts/make_paper_figures.py         Every table and figure in the paper
+results/                 Raw per-window outputs and analysis results (JSON)
+docs/paper/              Paper source (LaTeX, elsarticle)
+docs/analysis_plan.md    Analysis plan and its dated change log; docs/confirmatory_plan.md for INCART
+tests/                   Unit tests (CPU) and two GPU integration tests
+```
+
+Some module names (`p1_step1_...`, `day7_...`, `ablation_common.py`) come from the dissertation this project grew out of;
+they are kept because later steps import them and the frozen INCART manifest hashes them by path.
+
+## Reproduce
+
+### 1. Rebuild the paper's tables and figures (CPU, about a minute)
+
+```bash
+pip install -r requirements.txt
+python scripts/make_paper_tables.py
+python scripts/make_paper_figures.py
+cd docs/paper && latexmk -pdf main.tex
+```
+
+Both scripts read only `results/`, re-check the numbers quoted in the text, and write `docs/paper/tables/` and
+`docs/paper/figures/`.
+
+| Paper item | Result file(s) | Produced by |
 |---|---|---|
-| Table 4.1, tokens / latency / accuracy | `archive/dissertation/day6_run_comparison.py` | `day6_results.json.bak_pre_rerun_20260816` |
-| Table 4.1, energy and VRAM | `measure_comm_cost.py` | `comm_cost_results.json` |
-| Table 4.1, confidence intervals | `archive/dissertation/e0_statistics.py` | `headline_reduction_cis.json` |
-| Table 4.2, paired efficiency detail | `measure_comm_cost.py` | `comm_cost_results.json` |
-| Figure, paired distributions | `archive/dissertation/make_headline_figures.py` | `day6_results.json.bak_pre_rerun_20260816` |
-| Figure, efficiency forest plot | `archive/dissertation/make_headline_figures.py` | `headline_reduction_cis.json` |
-| Table 4.3, class recoverability | `day7_auditability_probe.py`, `archive/dissertation/day7_probe_target_comparison.py` | `day7_auditability_results_v2.json`, `day7_probe_target_comparison.json` |
-| Figure, compression-ratio ablation | `archive/dissertation/e1_ablation.py` | `e1_ablation_results.json` |
-| Table, training-budget ladder | `archive/dissertation/e3_training_compute_ladder.py` | `e3_training_ladder_results.json` |
-| Training-set-size sweep | `archive/dissertation/e4_training_set_size.py`, `archive/dissertation/e4b_per_class_27.py` | `e4_training_set_size_results.json` |
-| Figure, embedding-norm distributions | `archive/dissertation/day3_norm_check.py`, `archive/dissertation/export_norm_check_raw.py` | `day3_norm_check_results.json`, `norm_check_raw_arrays.npz` |
-| Figure, S-class recall progression | `archive/dissertation/s_class_expanded_check.py`, `archive/dissertation/s_class_matched_check.py`, `archive/dissertation/s_class_headroom_bias_check.py`, `archive/dissertation/check_s_class_per_record.py` | `s_class_*.json` |
-| Figure, auxiliary reconstruction objective | `archive/dissertation/run_aux_experiment.py`, `archive/dissertation/train_perception_agent_aux.py`, `archive/dissertation/day7_auditability_probe_aux.py` | `aux_reconstruction_results.json`, `aux_sanity_seed101.json` |
-| Figure, probe confusion matrix | `day7_auditability_probe.py` | `day7_auditability_results_v2.json` |
-| Figure, seed-to-seed variance | `archive/dissertation/e2_seed_variance.py` | `e2_seed_variance_results.json` |
-| ECG model accuracy | `train_perception_agent.py`, `perception_eval.py` | `perception_eval_results.json` |
-| Quantisation coupling pilot | `archive/dissertation/quantization_coupling_pilot.py` | `quantization_coupling_pilot_results.json` |
+| Cost table | `p1_e3b_context_costs.json`, `p1_item7_ttd.json` | `p1_e3b_context_costs.py`, `p1_item7_ttd.py` |
+| Accuracy table, accuracy figure | `p1_item7_r4_analysis.json` | `p1_item7_r4_analysis.py` |
+| Filtered text | `p1_item7_filtered.json` | `p1_item7_filtered.py` |
+| Serving table and figure | `p1_serving.json` | `p1_serving.py` |
+| Recoverability | `p1_item7_r4_analysis.json`, `p1_item7_runlen.json` | `p1_item7_slot_decoder.py`, `p1_item7_runlen.py` |
+| Second sender | `p1_second_sender_analysis.json` | `p1_second_sender_analysis.py` |
+| Compression sweep, ablation | `p1_sweep_analysis.json`, `p1_dev27_kseeds.json`, `p1_dev26_ablation.json` | `p1_sweep_analysis.py`, `p1_seed_group_analysis.py --dev 27`, `--dev 26` |
+| INCART tables | `p1_confirmatory_incart.json`, `p1_incart_timing_n50_capped.json` | `p1_confirmatory_analysis.py`, `p1_incart_timing_recheck.py` |
+| Bandwidth | `p1_bandwidth.json` | `p1_bandwidth.py` |
+| Learning curves | `p1_learning_curves.json` | `p1_learning_curves.py` |
+| Position of the deciding beat | `p1_position_effect.json` | `scripts/position_effect.py` |
 
-`results_ledger.json` records the same provenance machine-readably: each
-reported number, the file it came from, and when it was produced.
+### 2. Re-run the analyses from the raw outputs (CPU)
 
-### Two provenance notes
+Every analysis re-derives its numbers from the committed per-window outputs in `results/`. Each one was re-run from a
+clean checkout and reproduced the committed result exactly. They run on the CPU but load the sender checkpoint, which
+was saved on a GPU, so run them on a machine with CUDA. The first one also rebuilds the sender's replay cache
+(about 4 minutes per split).
 
-**The headline efficiency pass.** Table 4.1's latencies come from
-`day6_results.json.bak_pre_rerun_20260816`, not from `day6_results.json`. The
-harness was re-run after the reported pass; the re-run agrees exactly on prompt
-tokens and accuracy and to within 1 ms on Arm B, but gives 9951.1 ms for Arm A
-against the reported 9892.2 ms. Both files are kept here, and the reported pass
-is the one cited throughout the dissertation.
+```bash
+python p1_item7_r4_analysis.py                 # accuracy, cost, recoverability (about 16 min)
+python p1_seed_group_analysis.py --dev 26      # side-input ablation (about 8 min)
+python p1_seed_group_analysis.py --dev 27      # tokens per event, three runs (about 8 min)
+python p1_sweep_analysis.py                    # compression sweep (about 4 min)
+python p1_item7_runlen.py                      # abnormal-run recoverability (about 3 min)
+python p1_confirmatory_analysis.py             # INCART hypotheses H1-H4 (about 1.5 min)
+python p1_e3b_context_costs.py
+python p1_bandwidth.py
+python p1_learning_curves.py
+python scripts/position_effect.py
+P1_ENCODER=perception/checkpoints/resnet1d_rr_seed0.pt P1_ENCODER_TAG=_res python p1_second_sender_analysis.py   # needs the second sender's checkpoint (about 13 min)
+```
 
-**The sixty-event invariance check.** Its raw per-event output was overwritten
-when the harness was re-run at the larger sample size and is not recoverable. It
-survives only in the project's contemporaneous record, is used for that
-invariance check alone, and is never a source for any other reported figure.
+### 3. Re-run everything (GPU)
 
-## Trained Checkpoints
+Requirements: an NVIDIA GPU with 12 GB, a Hugging Face account with the
+[Gemma licence](https://huggingface.co/google/gemma-4-E4B-it) accepted (`huggingface-cli login`), and PhysioNet access
+for the data. Each step is resumable and writes to `results/`.
 
-`perception/checkpoints/` holds the CNN-LSTM ECG model; `reasoning/checkpoints/`
-holds every adapter. `reasoning/checkpoints/virtual_adapter_day5_larger.pt` is
-the headline adapter the dissertation reports on. The scripts look for them at
-exactly these paths.
+```bash
+# Data: MIT-BIH (downloaded and split into DS1/DS2) and INCART (download incartdb 1.0.0 to data/incartdb/ first)
+python data_prep.py
 
-The headline adapter's training seed was not recorded and is unrecoverable; the
-later ablation checkpoints record theirs. Appendix A.4 of the dissertation sets
-out the full environment and checkpoint configuration.
+# Sender (checkpoint perception/checkpoints/cnn_lstm_rr_seed0.pt is included), then replay both splits through it
+python train_perception_agent_rr.py --seed 0
+python -c "from p1_item7_common import replay_split; replay_split('ds1'); replay_split('ds2')"
 
-## Notes on Scope
+# DS2 test windows
+python p1_item7_testset_v2.py
 
-This repository contains the experimental code, the trained checkpoints, and the
-raw result files supporting the dissertation. It does not include the
-dissertation manuscript, the MIT-BIH dataset (`data_prep.py` fetches it), the
-derived `.npz` splits, or the Python virtual environment; see `.gitignore`.
-Run logs are omitted as they embed local filesystem paths.
+# Final adapter, three runs (checkpoints reasoning/checkpoints/p1_item7_mea_r4_seed{101,202,303}.pt are included)
+python p1_item7_train.py --recipe r4 --seed 101     # and 202, 303
+
+# DS2 evaluation: adapter runs and text arms, calibration logits, token counts, timing, serving
+python p1_item7_eval.py --split ds2v2 --suffix r4 --arms MEA:r4_seed101 MEA:r4_seed202 MEA:r4_seed303 A-compact A-filtered
+python p1_item7_calib.py collect && python p1_item7_calib.py analyse
+python p1_item7_filtered.py collect --text-arm A-compact
+python p1_item7_filtered.py collect --text-arm A-filtered
+python p1_item7_filtered.py tokens && python p1_item7_filtered.py timing
+python p1_item7_ttd.py
+python p1_serving.py
+
+# External test on INCART with the frozen system
+python p1_freeze.py
+python incart_prep.py
+python -c "from p1_item7_common import replay_split; replay_split('incart')"
+python p1_incart_windows.py
+python p1_item7_eval.py --split incart --arms MEA:r4_seed101 MEA:r4_seed202 MEA:r4_seed303
+python p1_item7_eval.py --split incart --stop-at-tier --arms A-compact A-filtered
+python p1_item7_filtered.py collect --text-arm A-compact --split incart
+python p1_item7_filtered.py collect --text-arm A-filtered --split incart
+python p1_item7_filtered.py timing --split incart
+python p1_incart_timing_recheck.py
+python p1_confirmatory_analysis.py
+```
+
+The second sender uses the same commands with `P1_ENCODER=perception/checkpoints/resnet1d_rr_seed0.pt` and
+`P1_ENCODER_TAG=_res` set, the evaluation suffix `r4_res` and arms `MEA:r4_res_seed101` and so on (train the sender
+with `python train_perception_agent_rr.py --arch resnet1d_rr --seed 0`; its checkpoints are not included).
+Ablation and compression variants use `p1_item7_train.py --recipe r4hn | r4k1 | r4k2 | r4k8`.
+
+Reference timings on an RTX 5070 (12 GB): one DS2 evaluation of all arms about 10 hours; INCART about 10 hours;
+serving benchmark 3 to 4 hours.
+
+### Tests
+
+```bash
+pytest                                                               # all tests
+pytest --ignore=tests/test_day2_baseline_arm.py --ignore=tests/test_day3_adapter.py   # CPU only (49 tests)
+```
+
+## Data
+
+- [MIT-BIH Arrhythmia Database](https://physionet.org/content/mitdb/1.0.0/) (PhysioNet, ODC-By), inter-patient split
+  of de Chazal et al. (DS1 training, DS2 test).
+- [St Petersburg INCART 12-lead Arrhythmia Database](https://physionet.org/content/incartdb/1.0.0/) (PhysioNet), used
+  only as an external test set.
+
+Raw data are not included; the scripts above download or convert them.
+
+## Methods notes
+
+- **Analysis plan.** The hypotheses, margins and tests were written down before each test set was used, in
+  [`docs/analysis_plan.md`](docs/analysis_plan.md), with a dated log of every later change and why.
+- **Freeze.** Before the INCART test, code, checkpoints and calibration were fixed by SHA-256 hashes in
+  `results/p1_freeze_manifest.json` (git tag `r4-confirmatory`).
+- **Statistics.** Patient-cluster bootstrap (20,000 resamples), non-inferiority margin −0.05, hypotheses tested in a
+  fixed sequence at α = 0.05.
+- **Energy.** GPU board power from NVML sampled at 100 Hz during each generation call and integrated with the
+  trapezoid rule; GPU memory capped at 90% so that a batch that does not fit is recorded instead of paging.
 
 ## Author
 
-Alif Tasbir
+Alif Tasbir. This work extends the author's MSc dissertation.
