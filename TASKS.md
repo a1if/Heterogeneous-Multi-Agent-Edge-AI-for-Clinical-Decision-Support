@@ -303,3 +303,4 @@ It continues the eval (A-compact from window 16, then A-filtered), then calibrat
 - [ ] Merge PR #4 (cleanup -> main) after review; repo is public, so the paper draft becomes public on merge
 - [x] Size cleanup: deleted 25 resume + smoke checkpoints (225 MB), cache/item7 replay cache, _local scratch, __pycache__; git gc (.git 200 MB -> 56 MB); 16 dissertation-only checkpoints untracked and moved to D:\Dissertationrchived_checkpoints
 - [x] Number audit (2026-10-06): ~160 prose numbers checked against results; 13 corrected (serving fit at N=50, bandwidth ratio scope, per-seed false-alarm cut, single-event token saving, change-log count 29, annotation-scored metrics recomputed on the primary set via p1_annotation_check.py, plus 7 wording fixes); make_paper_tables.py now checks 21 prose numbers on every build
+- [x] demo.py: one window through compact text, filtered text and the adapter (CPU mode with --no-llm); README "Try it" and "Tests" sections

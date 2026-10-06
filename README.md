@@ -80,9 +80,49 @@ python scripts/make_paper_figures.py     # every figure
 Re-running the analyses and the full GPU pipeline is described step by step in
 [docs/REPRODUCE.md](docs/REPRODUCE.md).
 
+## Try it
+
+`demo.py` picks a window of heartbeats from a test set, shows what the sender saw beat by beat, what each channel
+sends, and how the frozen Gemma receiver answers through each one.
+
+```bash
+python data_prep.py                              # once: download MIT-BIH and build the splits
+python demo.py --no-llm                          # CPU only: the window and the three messages, no Gemma
+python demo.py                                   # an urgent 10-beat window through all three channels
+python demo.py --n 50 --tier priority --pick 3   # another window: 1, 5, 10, 20 or 50 beats; routine/priority/urgent
+python demo.py --record 208 --any-tier           # windows from one MIT-BIH record
+python demo.py --split incart --n 20             # the external INCART test set (after incart_prep.py)
+```
+
+Without `--no-llm` it needs a CUDA GPU with about 10 GB free and access to
+[Gemma 4 E4B](https://huggingface.co/google/gemma-4-E4B-it) (`huggingface-cli login`). Example output for an urgent
+window whose one ventricular beat has confidence 0.957:
+
+```
+[A-compact]  tier: priority (WRONG)   | prompt 1106 tokens | answer 101 tokens in 16.6 s
+[A-filtered] tier: urgent (correct)   | prompt 682 tokens  | answer 53 tokens in 8.6 s
+[Adapter]    tier: priority (WRONG)   | prompt 553 tokens  | answer 59 tokens in 9.6 s
+```
+
+Compact text misread the confidence as below the 0.85 threshold, the failure the paper describes for long lists;
+the filtered message, which lists only that beat, did not. Single windows vary, so try several with `--pick`; the
+paper reports accuracy over 1,195 windows.
+
+## Tests
+
+```bash
+pytest --ignore=tests/test_day2_baseline_arm.py --ignore=tests/test_day3_adapter.py   # 49 CPU tests, under a minute
+pytest                                          # adds two GPU tests that load Gemma
+python scripts/make_paper_tables.py             # rebuilds the tables and checks 21 numbers quoted in the paper's text
+```
+
+The unit tests cover the adapter, prompts, constrained decoding, resumable checkpoints and the data conversion.
+The table script fails if a number in the paper no longer matches the result files.
+
 ## Repository layout
 
 ```
+demo.py              Try one window through all three channels
 perception/          Sender: CNN-LSTM with RR features, ResNet1D, event schema
 reasoning/           Receiver: Gemma loader, multi-event adapter, prompts, constrained decoding
 p1_item7_*.py        Pipeline: test windows, adapter training, evaluation, calibration, timing
