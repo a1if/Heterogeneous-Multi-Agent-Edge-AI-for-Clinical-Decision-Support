@@ -1,0 +1,38 @@
+% Figure 2: how the adapter is trained, included from sections/system.tex.
+% Grey fill = frozen; blue with thick border = trained; red = loss and the backward path (dashed).
+\definecolor{cL}{HTML}{2A78D6}
+\definecolor{cX}{HTML}{C0392B}
+{\renewcommand{\baselinestretch}{1}\selectfont
+\begin{tikzpicture}[font=\normalsize,
+  frozen/.style={draw=black!55, rounded corners=3pt, align=center, inner sep=6pt, fill=black!6, text width=#1},
+  io/.style={draw=black!40, rounded corners=3pt, align=center, inner sep=6pt, fill=white, text width=#1},
+  train/.style={draw=cL, line width=2pt, rounded corners=3pt, align=center, inner sep=6pt, fill=cL!8, text width=#1},
+  loss/.style={draw=cX, line width=1pt, rounded corners=3pt, align=center, inner sep=6pt, fill=cX!7, text width=#1},
+  arr/.style={-{Stealth[length=2.4mm]}, line width=0.9pt, black!60},
+  back/.style={-{Stealth[length=2.4mm]}, line width=1.1pt, dashed, cX!80},
+  tok/.style={draw=cL!80!black, fill=cL!35, minimum width=2.1mm, minimum height=4.2mm, inner sep=0pt, line width=0.4pt},
+  lab/.style={font=\small, text=black!75, align=center, inner sep=1.5pt}]
+
+\node[io=40mm] (win) at (0,0) {\textbf{Training window}\\$N$ events, $N$ from 1 to 50,\\incl.\ hard-negative routine windows};
+\node[frozen=40mm] (per) at (6.8,0) {\textbf{Perception agent}\\frozen\\gives $\mathbf{z}_i\in\mathbb{R}^{32}$ and side inputs $\mathbf{s}_i$};
+\draw[arr] (win)--(per);
+
+\node[train=60mm] (ad) at (14.6,0) {\textbf{Adapter}\\$\mathbf{T}_i=\gamma\,\mathrm{norm}(\mathbf{W}[\mathbf{z}_i;\mathbf{s}_i]+\mathbf{b}+\mathbf{P}_i)$\\880{,}641 trainable parameters};
+\draw[arr] (per)--(ad);
+
+\node[frozen=46mm, minimum height=26mm] (llm) at (24.0,0) {\textbf{Reasoning agent (frozen)}\\input: scaffold text, virtual tokens,\\then the correct answer tokens\\\emph{(teacher forcing)}};
+\draw[arr] (ad.east)--(llm.west);
+\foreach \i in {0,...,7}{\node[tok] at (18.85+0.27*\i,0.55) {};}
+\node[lab, anchor=north] at (19.7,-0.05) {$4N$ virtual\\tokens};
+
+\node[io=46mm] (tgt) at (24.0,5.4) {\textbf{Target answer}\\JSON: tier, templated justification,\\guideline fact\\(built from the reference tier)};
+\draw[arr] (tgt)--(llm);
+
+\node[loss=46mm] (ls) at (24.0,-5.0) {\textbf{Loss}\\$L = 4\,L_{\mathrm{tier}} + L_{\mathrm{rest}}$\\cross-entropy over the answer tokens only};
+\draw[arr] (llm)--(ls);
+
+\draw[back] (ls.west)--(ad.south |- ls.west)--(ad.south);
+\node[lab, text=cX!80!black, anchor=south west] at (14.9,-4.6) {gradients pass through the frozen model;\\only the adapter is updated};
+
+\node[io=44mm] (sel) at (6.8,-5.0) {\textbf{Schedule and selection}\\AdamW, lr $5\times10^{-4}$, batch of one;\\validation every quarter epoch,\\best balanced accuracy kept};
+\end{tikzpicture}}

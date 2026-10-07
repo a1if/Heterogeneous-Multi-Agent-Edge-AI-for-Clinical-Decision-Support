@@ -361,6 +361,62 @@ checks = {
     "24\\%": audit["ttft_rel_10"] == -24, "50\\%": audit["ttft_rel_20"] == -50, "78\\%": audit["ttft_rel_50"] == -78,
     "36\\%": audit["ttd_rel_50"] == -36,
 }
+
+# ---- Prose numbers outside the tables: each phrase must appear in the text and match the result files ----------------
+allprose = "\n".join((ROOT / "docs" / "paper" / "sections" / f"{s}.tex").read_text(encoding="utf-8")
+                     for s in ("system", "protocol", "results", "discussion"))
+rng2 = lambda v: (round(min(v), 2), round(max(v), 2))
+srows = load("p1_serving.json")["rows"]
+fit = lambda arm, n, b: all(not r.get("exceeds_memory") for r in srows if (r["arm"], r["n"], r["batch"]) == (arm, n, b))
+mea_peak_gib = max(max(r.get("prefill_peak_mb") or 0, r.get("prefill_cached_peak_mb") or 0)
+                   for r in srows if r["arm"] == "MEA" and not r.get("exceeds_memory")) / 1024
+med = lambda arm, n, f: float(np.median([r[f] for r in srows if (r["arm"], r["n"], r["batch"]) == (arm, n, 1)]))
+b1_energy_saving = [round((1 - med("MEA", n, "joules_per_decision") / med("A-filtered", n, "joules_per_decision")) * 100) for n in (10, 20, 50)]
+fa = r4["false_alarm"]
+fa_cut = [round((1 - fa[f"MEA:r4_seed{s}"]["all_routine"] / fa[f"MEA:r3_seed{s}"]["all_routine"]) * 100) for s in (101, 202, 303)]
+ev = load("p1_item7_eval_ds2v2_r4.json")["rows"]
+fa50 = []
+for s in (101, 202, 303):
+    rt = [x for x in ev if x["arm"] == f"MEA:r4_seed{s}" and x["n"] == 50 and x["reference"] == "routine"]
+    fa50.append(round(sum(x["tier"] != "routine" for x in rt) / len(rt) * 100, 1))
+ann = load("p1_annotation_check.json")["by_n"]
+rule_sens = rng2([ann[n]["reference_rule"]["sensitivity"] for n in ann])
+rule_spec = rng2([ann[n]["reference_rule"]["specificity"] for n in ann])
+mea_sens = rng2([ann[n][f"MEA:r4_seed{s}"]["sensitivity"] for n in ("5", "10", "20", "50") for s in (101, 202, 303)])
+text_sens = rng2([ann[n]["A-compact"]["sensitivity"] for n in ("10", "20", "50")])
+dec = ab["decodability"]
+hn = [dec[f"MEA:r4hn_seed{s}"][sl] for s in (101, 202, 303) for sl in ("slot0", "slot49")]
+hn_r2_max = round(max(max(d["heart_rate_r2"], d["rr_r2"]) for d in hn), 2)
+hn_run3 = rng2([d["run3"] for d in hn])
+bwb = load("p1_bandwidth.json")["summary"]
+ratio = lambda n: [bwb[n]["median_bytes"]["latent_i8"] / bwb[n]["median_bytes"][a] for a in ("compact_json_zlib", "filtered_json_zlib", "binary_fields")]
+b1 = bwb["1"]["median_bytes"]
+tok1 = load("p1_item7_ttd.json")["summary"]["1"]["prompt_tokens_median"]
+n_log = len(set(re.findall(r"(?m)^\*\*Deviation (\d+)", (ROOT / "docs" / "analysis_plan.md").read_text(encoding="utf-8"))))
+anom = load("p1_items6_7_decoder_anomaly.json")["item7"]
+auroc = rng2([v["tier_decoder"] for v in anom["arm_b_error_auroc_e80"].values()])
+noise = rng2([anom["corruption_auroc"][k]["mahalanobis"] for k in ("gaussian_noise_0dB", "powerline_60Hz")])
+prose_checks = {
+    "nor at a batch of four at 50 events": fit("A-compact", 50, 1) and not fit("A-compact", 50, 4) and not fit("A-compact", 10, 8),
+    "peak of about 10~GB": 9.5 <= mea_peak_gib <= 10.5,
+    "3 to 12\\% less energy per decision": (min(b1_energy_saving), max(b1_energy_saving)) == (3, 12),
+    "by 44 to 80\\%": (min(fa_cut), max(fa_cut)) == (44, 80),
+    "(0\\% to 3.8\\% at 50 events)": (min(fa50), max(fa50)) == (0.0, 3.8),
+    "sensitivity of 0.94 to 0.96 and specificity of only 0.46 to 0.64": (rule_sens, rule_spec) == ((0.94, 0.96), (0.46, 0.64)),
+    "sensitivity 0.90 to 0.96 at 5 to 50 events": mea_sens == (0.9, 0.96),
+    "(0.77 to 0.79 at 10 to 50 events)": text_sens == (0.77, 0.79),
+    "Specificity of the encoder's rule against the annotations is 0.46 to 0.64": rule_spec == (0.46, 0.64),
+    "$R^2$ at most 0.09; run $\\geq 3$ at 0.52 to 0.59": (hn_r2_max, hn_run3) == (0.09, (0.52, 0.59)),
+    "4 to 10 times larger": (round(min(ratio("50"))), round(max(ratio("50")))) == (4, 10),
+    "2 to 6 times at 10 events": (round(min(ratio("10"))), round(max(ratio("10")))) == (2, 6),
+    "smaller than compressed text but still 3.6 times a binary encoding": b1["latent_i8"] < b1["compact_json_zlib"] and round(b1["latent_i8"] / b1["binary_fields"], 1) == 3.6,
+    "from 576 to 516 tokens (10\\%)": (tok1["A-compact"], tok1["MEA"]) == (576, 516) and round((1 - 516 / 576) * 100) == 10,
+    f"{n_log} numbered entries": n_log == 29,
+    "(AUROC 0.89 to 0.97)": auroc == (0.89, 0.97) or auroc == (0.9, 0.97),
+    "interference (0.99)": noise == (0.99, 0.99),
+}
+for phrase, ok in prose_checks.items():
+    checks[phrase] = ok and phrase in allprose
 bad = [k for k, ok in checks.items() if not ok]
-print("prose cost checks failed:", bad if bad else "none")
+print("prose checks failed:", bad if bad else "none", f"({len(checks)} checked)")
 sys.exit(1 if bad else 0)
