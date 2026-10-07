@@ -21,3 +21,7 @@ docs/*
 # local scratch and tool output
 _local/
 graphify-out/
+
+# local working notes (kept off GitHub)
+CLAUDE.md
+TASKS.md
