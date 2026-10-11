@@ -1,4 +1,4 @@
-\documentclass[review,12pt]{elsarticle}
+\documentclass[preprint,12pt]{elsarticle}
 \usepackage[a4paper,margin=2cm]{geometry}
 \usepackage{mathptmx} % Times-compatible text and maths (pdfLaTeX has no system-font access)
 \usepackage{amsmath,amssymb}
@@ -10,10 +10,10 @@
 \usetikzlibrary{arrows.meta}
 \usepackage{hyperref}
 
-% Working draft. Open items are written as \todo{...} and must all be gone at submission.
-\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+% Run-in paragraph heading: italic, followed by a colon.
+\newcommand{\runhead}[1]{\par\medskip\noindent\textit{#1:}\enspace}
 
-\journal{Information Fusion}
+\journal{Engineering Applications of Artificial Intelligence}
 
 \begin{document}
 
@@ -22,8 +22,11 @@
 \title{Efficient Communication Between a Non-Transformer Perception Agent and a Frozen Gemma Language Model: A Communication-Fidelity Benchmark of Filtered Text and a Latent Channel}
 
 % Authorship and order to be agreed with the supervisor before submission.
-\author[dmu]{Alif Tasbir}
+\author[dmu]{Alif Tasbir\corref{cor1}}
+\ead{aliftasbir@gmail.com}
 \author[dmu]{Aboozar Taherkhani}
+\ead{aboozar.taherkhani@dmu.ac.uk}
+\cortext[cor1]{Corresponding author}
 \affiliation[dmu]{organization={De Montfort University}, city={Leicester}, country={United Kingdom}}
 
 \input{sections/abstract}
@@ -40,7 +43,11 @@ agent communication \sep latent communication \sep communication efficiency \sep
 \input{sections/protocol}
 \input{sections/results}
 \input{sections/discussion}
+\input{sections/appendix}
+\input{sections/declarations}
 
+\small
+\setlength{\bibsep}{1pt}
 \bibliographystyle{elsarticle-num}
 \bibliography{refs}
 

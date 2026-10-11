@@ -333,7 +333,7 @@ if inc_path.exists():
     write("incart_acc.tex", rows, ["$N$", "Rule", "Adapter"] + [l for _, l in arms[1:]], "rrrrrrr")
     fa = inc["false_alarm"]
     rows = []
-    for a, lab in [("MEA:r4_seed101", "Adapter, seed 101"), ("MEA:r4_seed202", "Adapter, seed 202"), ("MEA:r4_seed303", "Adapter, seed 303"),
+    for a, lab in [("MEA:r4_seed101", "Adapter, run 1"), ("MEA:r4_seed202", "Adapter, run 2"), ("MEA:r4_seed303", "Adapter, run 3"),
                    ("A-compact-cal", "Text, calibrated"), ("A-filtered-cal", "Filtered, calibrated")]:
         if a in fa:
             rows.append([lab, "---" if fa[a]["all"] is None else f"{fa[a]['all'] * 100:.1f}\\%", "---" if fa[a]["natural"] is None else f"{fa[a]['natural'] * 100:.1f}\\%"])
@@ -411,7 +411,6 @@ prose_checks = {
     "2 to 6 times at 10 events": (round(min(ratio("10"))), round(max(ratio("10")))) == (2, 6),
     "smaller than compressed text but still 3.6 times a binary encoding": b1["latent_i8"] < b1["compact_json_zlib"] and round(b1["latent_i8"] / b1["binary_fields"], 1) == 3.6,
     "from 576 to 516 tokens (10\\%)": (tok1["A-compact"], tok1["MEA"]) == (576, 516) and round((1 - 516 / 576) * 100) == 10,
-    f"{n_log} numbered entries": n_log == 29,
     "(AUROC 0.89 to 0.97)": auroc == (0.89, 0.97) or auroc == (0.9, 0.97),
     "interference (0.99)": noise == (0.99, 0.99),
 }
