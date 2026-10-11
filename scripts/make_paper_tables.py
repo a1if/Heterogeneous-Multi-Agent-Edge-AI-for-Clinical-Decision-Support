@@ -61,7 +61,7 @@ for n in NS:
         f"{tf['a_compact_median']:.0f} / {tf['mea_median']:.0f}",
         pct(tf["median_rel_diff"]),
         pct(td["median_rel_diff"]),
-        "---" if abs(mem) < 1e-9 else f"$-${abs(mem):.0f}",
+        "n/a" if abs(mem) < 1e-9 else f"$-${abs(mem):.0f}",
     ])
     audit[f"ttft_rel_{n}"] = round(tf["median_rel_diff"] * 100)
     audit[f"ttd_rel_{n}"] = round(td["median_rel_diff"] * 100)
@@ -120,7 +120,7 @@ for n in NS:
     t = d_cal.get("test")
     rows.append([
         n, "1.00", f"{d_def['text']:.2f}", f"{d_cal['text']:.2f}", f"{d_cal['mea_mean']:.2f}",
-        "---" if t is None else f"{pm(t['difference'])} {ci(*t['cluster_ci95'])}",
+        "n/a" if t is None else f"{pm(t['difference'])} {ci(*t['cluster_ci95'])}",
     ])
     audit[f"acc_adapter_{n}"] = round(d_cal["mea_mean"], 2)
     audit[f"acc_textcal_{n}"] = round(d_cal["text"], 2)
@@ -142,7 +142,7 @@ for n in NS:
     pt = flt["prompt_tokens"][n]
     rows.append([
         n, f"{d['r4_mean']:.3f}", f"{d['base']:.3f}",
-        "---" if t is None else f"{pm(t['difference'])} {ci(*t['cluster_ci95'])}",
+        "n/a" if t is None else f"{pm(t['difference'])} {ci(*t['cluster_ci95'])}",
         f"{pt['MEA']['median']:.0f} / {pt['A-filtered']['median']:.0f}",
     ])
 write("filtered.tex", rows, ["$N$", "Adapter", "Filtered", "Difference [95\\% CI]", "Tokens"], "rrrrr")
@@ -265,7 +265,7 @@ for n in NS:
     p = sum(mix[f"{n}|priority"].values())
     u = sum(mix[f"{n}|urgent"].values())
     nn = sum(v for k, v in nat.items() if k.startswith(n + "|")) if n != "1" else 0
-    rows.append([n, str(r), str(p), str(u), str(r + p + u), str(nn) if nn else "---", str(r + p + u + nn)])
+    rows.append([n, str(r), str(p), str(u), str(r + p + u), str(nn) if nn else "n/a", str(r + p + u + nn)])
     tot_s += r + p + u
     tot_n += nn
 rows.append(["All", "", "", "", str(tot_s), str(tot_n), str(tot_s + tot_n)])
@@ -285,10 +285,10 @@ for n in NS:
     if any(v is None for v in cells.values()):
         continue
     s = sum(cells.values())
-    rows.append([n, str(cells["routine"]), str(cells["priority"]), str(cells["urgent"]), str(s), str(nat) if nat else "---", str(s + nat)])
+    rows.append([n, str(cells["routine"]), str(cells["priority"]), str(cells["urgent"]), str(s), str(nat) if nat else "n/a", str(s + nat)])
 if rows:
     tot_i = sum(int(r[6]) for r in rows)
-    rows.append(["All", "", "", "", str(sum(int(r[4]) for r in rows[:-0 or None])), str(sum(int(r[5]) for r in rows if r[5] != "---")), str(tot_i)])
+    rows.append(["All", "", "", "", str(sum(int(r[4]) for r in rows[:-0 or None])), str(sum(int(r[5]) for r in rows if r[5] != "n/a")), str(tot_i)])
     write("incart_windows.tex", rows, ["$N$", "Routine", "Priority", "Urgent", "Stratified", "Natural prevalence", "Total"], "rrrrrrr")
     audit["incart_windows_total"] = (tot_i, load("p1_item7_testset_incart.json")["n_windows"])
 
@@ -336,7 +336,7 @@ if inc_path.exists():
     for a, lab in [("MEA:r4_seed101", "Adapter, run 1"), ("MEA:r4_seed202", "Adapter, run 2"), ("MEA:r4_seed303", "Adapter, run 3"),
                    ("A-compact-cal", "Text, calibrated"), ("A-filtered-cal", "Filtered, calibrated")]:
         if a in fa:
-            rows.append([lab, "---" if fa[a]["all"] is None else f"{fa[a]['all'] * 100:.1f}\\%", "---" if fa[a]["natural"] is None else f"{fa[a]['natural'] * 100:.1f}\\%"])
+            rows.append([lab, "n/a" if fa[a]["all"] is None else f"{fa[a]['all'] * 100:.1f}\\%", "n/a" if fa[a]["natural"] is None else f"{fa[a]['natural'] * 100:.1f}\\%"])
     write("incart_fa.tex", rows, ["Arm", "All routine windows", "Natural prevalence"], "lrr")
     audit["incart_status"] = {h: inc["hypotheses"][h]["status"] for h in inc["hypotheses"]}
 
